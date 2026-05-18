@@ -15,6 +15,7 @@ A short checklist for the first top-down survival automation prototype.
 - [x] Configure durability and drop amounts for each resource type.
 - [x] Make resource nodes breakable with the pickaxe.
 - [x] Add placeholder feedback for hits, damage, and depletion.
+- [x] Spawn ground item drops when destroyed resource nodes deplete.
 - [ ] Add proper mining time and tool modifiers.
 
 ## Player and Tools
@@ -22,15 +23,19 @@ A short checklist for the first top-down survival automation prototype.
 - [x] Implement basic player movement.
 - [x] Add the pickaxe as the starting tool at the behavior level.
 - [x] Configure the hit area and target check in front of the player.
+- [x] Rotate or face the player toward the mouse cursor during aiming and harvesting.
 - [ ] Restrict harvesting by tool type once swords and separate tools are added.
 
 ## Inventory
 
 - [x] Add a simple inventory with item counts.
-- [x] Automatically send gathered resources to the inventory.
+- [x] Automatically send picked-up resources to the inventory.
 - [x] Show the inventory in a minimal UI.
-- [x] Temporarily define the prototype inventory as unlimited.
-- [ ] Add stack limits and overflow handling after the first smoke test.
+- [x] Add proximity pickup for ground item drops.
+- [x] Add inventory capacity, slot limits, and free-slot checks for pickup.
+- [x] Build a dedicated inventory UI that shows slots, stack counts, and remaining capacity.
+- [x] Add stack limits and overflow handling after the first smoke test.
+- [ ] Add item definitions with per-item stack sizes instead of a shared prototype stack size.
 
 ## Automation
 

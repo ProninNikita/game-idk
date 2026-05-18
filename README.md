@@ -54,8 +54,10 @@ The project currently has the first Godot skeleton:
 - procedural placement of trees, stone, ore, and wild crops;
 - a player with top-down movement;
 - a starting pickaxe behavior that breaks nearby resources;
-- gathered resources go into a simple inventory;
-- a minimal HUD;
+- destroyed resources drop items onto the ground;
+- nearby ground items are picked up if the inventory has space;
+- a slot-based inventory with a visible HUD panel;
+- mouse-based facing and harvesting direction;
 - code-drawn placeholders with no graphic assets yet.
 
 To run it: open `project.godot` in Godot 4.6.x stable and launch the main scene.

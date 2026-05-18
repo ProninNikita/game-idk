@@ -7,3 +7,4 @@ script = ExtResource("1")
 
 [node name="ResourceNodes" type="Node2D" parent="."]
 
+[node name="GroundItems" type="Node2D" parent="."]

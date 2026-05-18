@@ -34,12 +34,17 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added a top-down player controller with a starting pickaxe and harvesting area.
 - Added a simple unlimited inventory and HUD with resource counts.
 - Added code-drawn placeholder visuals with no graphic assets, so they can be replaced by sprites later.
+- Added ground item drops from destroyed resource nodes.
+- Added proximity pickup that respects inventory capacity and free slots.
+- Added a dedicated inventory UI with slots, stack counts, and capacity feedback.
+- Added mouse-based player facing and rotation.
 
 ### Changed
 
 - README and documentation index now link to the changelog.
 - `Unreleased` includes planned work for manual harvesting of wood, stone, ore, and crops into the inventory.
 - TODO updated to reflect the first completed prototype steps.
+- Resource harvesting now drops items onto the ground instead of sending them directly to inventory.
 
 ### Fixed
 
@@ -53,6 +58,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Map resources are spawned as separate interactive scenes, while the ground is drawn by one world node instead of creating 22,500 Node objects.
 - Added the `ItemDef` Resource class for future item definitions.
 - The project was migrated by the Godot 4.6.2 editor and now includes script `.gd.uid` files.
+- Inventory storage now uses finite slots and stack limits instead of a single unlimited item-count dictionary.
 
 ### Known Issues
 

@@ -2,6 +2,7 @@ extends Node2D
 class_name HearthlineWorld
 
 const RESOURCE_NODE_SCENE: PackedScene = preload("res://scenes/world/resource_node.tscn")
+const GROUND_ITEM_SCENE: PackedScene = preload("res://scenes/world/ground_item.tscn")
 
 const RESOURCE_DEFS: Dictionary = {
 	&"tree": {
@@ -43,6 +44,7 @@ const RESOURCE_DEFS: Dictionary = {
 @export var world_seed: int = 18052026
 
 @onready var resource_container: Node2D = $ResourceNodes
+@onready var ground_item_container: Node2D = $GroundItems
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _occupied: Dictionary = {}
@@ -60,6 +62,8 @@ func generate_world() -> void:
 	_resource_count = 0
 
 	for child: Node in resource_container.get_children():
+		child.queue_free()
+	for child: Node in ground_item_container.get_children():
 		child.queue_free()
 
 	_spawn_resource_clusters(&"tree", 10, 42, 11)
@@ -81,6 +85,14 @@ func get_world_bounds() -> Rect2:
 
 func get_resource_count() -> int:
 	return _resource_count
+
+
+func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2, source_color: Color = Color(0.92, 0.78, 0.28)) -> Node:
+	var item: Node = GROUND_ITEM_SCENE.instantiate()
+	var scatter: Vector2 = Vector2(_rng.randf_range(-10.0, 10.0), _rng.randf_range(-10.0, 10.0))
+	item.call("setup", item_id, amount, spawn_position + scatter, source_color)
+	ground_item_container.add_child(item)
+	return item
 
 
 func _spawn_resource_clusters(resource_type: StringName, cluster_count: int, amount_per_cluster: int, radius: int) -> void:

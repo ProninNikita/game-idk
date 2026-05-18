@@ -9,13 +9,16 @@ func _ready() -> void:
 	_ensure_input_actions()
 
 	player.global_position = world.call("get_spawn_position")
+	player.call("set_world", world)
 	player.call("set_world_bounds", world.call("get_world_bounds"))
 	player.connect("inventory_changed", Callable(hud, "set_inventory"))
+	player.connect("inventory_slots_changed", Callable(hud, "set_inventory_slots"))
 	player.connect("action_hint_changed", Callable(hud, "set_hint"))
 
 	hud.call("set_world_info", world.get("map_size"), world.call("get_resource_count"))
 	hud.call("set_inventory", player.call("get_inventory_snapshot"))
-	hud.call("set_hint", "WASD - move | LMB/E - mine with pickaxe | Tab - inventory hint")
+	hud.call("set_inventory_slots", player.call("get_inventory_slots_snapshot"))
+	hud.call("set_hint", "WASD - move | Mouse - aim | LMB/E - mine | Walk over drops to pick up")
 
 
 func _ensure_input_actions() -> void:

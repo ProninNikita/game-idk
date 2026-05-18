@@ -64,6 +64,8 @@ func hit(damage: int, tool_tags: Array) -> Dictionary:
 		return {
 			"item_id": drop_item_id,
 			"amount": drop_amount,
+			"color": debug_color,
+			"position": global_position,
 		}
 
 	return {}
