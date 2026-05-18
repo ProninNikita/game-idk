@@ -1,4 +1,5 @@
 extends CharacterBody2D
+class_name PlayerController
 
 signal inventory_changed(items: Dictionary)
 signal action_hint_changed(text: String)
@@ -27,7 +28,7 @@ func _physics_process(delta: float) -> void:
 	_cooldown_left = max(0.0, _cooldown_left - delta)
 	_last_hint_time = max(0.0, _last_hint_time - delta)
 
-	var input_vector := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var input_vector: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = input_vector * move_speed
 
 	if input_vector.length_squared() > 0.01:
@@ -66,7 +67,7 @@ func _try_harvest() -> void:
 
 	var drop: Dictionary = target.hit(pickaxe_damage, [&"mining", &"cutting", &"harvesting"])
 	if drop.has("item_id"):
-		var item_id: StringName = drop["item_id"]
+		var item_id: StringName = StringName(drop["item_id"])
 		var amount: int = int(drop.get("amount", 1))
 		inventory.add_item(item_id, amount)
 		_emit_temporary_hint("+%d %s" % [amount, String(item_id)])
@@ -76,27 +77,27 @@ func _try_harvest() -> void:
 
 func _find_resource_target() -> HarvestableResourceNode:
 	var best_target: HarvestableResourceNode = null
-	var best_score := INF
+	var best_score: float = INF
 
-	for node in get_tree().get_nodes_in_group("resource_nodes"):
+	for node: Node in get_tree().get_nodes_in_group("resource_nodes"):
 		if not is_instance_valid(node):
 			continue
 		if not node is HarvestableResourceNode:
 			continue
 
-		var resource := node as HarvestableResourceNode
+		var resource: HarvestableResourceNode = node as HarvestableResourceNode
 		var to_target: Vector2 = resource.global_position - global_position
-		var distance := to_target.length()
+		var distance: float = to_target.length()
 		if distance > attack_range:
 			continue
 
-		var direction_score := 1.0
+		var direction_score: float = 1.0
 		if distance > 0.01:
 			direction_score = facing.dot(to_target.normalized())
 			if direction_score < -0.15:
 				continue
 
-		var score := distance - direction_score * 18.0
+		var score: float = distance - direction_score * 18.0
 		if score < best_score:
 			best_score = score
 			best_target = resource
@@ -108,9 +109,9 @@ func _clamp_to_world() -> void:
 	if world_bounds.size == Vector2.ZERO:
 		return
 
-	var margin := 12.0
-	global_position.x = clamp(global_position.x, world_bounds.position.x + margin, world_bounds.end.x - margin)
-	global_position.y = clamp(global_position.y, world_bounds.position.y + margin, world_bounds.end.y - margin)
+	var margin: float = 12.0
+	global_position.x = clampf(global_position.x, world_bounds.position.x + margin, world_bounds.end.x - margin)
+	global_position.y = clampf(global_position.y, world_bounds.position.y + margin, world_bounds.end.y - margin)
 
 
 func _on_inventory_changed(items: Dictionary) -> void:
@@ -126,5 +127,5 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 11.0, Color(0.18, 0.58, 0.92))
 	draw_circle(Vector2.ZERO, 11.0, Color(0.05, 0.10, 0.16), false, 2.0)
 	draw_line(Vector2.ZERO, facing * 17.0, Color(1.0, 0.95, 0.55), 3.0)
-	var angle := facing.angle()
+	var angle: float = facing.angle()
 	draw_arc(Vector2.ZERO, attack_range, angle - 0.35, angle + 0.35, 12, Color(1.0, 1.0, 1.0, 0.22), 2.0)

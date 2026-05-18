@@ -29,11 +29,11 @@ func setup(type: StringName, grid_pos: Vector2i, cell_size: int, definition: Dic
 	grid_position = grid_pos
 	tile_size = cell_size
 	display_name = String(definition.get("display_name", String(type)))
-	drop_item_id = definition.get("drop_item_id", type)
+	drop_item_id = StringName(definition.get("drop_item_id", type))
 	drop_amount = int(definition.get("drop_amount", 1))
 	max_health = int(definition.get("max_health", 3))
 	health = max_health
-	debug_color = definition.get("color", debug_color)
+	debug_color = definition.get("color", debug_color) as Color
 	collision_radius = float(definition.get("radius", 12.0))
 	position = Vector2((grid_position.x + 0.5) * tile_size, (grid_position.y + 0.5) * tile_size)
 
@@ -81,32 +81,33 @@ func _apply_collision_shape() -> void:
 	if collision_shape == null:
 		return
 
-	var shape := collision_shape.shape
+	var shape: Shape2D = collision_shape.shape
 	if shape is CircleShape2D:
 		if not shape.resource_local_to_scene:
 			shape = shape.duplicate()
 			shape.resource_local_to_scene = true
 			collision_shape.shape = shape
-		shape.radius = collision_radius
+		var circle_shape: CircleShape2D = shape as CircleShape2D
+		circle_shape.radius = collision_radius
 
 
 func _draw() -> void:
-	var color := debug_color.lerp(Color.WHITE, _hit_flash * 0.65)
-	var health_ratio := clamp(float(health) / float(max_health), 0.0, 1.0)
+	var color: Color = debug_color.lerp(Color.WHITE, _hit_flash * 0.65)
+	var health_ratio: float = clampf(float(health) / float(max_health), 0.0, 1.0)
 
 	if resource_type == &"tree":
 		draw_rect(Rect2(Vector2(-4, -4), Vector2(8, 17)), Color(0.34, 0.20, 0.10), true)
 		draw_circle(Vector2(0, -7), 14.0, color)
 		draw_circle(Vector2(0, -7), 14.0, Color(0.06, 0.10, 0.04), false, 2.0)
 	elif resource_type == &"stone":
-		var points := PackedVector2Array([
+		var points: PackedVector2Array = PackedVector2Array([
 			Vector2(-13, 8),
 			Vector2(-9, -8),
 			Vector2(5, -13),
 			Vector2(14, -2),
 			Vector2(9, 10),
 		])
-		var outline := PackedVector2Array(points)
+		var outline: PackedVector2Array = PackedVector2Array(points)
 		outline.append(points[0])
 		draw_colored_polygon(points, color)
 		draw_polyline(outline, Color(0.08, 0.08, 0.09), 2.0)
@@ -122,7 +123,7 @@ func _draw() -> void:
 	else:
 		draw_circle(Vector2.ZERO, 12.0, color)
 
-	var bar_width := 22.0
-	var bar_y := -24.0
+	var bar_width: float = 22.0
+	var bar_y: float = -24.0
 	draw_rect(Rect2(Vector2(-bar_width * 0.5, bar_y), Vector2(bar_width, 3.0)), Color(0.05, 0.05, 0.05, 0.8), true)
 	draw_rect(Rect2(Vector2(-bar_width * 0.5, bar_y), Vector2(bar_width * health_ratio, 3.0)), Color(0.8, 0.95, 0.45), true)

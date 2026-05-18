@@ -1,4 +1,5 @@
 extends CanvasLayer
+class_name HearthlineHUD
 
 var _inventory_label: Label
 var _hint_label: Label
@@ -6,7 +7,7 @@ var _world_label: Label
 
 
 func _ready() -> void:
-	var margin := MarginContainer.new()
+	var margin: MarginContainer = MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	margin.offset_left = 12.0
 	margin.offset_top = 12.0
@@ -14,14 +15,14 @@ func _ready() -> void:
 	margin.offset_bottom = 230.0
 	add_child(margin)
 
-	var panel := PanelContainer.new()
+	var panel: PanelContainer = PanelContainer.new()
 	margin.add_child(panel)
 
-	var box := VBoxContainer.new()
+	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	panel.add_child(box)
 
-	var title := Label.new()
+	var title: Label = Label.new()
 	title.text = "Project Hearthline Prototype"
 	box.add_child(title)
 
@@ -53,11 +54,11 @@ func set_inventory(items: Dictionary) -> void:
 		_inventory_label.text = "Inventory: empty"
 		return
 
-	var keys := items.keys()
+	var keys: Array = items.keys()
 	keys.sort()
 
 	var parts: Array[String] = []
-	for key in keys:
+	for key: Variant in keys:
 		parts.append("%s: %d" % [String(key), int(items[key])])
 
 	_inventory_label.text = "Inventory: " + ", ".join(parts)
@@ -67,4 +68,3 @@ func set_hint(text: String) -> void:
 	if _hint_label == null:
 		return
 	_hint_label.text = text
-
