@@ -1,0 +1,36 @@
+# Godot 4
+.godot/
+*.translation
+
+# Godot exports
+export.cfg
+export_presets.cfg
+*.pck
+*.zip
+*.dmg
+*.exe
+*.app
+*.x86_64
+*.arm64
+
+# Imported/generated files
+*.import
+
+# Mono/C# for Godot, if enabled later
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs and local temp
+*.log
+tmp/
+temp/
+
