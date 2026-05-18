@@ -1,53 +1,53 @@
-# Арт и аудио
+# Art and Audio
 
-Статус: `Draft`
+Status: `Draft`
 
-## Арт-направление
+## Art Direction
 
-Top-down 2D с читаемыми силуэтами, теплой базой и опасным внешним миром. Стиль может быть stylized pixel art или hand-painted low-res, но главное - системная читаемость.
+Top-down 2D with readable silhouettes, a warm base, and a dangerous outer world. The style can be stylized pixel art or hand-painted low-res, but systemic readability matters most.
 
-## Визуальные pillars
+## Visual Pillars
 
-- База выглядит сделанной руками игрока.
-- Машины имеют понятные входы, выходы и состояние.
-- Ночь визуально меняет правила, но не скрывает важную информацию.
-- Биомы отличаются не только цветом, но и формой объектов.
+- The base looks handmade by the player.
+- Machines have clear inputs, outputs, and state.
+- Night visually changes the rules, but does not hide important information.
+- Biomes differ not only by color, but also by object shapes.
 
-## Камера
+## Camera
 
-- Top-down или slight 3/4 top-down, если это помогает силуэтам.
-- Камера следует за игроком плавно.
-- Zoom может быть фиксированным на MVP.
-- Не делать слишком близкий zoom: игрок должен видеть базу как систему.
+- Top-down or slight 3/4 top-down if it helps silhouettes.
+- Camera follows the player smoothly.
+- Zoom can be fixed for MVP.
+- Do not make zoom too close: the player should see the base as a system.
 
-## Масштаб
+## Scale
 
-Нужно быстро сделать art test:
+Create an art test early:
 
-- персонаж занимает 1 grid cell или чуть меньше;
-- маленькая машина 1x1;
-- furnace/generator 2x2;
-- storage 1x1 или 2x1;
-- tree/resource nodes не должны закрывать grid полностью.
+- character occupies one grid cell or slightly less;
+- small machine is 1x1;
+- furnace/generator is 2x2;
+- storage is 1x1 or 2x1;
+- trees/resource nodes should not fully hide the grid.
 
-## Палитра
+## Palette
 
-Рекомендация:
+Recommendation:
 
-- стартовая зона: зелень, земля, теплый свет;
-- машины: металл, дерево, янтарные индикаторы;
-- ночь: холодные тени + теплые источники света;
-- опасность: контрастный акцент, но не постоянный красный шум.
+- starting zone: greens, soil, warm light;
+- machines: metal, wood, amber indicators;
+- night: cool shadows + warm light sources;
+- danger: a contrasting accent, but not constant red noise.
 
-Избегать одного доминирующего оттенка на всю игру. Биомы должны иметь разные цветовые температуры.
+Avoid one dominant hue across the whole game. Biomes should have different color temperatures.
 
-## Анимации
+## Animations
 
-MVP-анимации:
+MVP animations:
 
-- idle/run игрока;
-- use tool;
-- hit resource;
+- player idle/run;
+- tool use;
+- resource hit;
 - item pickup;
 - machine working loop;
 - furnace fire;
@@ -55,38 +55,38 @@ MVP-анимации:
 - enemy idle/move/attack;
 - damage feedback.
 
-Приоритет: читаемость состояния важнее количества кадров.
+Priority: state readability matters more than frame count.
 
 ## VFX
 
-Нужны:
+Needed:
 
 - resource hit particles;
-- dust при строительстве;
-- small glow для interactable;
-- sparks/smoke для машин;
-- warning pulse для угроз;
-- light radius ночью.
+- construction dust;
+- small glow for interactables;
+- sparks/smoke for machines;
+- warning pulse for threats;
+- light radius at night.
 
-VFX должны помогать gameplay, а не закрывать тайлы.
+VFX should support gameplay, not cover tiles.
 
-## UI art
+## UI Art
 
-- Иконки предметов должны различаться по силуэту.
-- Рецепт должен читаться при маленьком размере.
-- Status icons для машин должны быть понятны без текста после первого знакомства.
-- Цветовая кодировка всегда дублируется формой/иконкой.
+- Item icons should differ by silhouette.
+- Recipes should remain readable at small sizes.
+- Machine status icons should be understandable after first exposure without text.
+- Color coding is always backed by shape/icon.
 
-## Звук
+## Sound
 
-Аудио pillars:
+Audio pillars:
 
-- ручной сбор должен быть приятным;
-- база должна звучать как работающая система;
-- ночь должна менять атмосферу;
-- угрозы должны быть слышны до атаки.
+- manual gathering should feel good;
+- the base should sound like a working system;
+- night should change the atmosphere;
+- threats should be heard before they attack.
 
-## SFX MVP
+## MVP SFX
 
 - footsteps by terrain;
 - tool swing;
@@ -102,31 +102,31 @@ VFX должны помогать gameplay, а не закрывать тайл�
 - enemy approach/attack/damage;
 - player damage/death.
 
-## Музыка
+## Music
 
-MVP можно начать с ambience вместо полноценной музыки:
+MVP can start with ambience instead of full music:
 
 - day ambience;
 - night ambience;
 - base hum;
 - danger layer.
 
-Позже добавить adaptive music:
+Later add adaptive music:
 
 - exploration;
 - base building;
 - night pressure;
 - event.
 
-## Asset pipeline
+## Asset Pipeline
 
-На старте:
+At the start:
 
-- использовать placeholder art;
-- naming convention сразу;
-- не смешивать final и prototype ассеты в одной папке.
+- use placeholder art;
+- set naming conventions immediately;
+- do not mix final and prototype assets in the same folder.
 
-Пример:
+Example:
 
 ```text
 art/
@@ -146,4 +146,3 @@ art/
 - `spr_machine_furnace_work.png`
 - `sfx_pickup_wood_01.wav`
 - `amb_night_forest_loop.ogg`
-

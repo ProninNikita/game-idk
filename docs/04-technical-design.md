@@ -1,21 +1,21 @@
-# Технический дизайн Godot
+# Godot Technical Design
 
-Статус: `Draft`
+Status: `Draft`
 
-## Цель архитектуры
+## Architecture Goal
 
-Сделать Godot-проект, который быстро дает playable prototype, но не рушится при добавлении автоматизации, сохранений и генерации мира.
+Build a Godot project that reaches a playable prototype quickly, but does not collapse when automation, saves, and world generation are added.
 
-## Главные технические решения
+## Main Technical Decisions
 
-- Движок: Godot 4.6.x stable.
-- Измерение мира: grid/tile-based логика поверх 2D top-down.
-- Игровые сущности: сцены Godot + data resources.
-- Данные: typed GDScript Resources для items/recipes/buildings.
-- Сохранения: versioned save data, не сериализовать напрямую живое дерево сцен без контроля.
-- Симуляция: разделить visual update и logic tick.
+- Engine: Godot 4.6.x stable.
+- World measurement: grid/tile-based logic over 2D top-down space.
+- Game entities: Godot scenes plus data resources.
+- Data: typed GDScript Resources for items/recipes/buildings.
+- Saves: versioned save data; do not serialize the live scene tree directly without control.
+- Simulation: separate visual update from logic tick.
 
-## Предлагаемая структура проекта
+## Proposed Project Structure
 
 ```text
 res://
@@ -52,39 +52,39 @@ res://
   tests/
 ```
 
-## Autoload singletons
+## Autoload Singletons
 
-Использовать умеренно. Autoload хорош для сервисов, но плох как свалка состояния.
+Use them sparingly. Autoloads are good for services, but bad as a dump for all state.
 
-Предлагаемые autoload:
+Proposed autoloads:
 
-- `Game`: управляет состоянием приложения, сменой сцен, pause.
-- `SaveManager`: save/load, миграции.
-- `DataRegistry`: доступ к item/recipe/building definitions.
-- `EventBus`: глобальные сигналы только для cross-system событий.
-- `Settings`: настройки, input remap, audio volumes.
+- `Game`: application state, scene switching, pause.
+- `SaveManager`: save/load and migrations.
+- `DataRegistry`: access to item/recipe/building definitions.
+- `EventBus`: global signals only for cross-system events.
+- `Settings`: settings, input remap, audio volumes.
 
-Не хранить в autoload:
+Do not store in autoloads:
 
-- живые entity instance;
-- весь world state;
-- временную combat-логику;
-- UI-состояние конкретного экрана.
+- live entity instances;
+- all world state;
+- temporary combat logic;
+- UI state for a specific screen.
 
-## Scene ownership
+## Scene Ownership
 
-### Main scene
+### Main Scene
 
-Отвечает за:
+Responsible for:
 
-- загрузку текущего мира;
-- создание player;
-- подключение UI;
+- loading the current world;
+- creating the player;
+- connecting UI;
 - routing pause/save.
 
-### World scene
+### World Scene
 
-Отвечает за:
+Responsible for:
 
 - tilemap/chunks;
 - spawner;
@@ -92,29 +92,29 @@ res://
 - world tick;
 - chunk persistence.
 
-### Player scene
+### Player Scene
 
-Отвечает за:
+Responsible for:
 
-- движение;
+- movement;
 - interaction ray/area;
 - inventory component;
 - health/survival stats;
 - animation state.
 
-### Building/Machine scenes
+### Building/Machine Scenes
 
-Каждая машина:
+Each machine:
 
-- имеет data definition;
-- имеет координату grid;
-- имеет input/output slots;
-- имеет tick method или подписку на simulation scheduler;
-- умеет export/import save state.
+- has a data definition;
+- has a grid coordinate;
+- has input/output slots;
+- has a tick method or subscribes to a simulation scheduler;
+- can export/import save state.
 
-## Компоненты
+## Components
 
-Предлагаемые компоненты:
+Proposed components:
 
 - `HealthComponent`;
 - `InventoryComponent`;
@@ -125,32 +125,32 @@ res://
 - `StorageComponent`;
 - `GridOccupantComponent`.
 
-Компоненты должны быть простыми Nodes или Resources. Не делать ECS на старте, если Godot-сцены закрывают задачу.
+Components should be simple Nodes or Resources. Do not build an ECS at the start if Godot scenes solve the problem.
 
-## Grid и координаты
+## Grid and Coordinates
 
-Нужно единое правило:
+Use one clear rule:
 
-- world position: пиксели/units Godot;
+- world position: Godot pixels/units;
 - grid position: `Vector2i`;
 - chunk position: `Vector2i`;
 - tile position inside chunk: `Vector2i`.
 
-Все здания должны хранить grid coordinate, а не только world transform.
+All buildings should store grid coordinates, not only world transforms.
 
-## Simulation tick
+## Simulation Tick
 
-Не завязывать производство на `_process(delta)` каждой машины, если машин станет много.
+Do not bind production to `_process(delta)` on every machine if there will be many machines.
 
-Рекомендация:
+Recommendation:
 
-- MVP: машины могут тикать в `_physics_process`, но через общий `MachineScheduler`.
-- После MVP: фиксированный simulation tick, например 5-10 раз в секунду для production logic.
-- Visual animation отдельно от production tick.
+- MVP: machines can tick in `_physics_process`, but through a shared `MachineScheduler`.
+- After MVP: fixed simulation tick, for example 5-10 times per second for production logic.
+- Visual animation stays separate from production tick.
 
 ## Items
 
-Item definition как Resource:
+Item definition as Resource:
 
 ```gdscript
 class_name ItemDef
@@ -163,7 +163,7 @@ extends Resource
 @export var icon: Texture2D
 ```
 
-Item stack в runtime:
+Runtime item stack:
 
 ```gdscript
 class_name ItemStack
@@ -174,7 +174,7 @@ var amount: int
 
 ## Recipes
 
-Recipe definition как Resource:
+Recipe definition as Resource:
 
 ```gdscript
 class_name RecipeDef
@@ -188,7 +188,7 @@ extends Resource
 @export var required_tech: StringName
 ```
 
-Для реального кода позже лучше заменить raw Dictionary на typed helper structures, если потребуется editor usability.
+In real code, raw Dictionary can later be replaced by typed helper structures if editor usability requires it.
 
 ## Buildings
 
@@ -200,14 +200,14 @@ Building definition:
 - build cost;
 - tags;
 - max health;
-- energy use/produce;
+- energy use/production;
 - allowed rotations;
 - collision layer;
 - footprint rules.
 
-## Save/load
+## Save/Load
 
-Сохранять:
+Save:
 
 - game version;
 - save schema version;
@@ -221,51 +221,50 @@ Building definition:
 - loose items;
 - active events.
 
-Не сохранять напрямую:
+Do not save directly:
 
-- Node paths как единственный идентификатор;
+- NodePaths as the only identifier;
 - runtime object references;
 - transient animation state;
-- данные, которые можно восстановить из definitions.
+- data that can be restored from definitions.
 
-## Save migration
+## Save Migration
 
-Каждый save содержит `schema_version`.
+Each save contains `schema_version`.
 
-При изменении формата:
+When the format changes:
 
-1. загрузить старую структуру;
-2. применить миграции по порядку;
-3. сохранить в новом формате после успешной загрузки;
-4. держать тестовый save для каждого важного milestone.
+1. load the old structure;
+2. apply migrations in order;
+3. save in the new format after a successful load;
+4. keep a test save for each important milestone.
 
-## Производительность
+## Performance
 
-Риски:
+Risks:
 
-- много машин с `_process`;
-- много physics bodies;
-- pathfinding для множества существ;
-- частая пересборка TileMap;
-- сохранение больших чанков целиком.
+- many machines with `_process`;
+- many physics bodies;
+- pathfinding for many creatures;
+- frequent TileMap rebuilds;
+- saving large chunks whole.
 
-Правила:
+Rules:
 
-- чанки сохранять diff-ами, если world generation deterministic;
-- симуляцию машин batching-ом;
-- избегать per-frame allocation в hot paths;
-- UI обновлять по событиям, а не каждый кадр;
-- профилировать до крупных оптимизаций.
+- save chunks as diffs if world generation is deterministic;
+- batch machine simulation;
+- avoid per-frame allocation in hot paths;
+- update UI by events, not every frame;
+- profile before major optimization.
 
-## Тестируемость
+## Testability
 
-Логику рецептов, инвентаря, стаков, сохранений и генерации держать в классах, которые можно тестировать без запуска полной сцены.
+Keep recipe, inventory, stack, save, and generation logic in classes that can be tested without launching a full scene.
 
-Минимальные тестируемые модули:
+Minimum testable modules:
 
 - inventory add/remove/split/merge;
 - recipe validation;
 - building placement;
 - save serialization;
 - deterministic world generation.
-

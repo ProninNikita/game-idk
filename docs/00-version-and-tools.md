@@ -1,95 +1,95 @@
-# Версии и инструменты
+# Versions and Tools
 
-Статус: `Draft`
+Status: `Draft`
 
-## Проверка Godot на 18 мая 2026
+## Godot Check on May 18, 2026
 
-По официальному архиву Godot:
+According to the official Godot archive:
 
-- последняя стабильная версия: **Godot 4.6.2-stable**, опубликована 1 апреля 2026;
-- свежая RC-версия: **Godot 4.6.3-rc2**, опубликована 16 мая 2026;
-- свежая beta-ветка: **Godot 4.7-beta2**, опубликована 11 мая 2026.
+- latest stable version: **Godot 4.6.2-stable**, released on April 1, 2026;
+- latest release candidate: **Godot 4.6.3-rc2**, released on May 16, 2026;
+- latest beta branch: **Godot 4.7-beta2**, released on May 11, 2026.
 
-Решение для проекта: **начинать на Godot 4.6.2-stable** или на последнем стабильном патче ветки `4.6.x`, когда `4.6.3` станет stable. Beta/RC не использовать как основную версию проекта, пока нет конкретной фичи, ради которой нужен риск.
+Project decision: **start on Godot 4.6.2-stable** or the latest stable patch in the `4.6.x` branch once `4.6.3` becomes stable. Do not use beta or RC builds as the main project version unless there is a specific feature that justifies the risk.
 
-Источники:
+Sources:
 
 - https://godotengine.org/download/archive/
 - https://docs.godotengine.org/en/stable/about/release_policy.html
 
-## Локальная среда
+## Local Environment
 
-Проверка локального приложения:
+Earlier local check:
 
 ```text
 /Applications/Godot.app/Contents/MacOS/Godot --version
 4.3.stable.official.77dcf97d8
 ```
 
-Повторная проверка во время создания первого Godot-скелета показала, что приложение по этому пути больше не найдено. Перед runtime smoke test нужно установить или переустановить Godot 4.6.x stable.
+A later check during the first Godot skeleton setup showed that this path no longer exists. Install or use Godot 4.6.x stable before runtime smoke testing.
 
-Рекомендация: перед созданием проекта обновить локальный Godot до **4.6.2-stable** или свежей стабильной версии `4.6.x`.
+Recommendation: update the local Godot installation to **4.6.2-stable** or a newer stable `4.6.x` patch before regular development.
 
-## Базовый стек
+## Base Stack
 
 - Engine: Godot 4.6.x stable.
-- Language: GDScript для первого прототипа.
-- Rendering: 2D, top-down, orthographic-style camera through `Camera2D`.
-- Physics: встроенная 2D physics Godot, без внешнего движка.
-- Data format: `.tres`/`.res` для ресурсов Godot, JSON/CSV только для внешних таблиц баланса при необходимости.
-- Save format: versioned JSON или binary Resource save; выбирать после первого прототипа сохранений.
+- Language: GDScript for the first prototype.
+- Rendering: 2D top-down with `Camera2D`.
+- Physics: built-in Godot 2D physics, no external engine.
+- Data format: `.tres`/`.res` for Godot resources; JSON/CSV only for external balance tables if needed.
+- Save format: versioned JSON or binary Resource save; decide after the first save prototype.
 - Version control: Git.
 
-## Почему GDScript сначала
+## Why GDScript First
 
-GDScript быстрее для итераций в Godot, хорошо интегрируется с editor tooling и достаточно удобен для систем уровня MVP. C# можно рассмотреть позже, если появятся тяжелые симуляции, editor tooling на C# или потребность в строгой типизации на большом объеме кода.
+GDScript is faster for iteration in Godot, integrates well with editor tooling, and is enough for MVP-level systems. C# can be considered later if heavy simulation, C# editor tooling, or stronger large-scale typing becomes necessary.
 
-## Правила обновления Godot
+## Godot Update Rules
 
-Обновляться можно:
+Updating is allowed:
 
-- перед началом milestone;
-- после создания backup/commit;
-- после чтения release notes;
-- если версия является stable;
-- если проект проходит smoke-тест после открытия в новой версии.
+- before a milestone starts;
+- after making a backup or commit;
+- after reading release notes;
+- when the target version is stable;
+- when the project passes a smoke test after opening in the new version.
 
-Не обновляться:
+Do not update:
 
-- в середине стабилизации билда;
-- перед playtest без времени на регрессию;
-- на beta/RC без отдельной экспериментальной ветки проекта.
+- during build stabilization;
+- right before a playtest without time for regression checks;
+- to beta/RC builds without a separate experimental branch.
 
-## Минимальные инструменты разработки
+## Minimum Development Tools
 
 - Godot 4.6.x stable.
 - Git.
-- Редактор кода: Godot script editor, VS Code или Cursor.
-- Таблицы баланса: LibreOffice, Google Sheets или CSV в репозитории.
-- Диаграммы: Mermaid в Markdown или Excalidraw.
-- Трекер задач: Markdown-бэклог на старте, потом можно перейти в GitHub Issues/Linear.
+- Code editor: Godot script editor, VS Code, or Cursor.
+- Balance tables: LibreOffice, Google Sheets, or CSV in the repository.
+- Diagrams: Mermaid in Markdown or Excalidraw.
+- Task tracker: Markdown backlog at the start; GitHub Issues or Linear can be adopted later.
 
-## Project Settings, которые стоит зафиксировать в начале
+## Project Settings to Lock Early
 
 - Window stretch mode: `canvas_items`.
 - Window stretch aspect: `expand`.
-- Physics ticks per second: начать с дефолта, менять только после профилирования.
-- Input map: фиксировать имена действий сразу, не привязывать механику к конкретным клавишам.
-- Rendering: держать 2D pipeline простым до появления реальной потребности в custom shaders.
+- Physics ticks per second: start with the default and change only after profiling.
+- Input map: define action names early; do not bind gameplay directly to specific keys.
+- Rendering: keep the 2D pipeline simple until custom shaders are truly needed.
 
-## Целевые платформы
+## Target Platforms
 
-Старт:
+Start:
 
 - Windows desktop.
 - macOS desktop.
 - Linux desktop.
 
-Позже:
+Later:
 
-- Steam Deck, если управление и UI хорошо работают с gamepad.
+- Steam Deck, if controls and UI work well with gamepad.
 
-Не планировать на старте:
+Not planned at the start:
 
 - mobile;
 - web export;

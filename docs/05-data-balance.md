@@ -1,51 +1,51 @@
-# Данные и баланс
+# Data and Balance
 
-Статус: `Draft`
+Status: `Draft`
 
-## Цель
+## Goal
 
-Баланс должен поддерживать три чувства:
+Balance should support three feelings:
 
-- ручной труд быстро становится понятной проблемой;
-- автоматизация дает заметное облегчение;
-- выживание не исчезает полностью, а переходит на уровень планирования.
+- manual labor quickly becomes a clear problem;
+- automation gives noticeable relief;
+- survival does not disappear completely, but shifts into planning.
 
-## Базовые единицы
+## Base Units
 
-- Время: секунды real-time.
-- Дистанция: grid cells.
-- День: начать с 12-18 минут real-time, проверить playtest.
-- Ночь: 4-6 минут real-time.
-- Стак: 20/50/99 в зависимости от типа предмета.
+- Time: real-time seconds.
+- Distance: grid cells.
+- Day: start with 12-18 real-time minutes, then verify through playtests.
+- Night: 4-6 real-time minutes.
+- Stack: 20/50/99 depending on item type.
 
-## Категории предметов
+## Item Categories
 
-| Категория | Примеры | Stack | Особенность |
+| Category | Examples | Stack | Notes |
 | --- | --- | --- | --- |
-| Raw | wood, stone, ore, fiber | 50-99 | Частый сбор, высокая масса в логистике. |
-| Food | berries, cooked_food | 10-20 | Может портиться позже. |
-| Fuel | coal, charcoal, resin | 50 | Используется теплом/энергией. |
-| Processed | plank, brick, ingot | 50 | Основа строительства. |
-| Components | gear, wire, machine_part | 20-50 | Ограничивают прогресс. |
-| Rare | crystal, ancient_core | 5-20 | Биомные цели. |
+| Raw | wood, stone, ore, fiber | 50-99 | Frequent gathering, high logistics volume. |
+| Food | berries, cooked_food | 10-20 | Can spoil later. |
+| Fuel | coal, charcoal, resin | 50 | Used by heat/energy. |
+| Processed | plank, brick, ingot | 50 | Construction backbone. |
+| Components | gear, wire, machine_part | 20-50 | Progression bottlenecks. |
+| Rare | crystal, ancient_core | 5-20 | Biome goals. |
 
-## Стартовые рецепты
+## Starting Recipes
 
-| Рецепт | Вход | Выход | Время | Станция |
+| Recipe | Input | Output | Time | Station |
 | --- | --- | --- | --- | --- |
 | planks | 2 wood | 1 plank | 1.0s | hand/workbench |
 | campfire | 5 wood, 3 stone | 1 campfire | 2.0s | hand |
 | stone_axe | 2 stone, 1 wood, 1 fiber | 1 stone_axe | 2.0s | hand |
 | furnace | 10 stone, 4 clay/brick | 1 furnace | 4.0s | workbench |
 | ingot | 2 ore, 1 fuel | 1 ingot | 5.0s | furnace |
-| collector | 6 plank, 4 ingot, 2 gear | 1 collector | 8.0s | workbench |
-| conveyor | 1 plank, 1 gear | 2 conveyor | 2.0s | workbench |
+| collector | 6 planks, 4 ingots, 2 gears | 1 collector | 8.0s | workbench |
+| conveyor | 1 plank, 1 gear | 2 conveyors | 2.0s | workbench |
 
-Все числа стартовые. Их задача - дать первый playable rhythm, а не финальный баланс.
+All numbers are starting values. Their job is to create a playable rhythm, not final balance.
 
-## Баланс голода
+## Hunger Balance
 
-Параметры:
+Parameters:
 
 - `hunger_max`;
 - `hunger_decay_idle`;
@@ -53,106 +53,105 @@
 - `food_restore`;
 - `starvation_damage_rate`.
 
-Стартовая цель:
+Starting goal:
 
-- игрок может пережить первый день, питаясь найденной едой;
-- к третьему дню нужна ферма, готовка или стабильный маршрут еды;
-- приготовленная еда должна быть в 2-3 раза ценнее сырой.
+- the player can survive the first day on found food;
+- by the third day, the player needs farming, cooking, or a stable food route;
+- cooked food should be 2-3 times more valuable than raw food.
 
-## Баланс ресурсов
+## Resource Balance
 
-### Древесина
+### Wood
 
-Роль:
+Role:
 
-- первый ресурс;
-- топливо;
-- строительство;
-- ранняя логистика.
+- first resource;
+- fuel;
+- construction;
+- early logistics.
 
-Риск: если дерево слишком универсально, игрок будет рубить одно и то же. Нужно рано добавить stone/ore/fiber constraints.
+Risk: if wood is too universal, the player will chop the same thing forever. Add stone/ore/fiber constraints early.
 
-### Камень
+### Stone
 
-Роль:
+Role:
 
-- печи;
-- стены;
-- базовые машины;
-- дорожки/фундамент позже.
+- furnaces;
+- walls;
+- basic machines;
+- roads/foundation later.
 
-### Руда
+### Ore
 
-Роль:
+Role:
 
-- первый gate автоматизации;
-- требует экспедиции или шахты;
-- переработка требует fuel.
+- first automation gate;
+- requires an expedition or mine;
+- processing requires fuel.
 
-### Еда
+### Food
 
-Роль:
+Role:
 
 - survival pressure;
-- причина фермы/готовки/хранилища;
-- ресурс для экспедиций.
+- reason to build farms/cooking/storage;
+- expedition resource.
 
-## Формула автоматизации
+## Automation Formula
 
-Хорошая машина должна окупаться не сразу, но достаточно быстро.
+A good machine should pay for itself not immediately, but soon enough to feel worthwhile.
 
-Пример:
+Example:
 
-- ручной сбор wood: 1 wood / 1.5s;
-- collector: 1 wood / 5s, но без участия игрока;
-- cost collector: 6 planks + 4 ingots + 2 gears;
-- окупаемость по вниманию: 5-10 минут после постройки.
+- manual wood gathering: 1 wood / 1.5s;
+- collector: 1 wood / 5s, but without player attention;
+- collector cost: 6 planks + 4 ingots + 2 gears;
+- attention payback: 5-10 minutes after construction.
 
-Важно балансировать не только output/sec, но и player attention/sec.
+Balance output/sec and player attention/sec, not only raw throughput.
 
-## Технологические gates
+## Technology Gates
 
-| Gate | Что требует | Что открывает |
+| Gate | Requires | Unlocks |
 | --- | --- | --- |
-| Fire | wood + stone | ночь, готовка, тепло |
-| Workbench | planks + fiber | инструменты, станции |
+| Fire | wood + stone | night, cooking, heat |
+| Workbench | planks + fiber | tools, stations |
 | Smelting | stone + fuel + ore | ingots |
 | Mechanics | ingots + gears | collector/conveyor |
 | Power | fuel + machine parts | powered machines |
-| Farming | water + seeds | стабильная еда |
-| Defense | stone + light + energy | ночная безопасность |
+| Farming | water + seeds | stable food |
+| Defense | stone + light + energy | night safety |
 
-## Баланс исследования
+## Exploration Balance
 
-Правило: новый биом должен давать хотя бы одно из трех:
+Rule: a new biome should provide at least one of three things:
 
-- новый ресурс;
-- новый риск;
-- новый способ решить старую проблему.
+- a new resource;
+- a new risk;
+- a new way to solve an old problem.
 
-Если биом дает только декорации, он не нужен для первого production scope.
+If a biome only adds decoration, it is not needed in the first production scope.
 
-## Экономика времени
+## Time Economy
 
-Игра должна уменьшать скуку через автоматизацию, а не через ускорение всего подряд.
+The game should reduce boredom through automation, not by simply speeding everything up.
 
-Проверочные вопросы:
+Check questions:
 
-- Какие действия игрок повторяет слишком часто?
-- Можно ли автоматизировать это действие?
-- Автоматизация требует нового решения или просто покупается?
-- Возникает ли новая проблема после автоматизации?
+- Which actions does the player repeat too often?
+- Can that action be automated?
+- Does the automation require a new decision, or is it simply bought?
+- Does a new problem appear after automation?
 
-## Метрики playtest
+## Playtest Metrics
 
-На playtest записывать:
+Record during playtests:
 
-- время до первого campfire;
-- время до первой furnace;
-- время до первого collector;
-- время до первой автоматической цепочки;
-- количество смертей до третьей ночи;
-- сколько раз игрок открывает inventory в минуту;
-- где игрок бросает предметы на землю;
-- какие ресурсы становятся bottleneck.
-
+- time to first campfire;
+- time to first furnace;
+- time to first collector;
+- time to first automated chain;
+- number of deaths before the third night;
+- inventory opens per minute;
+- where players drop items on the ground;
+- which resources become bottlenecks.

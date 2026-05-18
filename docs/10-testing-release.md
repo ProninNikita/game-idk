@@ -1,16 +1,16 @@
-# Тестирование и релиз
+# Testing and Release
 
-Статус: `Draft`
+Status: `Draft`
 
-## Цель
+## Goal
 
-Тестирование должно ловить поломки core loop: сбор, крафт, строительство, автоматизацию, сохранения, ночь/угрозы.
+Testing should catch broken core loop behavior: gathering, crafting, building, automation, saving, night/threats.
 
-## Test pyramid для проекта
+## Test Pyramid for the Project
 
-### Unit-like tests
+### Unit-Like Tests
 
-Для чистой логики:
+For pure logic:
 
 - inventory operations;
 - item stack merge/split;
@@ -20,110 +20,110 @@
 - save migration;
 - deterministic world generation.
 
-### Scene tests
+### Scene Tests
 
-Для Godot-сцен:
+For Godot scenes:
 
 - player movement scene loads;
 - building ghost validates placement;
 - machine accepts input and produces output;
 - UI opens/closes without errors.
 
-### Manual playtests
+### Manual Playtests
 
-Для всего остального:
+For everything else:
 
-- первый день;
-- первая ночь;
-- первая автоматизация;
+- first day;
+- first night;
+- first automation;
 - save/load after building;
 - death/respawn;
 - performance with many machines.
 
-## Smoke test checklist
+## Smoke Test Checklist
 
-Перед любым build:
+Before any build:
 
-- проект открывается в целевой версии Godot;
-- main scene запускается без ошибок;
-- можно начать новую игру;
-- player двигается;
-- можно собрать ресурс;
-- inventory работает;
-- можно построить объект;
-- можно сохранить и загрузить;
-- выход в меню не ломает состояние;
-- нет красных ошибок в Godot Output при обычной игре 5 минут.
+- project opens in the target Godot version;
+- main scene runs without errors;
+- a new game can start;
+- player moves;
+- a resource can be gathered;
+- inventory works;
+- an object can be built;
+- save and load work;
+- returning to menu does not break state;
+- no red errors in Godot Output during 5 minutes of normal play.
 
-## Playtest checklist: первые 20 минут
+## Playtest Checklist: First 20 Minutes
 
-Наблюдать:
+Observe:
 
-- понял ли игрок первую цель без объяснения;
-- нашел ли еду;
-- построил ли campfire;
-- понял ли ночь;
-- понял ли крафт;
-- где возникла первая фрустрация;
-- какие элементы игрок не заметил.
+- did the player understand the first goal without explanation?
+- did the player find food?
+- did the player build a campfire?
+- did the player understand night?
+- did the player understand crafting?
+- where did the first frustration occur?
+- which elements did the player miss?
 
-Вопросы после:
+Post-playtest questions:
 
-- Что ты пытался сделать, но игра не позволила?
-- Где было непонятно почему что-то не работает?
-- Какую вещь хотелось автоматизировать первой?
-- Было ли страшно/напряженно ночью?
+- What did you try to do that the game did not allow?
+- Where was it unclear why something did not work?
+- What did you want to automate first?
+- Did night feel tense or dangerous?
 
-## Performance targets
+## Performance Targets
 
-Для desktop MVP:
+For desktop MVP:
 
-- 60 FPS на средней машине;
-- 500 простых зданий без заметного падения;
-- 1000 loose/conveyor items как stress target после optimization pass;
-- save/load до 3 секунд для small world;
-- отсутствие frame spikes при открытии inventory/build menu.
+- 60 FPS on a mid-range machine;
+- 500 simple buildings without noticeable slowdown;
+- 1000 loose/conveyor items as a stress target after optimization pass;
+- save/load under 3 seconds for a small world;
+- no frame spikes when opening inventory/build menu.
 
-Числа будут уточняться после реального прототипа.
+These numbers will be refined after the real prototype.
 
-## Save/load тесты
+## Save/Load Tests
 
-Обязательные сценарии:
+Required scenarios:
 
 - save near base;
-- save while machine working;
-- save with blocked conveyor;
+- save while a machine is working;
+- save with a blocked conveyor;
 - save during night;
 - save after player death;
 - load old schema after migration;
 - corrupted save handling.
 
-## Регрессии Godot version upgrade
+## Godot Version Upgrade Regression
 
-После обновления Godot:
+After updating Godot:
 
-- открыть проект и сохранить копию;
-- запустить smoke test;
-- проверить tilemap;
-- проверить input;
-- проверить shaders/materials, если есть;
-- проверить exports;
-- проверить save/load;
-- записать результат в decisions log.
+- open the project and save a copy;
+- run smoke test;
+- check tilemap;
+- check input;
+- check shaders/materials, if any;
+- check exports;
+- check save/load;
+- record result in the decisions log.
 
-## Release checklist для demo
+## Demo Release Checklist
 
-- version number выставлен;
-- changelog написан;
-- controls screen актуален;
-- known issues список готов;
-- debug shortcuts выключены или скрыты;
-- crash/error logs доступны;
+- version number set;
+- changelog written;
+- controls screen up to date;
+- known issues list ready;
+- debug shortcuts disabled or hidden;
+- crash/error logs accessible;
 - save folder documented;
-- build протестирован на чистой машине;
-- archive naming единый.
+- build tested on a clean machine;
+- archive naming is consistent.
 
-## Bug report template
+## Bug Report Template
 
 ```md
 ## Summary
@@ -147,8 +147,7 @@ Critical / High / Medium / Low
 
 ## Severity
 
-- Critical: crash, save corruption, нельзя продолжить игру.
-- High: ломает core loop или major system.
-- Medium: заметная ошибка с workaround.
+- Critical: crash, save corruption, cannot continue.
+- High: breaks core loop or a major system.
+- Medium: noticeable issue with a workaround.
 - Low: polish, visual, minor UX.
-

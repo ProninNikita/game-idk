@@ -1,116 +1,116 @@
-# UI/UX и управление
+# UI/UX and Controls
 
-Статус: `Draft`
+Status: `Draft`
 
-## UX-цель
+## UX Goal
 
-Игрок должен понимать, что происходит с персонажем, базой и производством, не утопая в окнах. UI должен помогать строить и диагностировать системы.
+The player should understand what is happening with the character, base, and production without drowning in windows. UI should help build and diagnose systems.
 
-## Управление PC
+## PC Controls
 
-| Действие | Клавиатура/мышь |
+| Action | Keyboard/Mouse |
 | --- | --- |
-| Движение | WASD |
-| Interact / use tool | ЛКМ или E |
-| Alternate action | ПКМ |
-| Inventory | Tab или I |
+| Movement | WASD |
+| Interact / use tool | Left Mouse Button or E |
+| Alternate action | Right Mouse Button |
+| Inventory | Tab or I |
 | Crafting/build menu | B |
 | Rotate building | R |
 | Quick slots | 1-9 |
 | Map | M |
 | Pause | Esc |
 
-Финальные бинды зафиксировать после прототипа.
+Final bindings should be locked after the prototype.
 
-## Gamepad позже
+## Gamepad Later
 
-Gamepad не MVP, но архитектурно стоит не мешать:
+Gamepad is not MVP, but the architecture should not block it:
 
-- все действия через InputMap;
-- UI поддерживает focus navigation;
-- building placement может использовать right stick/cursor mode.
+- all actions go through InputMap;
+- UI supports focus navigation;
+- building placement can use right stick/cursor mode.
 
 ## HUD
 
-HUD MVP:
+MVP HUD:
 
 - health;
 - hunger;
-- temperature/heat warning, если включено;
+- temperature/heat warning, if enabled;
 - day/night clock;
 - quickbar;
 - selected item/tool;
-- короткие status icons;
+- short status icons;
 - contextual prompt.
 
-HUD не должен закрывать центр экрана и grid под ногами игрока.
+HUD should not cover the center of the screen or the grid under the player.
 
-## Инвентарь
+## Inventory
 
-Принципы:
+Principles:
 
 - grid inventory;
 - stack splitting;
 - quick transfer;
-- sort;
-- filter позже;
-- item tooltip с назначением и рецептами позже.
+- sorting;
+- filters later;
+- item tooltip with purpose and recipes later.
 
 MVP:
 
-- открыть/закрыть;
+- open/close;
 - drag/drop;
 - transfer to chest;
 - quickbar assignment.
 
-## Крафт UI
+## Crafting UI
 
-Должен показывать:
+Should show:
 
-- доступные рецепты;
-- недостающие ресурсы;
-- время крафта;
-- где крафтится;
-- что откроется после постройки станции.
+- available recipes;
+- missing resources;
+- craft time;
+- station requirement;
+- what a new station unlocks.
 
-Не делать огромный tech tree в MVP. Достаточно списка рецептов по категориям.
+Do not build a huge tech tree in MVP. A categorized recipe list is enough.
 
-## Строительство UI
+## Building UI
 
-Обязательные состояния:
+Required states:
 
 - ghost preview;
 - valid placement;
-- invalid placement с причиной;
+- invalid placement with reason;
 - rotation;
 - cost display;
 - footprint;
-- input/output direction для машин.
+- input/output direction for machines.
 
-Причины invalid placement:
+Invalid placement reasons:
 
-- нет ресурсов;
-- занято;
-- непроходимо;
+- not enough resources;
+- occupied;
+- blocked terrain;
 - wrong terrain;
 - outside build range;
-- missing foundation, если появится.
+- missing foundation, if added.
 
-## Диагностика машин
+## Machine Diagnostics
 
-Каждая машина должна визуально показывать:
+Every machine should visually show:
 
-- работает;
-- нет входного ресурса;
+- working;
+- missing input resource;
 - output blocked;
-- нет топлива;
-- нет энергии;
-- повреждена;
-- выключена.
+- no fuel;
+- no energy;
+- damaged;
+- turned off.
 
-Лучше использовать маленькие icons/status lights, а не длинный текст над каждой машиной.
+Use small icons/status lights rather than long text above every machine.
 
-## Карта
+## Map
 
 MVP:
 
@@ -119,16 +119,16 @@ MVP:
 - base marker;
 - POI markers after discovery.
 
-Позже:
+Later:
 
 - custom pins;
 - resource overlay;
 - danger overlay;
 - logistics overlay.
 
-## Оверлеи
+## Overlays
 
-Полезные режимы:
+Useful modes:
 
 - build grid;
 - energy radius/network;
@@ -137,37 +137,36 @@ MVP:
 - logistics flow;
 - danger/noise.
 
-Не включать все сразу в MVP. Первый обязательный overlay - build grid + placement validity.
+Do not add everything at once in MVP. The first required overlay is build grid + placement validity.
 
-## Обратная связь
+## Feedback
 
-Нужны:
+Needed:
 
-- звук подбора;
+- pickup sound;
 - hit spark/impact;
 - small item pop;
 - machine start/stop;
-- warning pulse при голоде/ночной угрозе;
-- screen edge hint для угрозы вне экрана, если честно работает.
+- warning pulse for hunger/night danger;
+- screen-edge hint for offscreen threats, if implemented honestly.
 
 ## Accessibility
 
-Сразу закладывать:
+Plan from the start:
 
 - remappable controls;
 - readable font sizes;
-- color + icon, не только цвет;
+- color + icon, not color alone;
 - adjustable screenshake;
 - separate volumes: master/music/sfx/ambience;
-- pause в single-player.
+- pause in single-player.
 
-## UX-проверки
+## UX Checks
 
-На каждом playtest:
+At each playtest:
 
-- игрок понял, что делать в первые 60 секунд?
-- игрок понял, почему машина остановилась?
-- игрок понял, почему нельзя поставить здание?
-- игрок смог найти нужный рецепт?
-- игрок видит угрозу до получения урона?
-
+- did the player understand what to do in the first 60 seconds?
+- did the player understand why a machine stopped?
+- did the player understand why a building could not be placed?
+- could the player find the needed recipe?
+- does the player see a threat before taking damage?

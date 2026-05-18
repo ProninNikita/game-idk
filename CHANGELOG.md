@@ -1,69 +1,69 @@
 # Changelog
 
-Файл для истории версий, новых фич, изменений баланса, исправлений и технических решений, которые важны для игроков или разработки.
+This file tracks version history, new features, balance changes, fixes, and technical decisions that matter to players or development.
 
-Формат основан на Keep a Changelog: https://keepachangelog.com/
+The format is based on Keep a Changelog: https://keepachangelog.com/
 
-## Как вести
+## How to Maintain
 
-- Все новые фичи сначала добавлять в `Unreleased`.
-- При выпуске версии переносить записи из `Unreleased` в новый блок версии.
-- Версии вести в формате `MAJOR.MINOR.PATCH`.
-- Для прототипов можно использовать `0.x.y`.
+- Add all new features to `Unreleased` first.
+- When releasing a version, move entries from `Unreleased` into a new version block.
+- Use `MAJOR.MINOR.PATCH` versioning.
+- Prototype versions can use `0.x.y`.
 
-## Типы изменений
+## Change Types
 
-- `Added` - новые фичи, документы, контент, системы.
-- `Changed` - изменения существующего поведения, баланса или структуры.
-- `Fixed` - исправления ошибок.
-- `Removed` - удаленные фичи, данные или документы.
-- `Technical` - внутренние изменения архитектуры, инструментов, пайплайна.
-- `Known Issues` - известные проблемы версии.
+- `Added` - new features, documents, content, or systems.
+- `Changed` - changes to existing behavior, balance, or structure.
+- `Fixed` - bug fixes.
+- `Removed` - removed features, data, or documents.
+- `Technical` - internal architecture, tooling, or pipeline changes.
+- `Known Issues` - known issues for the version.
 
 ## [Unreleased]
 
 ### Added
 
-- Документ истории версий и изменений.
-- Git-ready структура для старта проекта.
-- Добавлен `TODO.md` с чеклистом ближайших задач для стартового прототипа: карта 150x150, ресурсы, кирка, инвентарь и первая автоматизация.
-- README дополнен ссылкой на `TODO.md`.
-- Добавлен стартовый Godot-проект с `project.godot` и main scene.
-- Добавлена процедурная debug-карта 150x150 клеток.
-- Добавлены ресурсные узлы: дерево, камень, руда и дикие культуры.
-- Добавлен игрок с top-down движением, стартовой киркой и зоной добычи.
-- Добавлен простой безлимитный инвентарь и HUD с количеством ресурсов.
-- Добавлена placeholder-отрисовка через код без графических ассетов, чтобы позже заменить ее спрайтами.
+- Version and change history document.
+- Git-ready structure for the project start.
+- Added `TODO.md` with a checklist for the first prototype: 150x150 map, resources, pickaxe, inventory, and first automation.
+- README now links to `TODO.md`.
+- Added the initial Godot project with `project.godot` and the main scene.
+- Added a procedural 150x150 debug map.
+- Added resource nodes: trees, stone, ore, and wild crops.
+- Added a top-down player controller with a starting pickaxe and harvesting area.
+- Added a simple unlimited inventory and HUD with resource counts.
+- Added code-drawn placeholder visuals with no graphic assets, so they can be replaced by sprites later.
 
 ### Changed
 
-- README и индекс документации обновлены ссылкой на changelog.
-- В `Unreleased` зафиксированы планируемые работы по ручной добыче дерева, камня, руды и культур с попаданием ресурсов в инвентарь.
-- TODO обновлен по фактически выполненным первым шагам прототипа.
+- README and documentation index now link to the changelog.
+- `Unreleased` includes planned work for manual harvesting of wood, stone, ore, and crops into the inventory.
+- TODO updated to reflect the first completed prototype steps.
 
 ### Fixed
 
-- Исправлены ошибки Godot 4.6, где предупреждения GDScript о выводе Variant-типа останавливались как parser errors.
-- Добавлены input actions в `project.godot`, чтобы движение и действия существовали до runtime setup.
+- Fixed Godot 4.6 issues where GDScript warnings about inferred Variant types stopped parsing as errors.
+- Added input actions to `project.godot`, so movement and actions exist before runtime setup.
 
 ### Technical
 
-- Подготовлен `.gitignore` для Godot-проекта.
-- Добавлена структура `scenes/` и `scripts/` для Godot.
-- Ресурсы карты создаются отдельными интерактивными сценами, а земля карты рисуется одним world node без создания 22 500 Node-объектов.
-- Добавлен `ItemDef` Resource-класс для будущих item definitions.
-- Проект мигрирован редактором Godot 4.6.2 и получил `.gd.uid` файлы скриптов.
+- Added `.gitignore` for the Godot project.
+- Added `scenes/` and `scripts/` structure for Godot.
+- Map resources are spawned as separate interactive scenes, while the ground is drawn by one world node instead of creating 22,500 Node objects.
+- Added the `ItemDef` Resource class for future item definitions.
+- The project was migrated by the Godot 4.6.2 editor and now includes script `.gd.uid` files.
 
 ### Known Issues
 
-- Ранее локально обнаруживался Godot 4.3, а рекомендованная версия проекта - Godot 4.6.x stable.
-- На текущей машине приложение Godot по старому пути `/Applications/Godot.app/Contents/MacOS/Godot` не найдено, поэтому runtime smoke test еще не выполнен.
+- Godot 4.3 was detected locally earlier, while the recommended project version is Godot 4.6.x stable.
+- On this machine, the old Godot path `/Applications/Godot.app/Contents/MacOS/Godot` is not valid, so runtime checks should use the current Godot install path.
 
 ## [0.1.0] - 2026-05-18
 
 ### Added
 
-- Стартовая документация проекта:
+- Initial project documentation:
   - vision;
   - Game Design Document;
   - systems design;
@@ -78,10 +78,10 @@
   - decisions and risks;
   - coding standards;
   - content pipeline.
-- Зафиксирована рекомендация по движку: Godot 4.6.x stable.
-- Зафиксирована текущая проверенная стабильная версия Godot на 18 мая 2026: Godot 4.6.2-stable.
-- Зафиксирована локальная версия Godot: 4.3.stable.official.
+- Recorded the engine recommendation: Godot 4.6.x stable.
+- Recorded the latest checked stable Godot version on May 18, 2026: Godot 4.6.2-stable.
+- Recorded the previously detected local Godot version: 4.3.stable.official.
 
 ### Technical
 
-- Создана базовая файловая структура документации.
+- Created the base documentation file structure.

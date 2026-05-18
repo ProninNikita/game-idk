@@ -1,116 +1,116 @@
 # Game Design Document
 
-Статус: `Draft`
+Status: `Draft`
 
-## Обзор
+## Overview
 
-Project Hearthline - 2D top-down игра про выживание, крафт, базостроение и автоматизацию. Игрок исследует мир, добывает ресурсы, строит лагерь, создает производственные цепочки и переживает давление окружающей среды.
+Project Hearthline is a 2D top-down game about survival, crafting, base building, and automation. The player explores the world, gathers resources, builds a camp, creates production chains, and survives pressure from the environment.
 
-## Core loop
+## Core Loop
 
-1. Исследовать ближайшую территорию.
-2. Найти ресурс или угрозу.
-3. Собрать, добыть или обойти.
-4. Переработать ресурс вручную или через постройку.
-5. Построить улучшение базы.
-6. Автоматизировать повторяющееся действие.
-7. Подготовиться к следующему давлению мира.
-8. Расшириться в новый биом или глубже в текущий.
+1. Explore nearby territory.
+2. Find a resource or threat.
+3. Gather, mine, avoid, or fight.
+4. Process resources manually or through a building.
+5. Build a base improvement.
+6. Automate a repeated action.
+7. Prepare for the next environmental pressure.
+8. Expand into a new biome or deeper into the current one.
 
-## Moment-to-moment loop
+## Moment-to-Moment Loop
 
-- двигаться;
-- собирать;
-- рубить/копать/ломать;
-- подбирать;
-- крафтить;
-- размещать постройки;
-- переносить предметы;
-- проверять состояние персонажа;
-- реагировать на угрозы;
-- возвращаться к базе.
+- move;
+- gather;
+- chop/mine/break;
+- pick up;
+- craft;
+- place buildings;
+- carry items;
+- check character state;
+- react to threats;
+- return to base.
 
-## Mid-term loop
+## Mid-Term Loop
 
-- открыть новый ресурс;
-- построить новую цепочку;
-- стабилизировать еду/энергию/защиту;
-- улучшить инструменты;
-- расширить склад;
-- открыть новый биом;
-- пережить событие.
+- discover a new resource;
+- build a new chain;
+- stabilize food/energy/defense;
+- upgrade tools;
+- expand storage;
+- unlock a new biome;
+- survive an event.
 
-## Long-term loop
+## Long-Term Loop
 
-- превратить базу в устойчивую автономную систему;
-- открыть все основные технологии;
-- построить инфраструктуру для дальних биомов;
-- пережить сезонные или мировые кризисы;
-- достичь финальной цели мира.
+- turn the base into a resilient autonomous system;
+- unlock all major technologies;
+- build infrastructure for distant biomes;
+- survive seasonal or world-scale crises;
+- reach the world's final objective.
 
-## Игровая сессия
+## Session Rhythm
 
-Ожидаемый ритм:
+Expected rhythm:
 
-- 5 минут: маленькая цель, например добыть древесину, поставить костер, запустить печь.
-- 20 минут: цепочка прогресса, например наладить еду или автоматизировать доски.
-- 60 минут: milestone, например открыть новый биом или построить защитный контур.
+- 5 minutes: a small goal, such as gathering wood, placing a campfire, or starting a furnace.
+- 20 minutes: a progression chain, such as stabilizing food or automating planks.
+- 60 minutes: a milestone, such as unlocking a new biome or building a defensive perimeter.
 
-## Начало игры
+## Game Start
 
-Игрок появляется в относительно безопасной зоне:
+The player appears in a relatively safe area:
 
-- рядом есть базовая древесина/камень/еда;
-- угроза ночью есть, но первая ночь должна быть переживаемой;
-- рядом видны 1-2 интересные точки;
-- первый экран должен показать направление: ресурсы, место для базы, границу опасности.
+- basic wood/stone/food are nearby;
+- night danger exists, but the first night should be survivable;
+- 1-2 interesting points are visible nearby;
+- the first screen should show direction: resources, base space, and the edge of danger.
 
-## Действия игрока
+## Player Actions
 
-### Движение
+### Movement
 
 - WASD/left stick.
-- Диагональное движение нормализовано.
-- Камера следует за игроком с мягким сглаживанием.
+- Diagonal movement is normalized.
+- Camera follows the player with light smoothing.
 
-### Сбор
+### Gathering
 
-- Ручной сбор быстрый и тактильный.
-- Инструмент влияет на скорость, выход и доступность ресурсов.
-- Некоторые ресурсы требуют станции или автоматизации.
+- Manual gathering is quick and tactile.
+- Tools affect speed, yield, and resource access.
+- Some resources require stations or automation.
 
-### Крафт
+### Crafting
 
-- Быстрый ручной крафт для базовых предметов.
-- Станции для продвинутых рецептов.
-- Производственные здания используют те же рецепты или их автоматические варианты.
+- Fast manual crafting for basic items.
+- Stations for advanced recipes.
+- Production buildings use the same recipes or automated variants.
 
-### Строительство
+### Building
 
-- Grid-based размещение.
-- Предпросмотр постройки показывает валидность позиции.
-- Постройки можно поворачивать, если у них есть направление входа/выхода.
-- Разбор возвращает часть ресурсов, полный возврат возможен в early prototype для удобства.
+- Grid-based placement.
+- Building preview shows whether the position is valid.
+- Buildings can rotate if they have input/output direction.
+- Dismantling returns part of the resources; full refund is acceptable in early prototype for convenience.
 
-### Бой и защита
+### Combat and Defense
 
-- Бой не должен быть главным жанром, но должен создавать давление.
-- Ставка на подготовку: свет, стены, ловушки, турели или отпугиватели.
-- Ручной бой простой: удар, уклонение/рывок возможно позже, дистанционное оружие после MVP.
+- Combat should not be the main genre, but it should create pressure.
+- Emphasis is on preparation: light, walls, traps, turrets, or repellents.
+- Manual combat is simple: attack, possible dodge/dash later, ranged weapons after MVP.
 
-## Ресурсы
+## Resources
 
-Стартовые ресурсы:
+Starting resources:
 
 - wood;
 - stone;
 - fiber;
-- berries или raw_food;
+- berries or raw_food;
 - ore;
-- coal или fuel;
+- coal or fuel;
 - water.
 
-Промежуточные ресурсы:
+Intermediate resources:
 
 - planks;
 - bricks;
@@ -120,100 +120,99 @@ Project Hearthline - 2D top-down игра про выживание, крафт,
 - wire;
 - machine_parts.
 
-Абстрактные ресурсы:
+Abstract resources:
 
 - energy;
 - heat;
 - light;
 - research_points.
 
-## Прогрессия
+## Progression
 
-### Tier 0: Выживание руками
+### Tier 0: Hand Survival
 
-- сбор еды;
-- костер;
-- базовые инструменты;
-- ручной крафт;
-- первый сундук.
+- food gathering;
+- campfire;
+- basic tools;
+- manual crafting;
+- first chest.
 
-### Tier 1: Стабильный лагерь
+### Tier 1: Stable Camp
 
-- верстак;
-- печь;
-- ферма/сушилка еды;
-- стены или свет;
-- простая переработка.
+- workbench;
+- furnace;
+- farm/food dryer;
+- walls or light;
+- simple processing.
 
-### Tier 2: Первичная автоматизация
+### Tier 2: First Automation
 
-- сборщик ресурсов;
-- конвейер/переносчик;
-- автоматическая печь;
-- складской узел;
-- генератор энергии.
+- resource collector;
+- conveyor/transporter;
+- automatic furnace;
+- storage node;
+- energy generator.
 
-### Tier 3: Устойчивая база
+### Tier 3: Resilient Base
 
-- автоматизированная еда;
-- энергосеть;
-- защита периметра;
-- переработка отходов/побочных продуктов;
-- экспедиционные станции.
+- automated food;
+- power network;
+- defensive perimeter;
+- waste/byproduct processing;
+- expedition stations.
 
-### Tier 4: Мир и финальная цель
+### Tier 4: World and Final Goal
 
-- глубокие биомы;
-- редкие материалы;
-- сложные цепочки;
-- глобальное событие или финальная постройка.
+- deep biomes;
+- rare materials;
+- complex chains;
+- global event or final construction.
 
-## Технологии
+## Technologies
 
-Исследования открываются через:
+Research unlocks through:
 
-- обработку новых ресурсов;
-- постройку исследовательской станции;
-- выполнение системных целей;
-- изучение артефактов/аномалий.
+- processing new resources;
+- building a research station;
+- completing systemic goals;
+- studying artifacts/anomalies.
 
-Важно: tech tree не должен превращаться в меню отдельно от мира. Лучшие открытия должны быть связаны с действиями игрока.
+Important: the tech tree should not become a menu disconnected from the world. The best unlocks should be tied to player actions.
 
-## День и ночь
+## Day and Night
 
-День:
+Day:
 
-- сбор;
-- строительство;
-- дальние вылазки;
-- настройка цепочек.
+- gathering;
+- construction;
+- distant trips;
+- chain setup.
 
-Ночь:
+Night:
 
-- повышенная опасность;
-- важность света/тепла;
-- активность некоторых существ или событий;
-- полезное время для переработки и планирования, если база готова.
+- increased danger;
+- importance of light/heat;
+- activity from certain creatures or events;
+- useful time for processing and planning if the base is ready.
 
-## Смерть и провал
+## Death and Failure
 
-Варианты для прототипа:
+Prototype options:
 
-- игрок теряет часть предметов и возрождается у базы;
-- мир продолжает жить;
-- предметы можно вернуть с места смерти;
-- база не должна мгновенно уничтожаться из-за одной ошибки.
+- the player loses some items and respawns at the base;
+- the world continues living;
+- items can be recovered from the death location;
+- the base should not instantly collapse from one mistake.
 
-Permadeath не рекомендуется для первого режима. Можно добавить отдельный hardcore mode позже.
+Permadeath is not recommended for the first mode. It can become a separate hardcore mode later.
 
-## Победа
+## Victory
 
-Финальная цель пока открыта. Возможные направления:
+The final goal is still open. Possible directions:
 
-- построить маяк/машину для стабилизации мира;
-- пережить большой сезонный цикл;
-- открыть центр мира;
-- восстановить древнюю сеть, которая меняет правила биомов.
+- build a beacon/machine that stabilizes the world;
+- survive a full seasonal cycle;
+- reach the center of the world;
+- restore an ancient network that changes biome rules.
 
-Для MVP финальная победа не нужна. Нужна ясная цель vertical slice: построить устойчивую базу и пережить третью ночь/первое событие.
-
+MVP does not need a final victory. It needs a clear vertical slice goal: build a stable base and survive the third night or first event.

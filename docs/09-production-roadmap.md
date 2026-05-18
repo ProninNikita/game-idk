@@ -1,32 +1,32 @@
-# Производственный план
+# Production Roadmap
 
-Статус: `Draft`
+Status: `Draft`
 
-## Принцип
+## Principle
 
-Сначала playable prototype, потом vertical slice, потом расширение. Не строить десятки систем до проверки core loop.
+Playable prototype first, vertical slice second, expansion after that. Do not build dozens of systems before the core loop is tested.
 
-## Phase 0: Подготовка проекта
+## Phase 0: Project Setup
 
-Цель: рабочая Godot-среда и документационный baseline.
+Goal: working Godot environment and documentation baseline.
 
 Done:
 
-- выбран target Godot;
-- создана документация;
-- определен MVP scope.
+- target Godot chosen;
+- documentation created;
+- MVP scope defined.
 
-Следующее:
+Next:
 
-- обновить локальный Godot до 4.6.x stable;
-- создать Godot project;
-- настроить Git;
-- создать базовую структуру папок;
-- добавить placeholder assets.
+- update local Godot to 4.6.x stable;
+- create Godot project;
+- set up Git;
+- create base folder structure;
+- add placeholder assets.
 
 ## Phase 1: Movement and Interaction Prototype
 
-Цель: игрок приятно двигается и взаимодействует с миром.
+Goal: the player moves well and interacts with the world.
 
 Scope:
 
@@ -41,14 +41,14 @@ Scope:
 
 Exit criteria:
 
-- можно собрать wood/stone/food;
-- предметы попадают в inventory;
-- игрок понимает selected tool/action;
-- управление ощущается нормально.
+- wood/stone/food can be gathered;
+- items enter inventory;
+- the player understands selected tool/action;
+- controls feel acceptable.
 
 ## Phase 2: Survival Prototype
 
-Цель: мир начинает давить на игрока.
+Goal: the world starts pressuring the player.
 
 Scope:
 
@@ -62,13 +62,13 @@ Scope:
 
 Exit criteria:
 
-- первая ночь создает напряжение;
-- игрок понимает, как подготовиться;
-- голод заставляет заботиться о еде, но не раздражает каждую минуту.
+- the first night creates tension;
+- the player understands how to prepare;
+- hunger makes food matter without annoying the player every minute.
 
 ## Phase 3: Building and Crafting Prototype
 
-Цель: игрок строит базу.
+Goal: the player builds a base.
 
 Scope:
 
@@ -82,13 +82,13 @@ Scope:
 
 Exit criteria:
 
-- можно построить маленький лагерь;
-- крафт и строительство используют одни item definitions;
-- здания сохраняются/загружаются.
+- a small camp can be built;
+- crafting and building use the same item definitions;
+- buildings save and load.
 
 ## Phase 4: Automation Prototype
 
-Цель: первая производственная цепочка работает без участия игрока.
+Goal: the first production chain works without player involvement.
 
 Scope:
 
@@ -102,19 +102,19 @@ Scope:
 
 Exit criteria:
 
-- можно автоматизировать хотя бы одну цепочку;
-- остановки машин понятны визуально;
-- симуляция не завязана на хаотичный per-node logic.
+- at least one chain can be automated;
+- machine stoppages are visually understandable;
+- simulation is not tied to chaotic per-node logic.
 
 ## Phase 5: Vertical Slice
 
-Цель: 30-60 минут цельного gameplay.
+Goal: 30-60 minutes of coherent gameplay.
 
 Scope:
 
 - small generated/handcrafted world;
 - 3-4 biomes/zones;
-- tech progression до Tier 2;
+- tech progression to Tier 2;
 - first event;
 - base defense;
 - save/load;
@@ -123,15 +123,15 @@ Scope:
 
 Exit criteria:
 
-- новый игрок понимает первые цели;
-- есть 3-5 значимых решений;
-- можно проиграть из-за плохой подготовки;
-- можно восстановиться после ошибки;
-- есть причина расширять базу.
+- a new player understands the first goals;
+- there are 3-5 meaningful decisions;
+- the player can lose because of poor preparation;
+- recovery after mistakes is possible;
+- there is a reason to expand the base.
 
 ## Phase 6: Alpha
 
-Цель: все главные системы есть, контент еще может быть грубым.
+Goal: all core systems exist, content can still be rough.
 
 Scope:
 
@@ -145,13 +145,13 @@ Scope:
 
 Exit criteria:
 
-- игра держит несколько часов прогрессии;
-- save format стабилен;
-- major systems не переписываются каждую неделю.
+- the game supports several hours of progression;
+- save format is stable;
+- major systems are not being rewritten every week.
 
 ## Phase 7: Beta
 
-Цель: стабилизация и контент.
+Goal: stabilization and content.
 
 Scope:
 
@@ -165,12 +165,12 @@ Scope:
 
 Exit criteria:
 
-- known critical bugs закрыты;
-- performance targets достигнуты;
-- tutorial не ломается;
-- game loop понятен playtesters.
+- known critical bugs are closed;
+- performance targets are met;
+- tutorial does not break;
+- playtesters understand the game loop.
 
-## Milestone naming
+## Milestone Naming
 
 - M0 Docs and setup.
 - M1 Hands in the dirt.
@@ -179,11 +179,10 @@ Exit criteria:
 - M4 First machine.
 - M5 Vertical slice.
 
-## Weekly rhythm
+## Weekly Rhythm
 
-- Понедельник: выбрать 3-5 задач недели.
-- Середина недели: короткий playable check.
-- Конец недели: build + notes + backlog cleanup.
+- Monday: choose 3-5 tasks for the week.
+- Midweek: short playable check.
+- End of week: build + notes + backlog cleanup.
 
-Даже solo-проекту полезен build в конце недели. Он показывает реальное состояние, а не настроение.
-
+Even a solo project benefits from an end-of-week build. It shows the real state, not the mood.

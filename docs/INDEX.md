@@ -1,41 +1,41 @@
-# Индекс документации
+# Documentation Index
 
-Этот набор документов нужен, чтобы проект можно было вести без хаоса: быстро проверить текущее решение, понять зачем строится система, и не терять контекст между прототипами.
+This documentation set keeps the project from drifting into chaos: it should make it quick to check current decisions, understand why a system exists, and preserve context between prototypes.
 
-## Главные документы
+## Main Documents
 
-| Файл | Для чего нужен |
+| File | Purpose |
 | --- | --- |
-| [00-version-and-tools.md](00-version-and-tools.md) | Версия Godot, локальная среда, правила обновления движка. |
-| [01-vision.md](01-vision.md) | Короткое видение, pillars, аудитория, границы проекта. |
-| [02-game-design-document.md](02-game-design-document.md) | Основной GDD: петли, прогрессия, мир, действия игрока. |
-| [03-systems-design.md](03-systems-design.md) | Детализация выживания, автоматизации, крафта, угроз и экологии. |
-| [04-technical-design.md](04-technical-design.md) | Архитектура Godot-проекта, сцены, autoload, сохранения, производительность. |
-| [05-data-balance.md](05-data-balance.md) | Данные, таблицы, формулы, балансировочные ручки. |
-| [06-world-generation.md](06-world-generation.md) | Биомы, чанки, генерация, сохранение изменений мира. |
-| [07-ui-ux.md](07-ui-ux.md) | Управление, HUD, инвентарь, строительство, доступность. |
-| [08-art-audio.md](08-art-audio.md) | Визуальный стиль, камера, анимации, звук, музыка. |
-| [09-production-roadmap.md](09-production-roadmap.md) | MVP, vertical slice, alpha, beta, критерии готовности. |
-| [10-testing-release.md](10-testing-release.md) | Тестирование, чеклисты, производительность, релизная дисциплина. |
-| [11-backlog.md](11-backlog.md) | Эпики и стартовые задачи. |
-| [12-decisions-and-risks.md](12-decisions-and-risks.md) | Журнал решений, риски и открытые вопросы. |
-| [13-coding-standards.md](13-coding-standards.md) | Стиль GDScript, сцены, сигналы, структура кода. |
-| [14-content-pipeline.md](14-content-pipeline.md) | Как добавлять предметы, рецепты, здания, биомы и ассеты. |
-| [TODO.md](../TODO.md) | Текущий чеклист задач прототипа. |
-| [CHANGELOG.md](../CHANGELOG.md) | История версий, новых фич, изменений и исправлений. |
+| [00-version-and-tools.md](00-version-and-tools.md) | Godot version, local environment, and engine update rules. |
+| [01-vision.md](01-vision.md) | Short vision, pillars, audience, and project boundaries. |
+| [02-game-design-document.md](02-game-design-document.md) | Main GDD: loops, progression, world, and player actions. |
+| [03-systems-design.md](03-systems-design.md) | Survival, automation, crafting, threats, and ecology details. |
+| [04-technical-design.md](04-technical-design.md) | Godot project architecture, scenes, autoloads, saves, and performance. |
+| [05-data-balance.md](05-data-balance.md) | Data, tables, formulas, and balance knobs. |
+| [06-world-generation.md](06-world-generation.md) | Biomes, chunks, generation, and persistent world changes. |
+| [07-ui-ux.md](07-ui-ux.md) | Controls, HUD, inventory, building, and accessibility. |
+| [08-art-audio.md](08-art-audio.md) | Visual style, camera, animation, sound, and music. |
+| [09-production-roadmap.md](09-production-roadmap.md) | MVP, vertical slice, alpha, beta, and readiness criteria. |
+| [10-testing-release.md](10-testing-release.md) | Testing, checklists, performance, and release discipline. |
+| [11-backlog.md](11-backlog.md) | Epics and starting tasks. |
+| [12-decisions-and-risks.md](12-decisions-and-risks.md) | Decision log, risks, and open questions. |
+| [13-coding-standards.md](13-coding-standards.md) | GDScript style, scenes, signals, and code structure. |
+| [14-content-pipeline.md](14-content-pipeline.md) | How to add items, recipes, buildings, biomes, and assets. |
+| [TODO.md](../TODO.md) | Current prototype task checklist. |
+| [CHANGELOG.md](../CHANGELOG.md) | Version history, new features, changes, and fixes. |
 
-## Как пользоваться
+## How to Use
 
-1. Перед разработкой новой системы обновлять соответствующий дизайн-документ.
-2. После реализации отмечать в [11-backlog.md](11-backlog.md), что сделано.
-3. Если принято архитектурное решение, добавлять запись в [12-decisions-and-risks.md](12-decisions-and-risks.md).
-4. Если баланс меняется больше чем на 20-30%, фиксировать причину в [05-data-balance.md](05-data-balance.md).
-5. Если добавляется новый тип контента, обновлять [14-content-pipeline.md](14-content-pipeline.md), если текущего процесса недостаточно.
-6. Все новые фичи и заметные изменения записывать в [CHANGELOG.md](../CHANGELOG.md) в раздел `Unreleased`.
+1. Before developing a new system, update the relevant design document.
+2. After implementation, mark completed work in [11-backlog.md](11-backlog.md).
+3. If an architecture decision is made, add an entry to [12-decisions-and-risks.md](12-decisions-and-risks.md).
+4. If balance changes by more than 20-30%, record the reason in [05-data-balance.md](05-data-balance.md).
+5. If a new content type is added and the current process is not enough, update [14-content-pipeline.md](14-content-pipeline.md).
+6. Record all new features and notable changes in [CHANGELOG.md](../CHANGELOG.md) under `Unreleased`.
 
-## Статусы документов
+## Document Statuses
 
-- `Draft`: черновик, можно менять свободно.
-- `Prototype`: проверяется в прототипе.
-- `Locked for milestone`: зафиксировано до конца текущего milestone.
-- `Deprecated`: решение больше не используется.
+- `Draft`: early version, can be changed freely.
+- `Prototype`: being tested in a prototype.
+- `Locked for milestone`: fixed until the end of the current milestone.
+- `Deprecated`: no longer used.

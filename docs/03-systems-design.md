@@ -1,83 +1,83 @@
-# Системный дизайн
+# Systems Design
 
-Статус: `Draft`
+Status: `Draft`
 
-## Survival-системы
+## Survival Systems
 
-### Голод
+### Hunger
 
-Назначение: заставить игрока строить пищевую устойчивость, а не бесконечно исследовать без подготовки.
+Purpose: make the player build food stability instead of exploring forever without preparation.
 
-Правила для прототипа:
+Prototype rules:
 
-- голод убывает постоянно;
-- физическая работа может ускорять расход;
-- сырая еда восстанавливает мало и может иметь риск;
-- приготовленная еда эффективнее;
-- автоматизация еды должна стать первым большим облегчением.
+- hunger decreases constantly;
+- physical work can increase hunger drain;
+- raw food restores little and can carry risk;
+- cooked food is more efficient;
+- food automation should become the first major relief.
 
-Баланс-цель: игрок не должен постоянно смотреть на шкалу голода, но должен планировать еду перед экспедицией.
+Balance goal: the player should not stare at the hunger bar constantly, but should plan food before expeditions.
 
-### Температура/тепло
+### Temperature/Heat
 
-Для MVP можно упростить до ночного холода или сезонного холода:
+For MVP, this can be simplified to night cold or seasonal cold:
 
-- ночью без костра/одежды/укрытия персонаж мерзнет;
-- холод повышает расход голода или снижает скорость;
-- источники тепла имеют радиус.
+- at night, without fire/clothing/shelter the character gets cold;
+- cold increases hunger drain or reduces speed;
+- heat sources have a radius.
 
-Температура должна быть пространственной системой: игрок понимает, где безопасно, а где нет.
+Temperature should be spatial: the player understands where it is safe and where it is not.
 
-### Свет и темнота
+### Light and Darkness
 
-Свет нужен не только для видимости:
+Light is not only visibility:
 
-- снижает риск ночных угроз;
-- позволяет работать некоторым зданиям;
-- дает читаемость базы;
-- может потреблять топливо/энергию.
+- it reduces night threat risk;
+- it allows some buildings to work;
+- it improves base readability;
+- it can consume fuel/energy.
 
-### Здоровье
+### Health
 
-Здоровье теряется от:
+Health is lost from:
 
-- атак;
-- голода на нуле;
-- экстремальной температуры;
-- ядов/плохой еды;
-- особых событий.
+- attacks;
+- zero hunger;
+- extreme temperature;
+- poison/bad food;
+- special events.
 
-Регенерация:
+Regeneration:
 
-- медленная естественная при сытости;
-- быстрая через еду/лекарства;
-- у костра или в укрытии можно усилить восстановление.
+- slow natural regen while fed;
+- faster recovery through food/medicine;
+- campfires or shelter can improve recovery.
 
-## Автоматизация
+## Automation
 
-### Принцип
+### Principle
 
-Каждая автоматизация должна заменять повторяющееся ручное действие:
+Every automation should replace a repeated manual action:
 
-- добыть;
-- перенести;
-- переработать;
-- сложить;
-- распределить;
-- защитить;
-- поддержать ресурс вроде топлива или воды.
+- extract;
+- transport;
+- process;
+- store;
+- distribute;
+- defend;
+- support a resource like fuel or water.
 
-### Машины MVP
+### MVP Machines
 
-- `Collector`: добывает ресурс с соседнего тайла или из залежи.
-- `Conveyor`: перемещает предметы по направлению.
-- `Inserter/Arm`: переносит предмет между машиной и контейнером.
-- `Furnace`: перерабатывает ore + fuel в ingot.
-- `Workbench/Assembler`: собирает простой рецепт.
-- `Chest`: хранит предметы.
-- `Generator`: превращает fuel в energy.
+- `Collector`: extracts a resource from a nearby tile or deposit.
+- `Conveyor`: moves items in a direction.
+- `Inserter/Arm`: transfers items between a machine and a container.
+- `Furnace`: turns ore + fuel into ingots.
+- `Workbench/Assembler`: crafts a simple recipe.
+- `Chest`: stores items.
+- `Generator`: turns fuel into energy.
 
-### Машины после MVP
+### Post-MVP Machines
 
 - splitter;
 - filter;
@@ -89,25 +89,25 @@
 - repair station;
 - research station.
 
-### Логистика
+### Logistics
 
-Стартовое решение: grid-based conveyor network.
+Starting decision: grid-based conveyor network.
 
-Правила:
+Rules:
 
-- предмет занимает слот на конвейере;
-- конвейер имеет направление;
-- поворот - отдельный tile state или автоматическое соединение;
-- splitter/filter появляются после базового прототипа;
-- при переполнении предметы стоят, машина блокируется.
+- an item occupies a slot on a conveyor;
+- each conveyor has a direction;
+- turns are either tile state or automatic connection;
+- splitter/filter arrive after the basic prototype;
+- if output is full, items stop and the machine blocks.
 
-Важная цель: игрок должен видеть причину остановки цепочки без debug UI.
+Important goal: the player should see why a chain stopped without debug UI.
 
-## Крафт и рецепты
+## Crafting and Recipes
 
-### Рецепт
+### Recipe
 
-Рецепт должен иметь:
+A recipe should have:
 
 - id;
 - display name;
@@ -118,92 +118,91 @@
 - required tech;
 - tags.
 
-### Ручной крафт
+### Manual Crafting
 
-Ручной крафт:
+Manual crafting:
 
-- быстрый для базовых предметов;
-- медленный или невозможный для машинных деталей;
-- не должен конкурировать с автоматизацией в mid-game.
+- fast for basic items;
+- slow or impossible for machine parts;
+- should not compete with automation in mid-game.
 
-### Станционный крафт
+### Station Crafting
 
-Станции:
+Stations:
 
-- ограничивают доступные рецепты;
-- имеют очереди;
-- могут потреблять энергию/топливо;
-- могут быть автоматизированы входом/выходом.
+- limit available recipes;
+- have queues;
+- can consume energy/fuel;
+- can be automated through input/output.
 
-## Энергия
+## Energy
 
-Для MVP энергия может быть простой:
+For MVP, energy can be simple:
 
-- генератор имеет internal fuel slot;
-- машины имеют `energy_per_second`;
-- энергосеть работает через радиус или grid connection.
+- a generator has an internal fuel slot;
+- machines have `energy_per_second`;
+- the energy network works through radius or grid connection.
 
-Варианты:
+Options:
 
-- Радиус: проще, меньше логистики.
-- Провода/полюса: интереснее, но требует UI и pathing.
+- Radius: simpler, less logistics.
+- Wires/poles: more interesting, but needs UI and pathing.
 
-Рекомендация MVP: начать с радиуса генератора, потом перейти к полюсам, если это добавляет весомое решение.
+MVP recommendation: start with generator radius, then move to poles if it creates meaningful decisions.
 
-## Угрозы
+## Threats
 
-Угрозы должны атаковать слабые места системы:
+Threats should attack weak points in the system:
 
-- темнота;
-- шум машин;
-- запах еды;
-- открытые склады;
-- дальние экспедиции;
-- загрязнение или перегрев, если добавим позднее.
+- darkness;
+- machine noise;
+- food smell;
+- open storage;
+- distant expeditions;
+- pollution or overheating, if added later.
 
-MVP-угроза:
+MVP threat:
 
-- ночью появляется простое существо/тень;
-- избегает света;
-- атакует игрока или беззащитные постройки;
-- имеет понятное предупреждение.
+- a simple creature/shadow appears at night;
+- avoids light;
+- attacks the player or unprotected buildings;
+- has a clear warning.
 
-## Экология
+## Ecology
 
-Экология нужна, чтобы мир не был бесконечным складом:
+Ecology keeps the world from being an infinite warehouse:
 
-- растения могут отрастать;
-- залежи истощаются;
-- животные/существа мигрируют;
-- чрезмерная добыча может менять локальные условия;
-- фермы требуют воды/света/температуры.
+- plants can regrow;
+- deposits deplete;
+- animals/creatures migrate;
+- excessive extraction can change local conditions;
+- farms require water/light/temperature.
 
-Для MVP:
+For MVP:
 
-- деревья/кусты имеют respawn или посадку;
-- руда конечна в ближней зоне;
-- еда отрастает медленно;
-- ферма решает долгосрочное питание.
+- trees/bushes respawn or can be planted;
+- ore is finite near the base;
+- food regrows slowly;
+- farms solve long-term food.
 
-## События
+## Events
 
-События дают ритм:
+Events create rhythm:
 
-- холодная ночь;
-- нападение;
-- буря;
-- урожайный день;
-- отключение/перегрузка энергии;
-- редкое появление ресурса.
+- cold night;
+- raid;
+- storm;
+- harvest day;
+- power outage/overload;
+- rare resource appearance.
 
-MVP: одно событие после нескольких дней, заранее телеграфированное.
+MVP: one event after several days, clearly telegraphed.
 
-## Исследование
+## Exploration
 
-Исследование должно двигать игрока за пределы базы:
+Exploration should move the player beyond the base:
 
-- новые биомы дают уникальные ресурсы;
-- опасность растет с расстоянием;
-- временные outposts помогают логистике;
-- карта должна сохранять найденные интересные точки.
-
+- new biomes provide unique resources;
+- danger increases with distance;
+- temporary outposts help logistics;
+- the map should preserve discovered points of interest.

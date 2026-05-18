@@ -1,37 +1,37 @@
-# Пайплайн контента
+# Content Pipeline
 
-Статус: `Draft`
+Status: `Draft`
 
-## Цель
+## Goal
 
-Добавление нового контента должно быть повторяемым: предметы, рецепты, здания, машины и биомы проходят один и тот же путь от идеи до playable проверки.
+Adding new content should be repeatable: items, recipes, buildings, machines, and biomes follow the same path from idea to playable verification.
 
-## Общий процесс
+## General Process
 
-1. Описать роль контента в дизайне.
-2. Добавить data definition.
-3. Добавить placeholder visual/audio, если нужно.
-4. Подключить к registry.
-5. Добавить рецепт или unlock condition.
-6. Проверить в test map.
-7. Записать баланс-заметки.
+1. Describe the content's design role.
+2. Add the data definition.
+3. Add placeholder visual/audio if needed.
+4. Connect it to the registry.
+5. Add a recipe or unlock condition.
+6. Test it on the test map.
+7. Record balance notes.
 
-Если контент не меняет решение игрока, он не приоритетен для MVP.
+If content does not change a player decision, it is not an MVP priority.
 
-## Добавление предмета
+## Adding an Item
 
 Checklist:
 
-- [ ] Есть `id`.
-- [ ] Есть display name.
-- [ ] Есть category/tags.
-- [ ] Есть stack size.
-- [ ] Есть icon.
-- [ ] Есть source: где предмет появляется.
-- [ ] Есть sink: куда предмет тратится.
-- [ ] Предмет проверен в inventory.
+- [ ] Has `id`.
+- [ ] Has display name.
+- [ ] Has category/tags.
+- [ ] Has stack size.
+- [ ] Has icon.
+- [ ] Has source: where the item comes from.
+- [ ] Has sink: where the item is spent.
+- [ ] Item is tested in inventory.
 
-Пример:
+Example:
 
 ```text
 id: iron_ore
@@ -42,25 +42,25 @@ source: rocky_field nodes, collector
 sink: furnace -> iron_ingot
 ```
 
-## Добавление рецепта
+## Adding a Recipe
 
 Checklist:
 
-- [ ] Все input items существуют.
-- [ ] Все output items существуют.
-- [ ] Время крафта задано.
-- [ ] Station type задан.
-- [ ] Unlock condition задан или явно `none`.
-- [ ] Рецепт не ломает progression gate.
-- [ ] Рецепт проверен вручную и на станции.
+- [ ] All input items exist.
+- [ ] All output items exist.
+- [ ] Craft time is set.
+- [ ] Station type is set.
+- [ ] Unlock condition is set or explicitly `none`.
+- [ ] Recipe does not break progression gates.
+- [ ] Recipe is tested manually and at a station.
 
-Баланс-вопросы:
+Balance questions:
 
-- Что игрок делал до этого рецепта?
-- Что рецепт теперь облегчает?
-- Какая новая проблема появляется после открытия?
+- What was the player doing before this recipe?
+- What does the recipe now make easier?
+- What new problem appears after unlocking it?
 
-## Добавление здания
+## Adding a Building
 
 Checklist:
 
@@ -74,16 +74,16 @@ Checklist:
 - [ ] Destroy/remove behavior.
 - [ ] UI/status feedback.
 
-Для машин дополнительно:
+For machines additionally:
 
 - [ ] Input slots.
 - [ ] Output slots.
 - [ ] Processing state.
 - [ ] Blocked state.
-- [ ] Fuel/energy need, если есть.
+- [ ] Fuel/energy requirement, if any.
 - [ ] Tick behavior.
 
-## Добавление биома
+## Adding a Biome
 
 Checklist:
 
@@ -92,17 +92,17 @@ Checklist:
 - [ ] Resource distribution.
 - [ ] Threat profile.
 - [ ] Unique reward.
-- [ ] Traversal rule, если есть.
+- [ ] Traversal rule, if any.
 - [ ] Audio/ambience.
 - [ ] Map color/marker.
 
-Биом должен отвечать минимум на один вопрос:
+A biome should answer at least one question:
 
-- Зачем игрок сюда идет?
-- Почему здесь опасно или неудобно?
-- Что здесь можно сделать, чего нельзя в стартовой зоне?
+- Why does the player go here?
+- Why is this place dangerous or inconvenient?
+- What can be done here that cannot be done in the starting area?
 
-## Добавление угрозы
+## Adding a Threat
 
 Checklist:
 
@@ -114,28 +114,28 @@ Checklist:
 - [ ] Reward or relief after dealing with it.
 - [ ] Save/load relevance.
 
-Угроза без counterplay раздражает. Угроза без telegraph кажется нечестной.
+A threat without counterplay is frustrating. A threat without telegraphing feels unfair.
 
-## Placeholder policy
+## Placeholder Policy
 
-Placeholder допустим, если:
+Placeholder content is acceptable if:
 
-- он явно лежит в `prototype`;
-- его легко заменить;
-- он не маскирует gameplay readability проблемы.
+- it clearly lives in `prototype`;
+- it is easy to replace;
+- it does not hide gameplay readability problems.
 
-Placeholder опасен, если:
+Placeholder content is dangerous if:
 
-- все предметы выглядят одинаково;
-- машина не показывает направление;
-- threat не читается;
-- UI строится вокруг временной картинки.
+- all items look the same;
+- a machine does not show direction;
+- a threat is not readable;
+- UI is built around temporary art.
 
-## Контентные таблицы
+## Content Tables
 
-На старте можно держать данные в Godot Resources. Если баланс часто меняется, добавить экспорт/импорт CSV.
+At the start, data can live in Godot Resources. If balance changes often, add CSV export/import.
 
-Возможные таблицы:
+Possible tables:
 
 - items;
 - recipes;
@@ -145,14 +145,13 @@ Placeholder опасен, если:
 - threats;
 - tech unlocks.
 
-## Definition of done для нового контента
+## Definition of Done for New Content
 
-Контент считается добавленным, если:
+Content is considered added when:
 
-- его можно получить в игре;
-- его можно использовать в игре;
-- он сохраняется/загружается, если остается в мире;
-- он имеет readable placeholder/final visual;
-- он упомянут в нужном design или balance документе;
-- он не создает красных ошибок в Output.
-
+- it can be obtained in game;
+- it can be used in game;
+- it saves/loads if it remains in the world;
+- it has readable placeholder/final visual;
+- it is mentioned in the relevant design or balance document;
+- it does not create red errors in Output.

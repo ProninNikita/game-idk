@@ -1,91 +1,90 @@
-# Видение игры
+# Game Vision
 
-Статус: `Draft`
+Status: `Draft`
 
-## Короткий pitch
+## Short Pitch
 
-Top-down survival automation sandbox, где игрок начинает с голыми руками в опасном мире, постепенно строит лагерь, превращает ручной сбор в автоматизированные цепочки и учится поддерживать баланс между ростом базы, ресурсами, угрозами и собственным выживанием.
+A top-down survival automation sandbox where the player starts nearly empty-handed in a dangerous world, gradually builds a camp, turns manual gathering into automated chains, and learns to balance base growth, resources, threats, and personal survival.
 
-## Ключевое ощущение
+## Core Feeling
 
-Игрок должен чувствовать: "Я построил хрупкую, но умную систему в мире, который живет и давит на нее". Не просто гринд ресурсов, не просто фабрика, не просто survival-метры, а постоянное улучшение маленькой цивилизации, которую приходится защищать, кормить и оптимизировать.
+The player should feel: "I built a fragile but clever system in a world that is alive and pushing back." Not just resource grinding, not just factory planning, and not just survival meters, but the steady improvement of a small civilization that must be defended, fed, and optimized.
 
-## Design pillars
+## Design Pillars
 
-### 1. Ручной старт, системный финал
+### 1. Manual Start, Systemic Endgame
 
-В начале игрок делает почти все сам: рубит, копает, собирает, таскает, готовит. Через несколько часов эти действия должны становиться задачами для построенных систем: фермы, конвейеры, склады, генераторы, переработчики.
+At first, the player does almost everything by hand: chopping, mining, gathering, carrying, cooking. After a few hours, those actions should become jobs for built systems: farms, conveyors, storage, generators, processors.
 
-### 2. Выживание через подготовку
+### 2. Survival Through Preparation
 
-Опасность должна быть предсказуемой настолько, чтобы игрок мог подготовиться, но достаточно жесткой, чтобы игнорирование мира ломало планы. Ночь, погода, голод, температура, атаки и истощение ресурсов работают как давление на планирование.
+Danger should be predictable enough to prepare for, but harsh enough that ignoring the world breaks plans. Night, weather, hunger, temperature, attacks, and resource depletion all pressure planning.
 
-### 3. Автоматизация с понятной географией
+### 3. Automation With Clear Geography
 
-Производственные цепочки должны быть видны на карте. Игрок читает базу глазами: где добыча, где логистика, где переработка, где склад, где защита.
+Production chains should be visible on the map. The player reads the base visually: where extraction happens, where logistics run, where processing sits, where storage is, and where defense is placed.
 
-### 4. Мир как участник системы
+### 4. The World as a System Participant
 
-Биомы, сезоны, существа, растения и ресурсы не просто декорации. Они влияют на маршруты, цепочки, риски и стратегию расширения.
+Biomes, seasons, creatures, plants, and resources are not just decoration. They affect routes, chains, risks, and expansion strategy.
 
-### 5. Маленькие победы каждые несколько минут
+### 5. Small Wins Every Few Minutes
 
-Новая печь, первый автоматический сборщик, первая стабильная еда, первая ночь без паники, первая линия доставки. Игра должна постоянно давать микро-прогресс.
+A new furnace, first automatic collector, first stable food source, first calm night, first delivery line. The game should keep producing small moments of progress.
 
-## Аудитория
+## Audience
 
-Основная:
+Primary:
 
-- игроки, которым нравится crafting/survival;
-- игроки, которые любят automation/logistics, но хотят более живой и уютно-опасный мир;
-- игроки, которым нравится top-down sandbox с долгой прогрессией.
+- players who enjoy crafting/survival;
+- players who like automation/logistics but want a more living, cozy-dangerous world;
+- players who enjoy top-down sandbox games with long progression.
 
-Не основная:
+Not primary:
 
-- игроки, ищущие чистую factory-оптимизацию с тысячами объектов на экране;
-- игроки, ищущие сюжетную RPG;
-- игроки, ищущие hardcore roguelike с постоянной смертью как главным контентом.
+- players looking for pure factory optimization with thousands of entities on screen;
+- players looking for a story-heavy RPG;
+- players looking for a hardcore roguelike where permanent death is the main content.
 
-## Уникальность проекта
+## Project Identity
 
-Главный угол: **выживание заставляет автоматизацию быть не только эффективной, но и устойчивой**. База должна переживать ночь, сезон, нехватку еды, нападение, поломки и ошибки в логистике.
+The main angle: **survival makes automation not only efficient, but resilient**. The base must survive night, seasons, food shortages, attacks, breakdowns, and logistics mistakes.
 
-## Тон
+## Tone
 
-- Таинственный, но не мрачный.
-- Опасный, но не безнадежный.
-- Рукотворный прогресс среди дикого мира.
-- Немного странные машины, костры, фермы, шум переработки и тихие ночные угрозы.
+- Mysterious, but not bleak.
+- Dangerous, but not hopeless.
+- Handmade progress inside a wild world.
+- Slightly strange machines, campfires, farms, processing noise, and quiet nighttime threats.
 
-## Границы проекта на старт
+## Starting Scope Boundaries
 
-В MVP входят:
+MVP includes:
 
-- один персонаж;
-- одна процедурная или полупроцедурная карта;
-- несколько ресурсов;
-- крафт;
-- строительство;
-- 1-2 цепочки автоматизации;
-- базовые survival-метры;
-- день/ночь;
-- простая угроза;
-- сохранение/загрузка.
+- one character;
+- one procedural or semi-procedural map;
+- several resources;
+- crafting;
+- building;
+- 1-2 automation chains;
+- basic survival meters;
+- day/night cycle;
+- one simple threat;
+- save/load.
 
-Не входят в MVP:
+MVP does not include:
 
-- мультиплеер;
-- сложная сюжетная кампания;
-- транспортные сети уровня поездов;
-- десятки биомов;
-- моддинг;
-- сложные NPC-поселения;
-- продвинутый combat buildcraft.
+- multiplayer;
+- complex story campaign;
+- train-level transportation systems;
+- dozens of biomes;
+- modding;
+- complex NPC settlements;
+- advanced combat buildcraft.
 
-## Creative constraints
+## Creative Constraints
 
-- Камера всегда top-down или близко к top-down.
-- Игрок должен понимать состояние базы без открытия больших окон.
-- Каждая автоматическая машина должна иметь понятный вход, выход и состояние.
-- Смерть или провал должны учить, а не просто отнимать час прогресса.
-
+- The camera is always top-down or close to top-down.
+- The player should understand base state without opening large windows.
+- Every automatic machine must have clear input, output, and state.
+- Death or failure should teach instead of simply deleting an hour of progress.

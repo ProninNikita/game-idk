@@ -1,161 +1,160 @@
-# Решения, риски и вопросы
+# Decisions, Risks, and Questions
 
-Статус: `Draft`
+Status: `Draft`
 
-## Журнал решений
+## Decision Log
 
-### ADR-0001: Top-down 2D
+### ADR-0001: Top-Down 2D
 
-Дата: 2026-05-18
+Date: 2026-05-18
 
-Решение: игра проектируется как 2D top-down.
+Decision: the game is designed as 2D top-down.
 
-Причина:
+Reason:
 
-- лучше читается база и логистика;
-- быстрее прототипирование;
-- Godot 2D хорошо подходит для tile/grid систем;
-- меньше art cost, чем полноценный 3D.
+- base and logistics are easier to read;
+- faster prototyping;
+- Godot 2D works well for tile/grid systems;
+- lower art cost than full 3D.
 
-Последствия:
+Consequences:
 
-- нужны сильные силуэты и UI overlays;
-- вертикальность мира ограничена;
-- большие объекты могут закрывать игрока, это надо решать fade/outline.
+- strong silhouettes and UI overlays are needed;
+- world verticality is limited;
+- large objects can hide the player, so fade/outline behavior is required.
 
-### ADR-0002: Godot 4.6.x stable
+### ADR-0002: Godot 4.6.x Stable
 
-Дата: 2026-05-18
+Date: 2026-05-18
 
-Решение: стартовать на Godot 4.6.x stable, текущая проверенная стабильная версия - 4.6.2-stable.
+Decision: start on Godot 4.6.x stable; the currently checked stable version is 4.6.2-stable.
 
-Причина:
+Reason:
 
-- новая стабильная ветка лучше для нового проекта;
-- beta/RC не нужны для MVP;
-- локальная 4.3 устарела относительно актуальной stable.
+- a newer stable branch is better for a new project;
+- beta/RC builds are not needed for MVP;
+- local 4.3 was outdated compared with the checked stable version.
 
-Последствия:
+Consequences:
 
-- перед созданием проекта нужно обновить локальный Godot;
-- при обновлениях внутри 4.6.x делать smoke test.
+- update local Godot before regular development;
+- run a smoke test after any 4.6.x update.
 
-### ADR-0003: GDScript first
+### ADR-0003: GDScript First
 
-Дата: 2026-05-18
+Date: 2026-05-18
 
-Решение: первый прототип писать на GDScript.
+Decision: write the first prototype in GDScript.
 
-Причина:
+Reason:
 
-- быстрая итерация;
-- хорошая интеграция с Godot editor;
-- меньше setup friction.
+- fast iteration;
+- strong integration with the Godot editor;
+- less setup friction.
 
-Последствия:
+Consequences:
 
-- нужно держать типы и boundaries дисциплинированно;
-- тяжелые симуляции позже можно вынести или оптимизировать.
+- typing and boundaries must stay disciplined;
+- heavy simulations can be optimized or moved later if needed.
 
-### ADR-0004: Grid-based automation
+### ADR-0004: Grid-Based Automation
 
-Дата: 2026-05-18
+Date: 2026-05-18
 
-Решение: строительство и автоматизация строятся вокруг grid.
+Decision: building and automation are built around a grid.
 
-Причина:
+Reason:
 
-- понятное размещение;
-- читаемая логистика;
-- проще save/load;
-- проще building placement.
+- clear placement;
+- readable logistics;
+- simpler save/load;
+- simpler building placement.
 
-Последствия:
+Consequences:
 
-- movement игрока может быть свободным, но buildings живут на grid;
-- нужен единый coordinate conversion.
+- player movement can be free, but buildings live on the grid;
+- coordinate conversion must be consistent.
 
-## Главные риски
+## Main Risks
 
-### Риск: слишком широкий scope
+### Risk: Scope Too Wide
 
-Вероятность: высокая.
+Probability: high.
 
-Влияние: высокое.
+Impact: high.
 
-Митигация:
+Mitigation:
 
-- держать MVP узким;
-- каждую систему строить в playable vertical path;
-- не добавлять биомы/ресурсы до первой автоматизированной цепочки.
+- keep MVP narrow;
+- build each system through a playable vertical path;
+- do not add biomes/resources before the first automated chain works.
 
-### Риск: survival мешает automation
+### Risk: Survival Gets in the Way of Automation
 
-Вероятность: средняя.
+Probability: medium.
 
-Влияние: высокое.
+Impact: high.
 
-Митигация:
+Mitigation:
 
-- survival pressure должен быть периодическим и планируемым;
-- первые метры голода/ночи не должны постоянно прерывать строительство;
-- автоматизация должна решать survival-проблемы.
+- survival pressure should be periodic and plannable;
+- early hunger/night systems should not constantly interrupt building;
+- automation should solve survival problems.
 
-### Риск: automation становится скучной из-за простых цепочек
+### Risk: Automation Becomes Boring Because Chains Are Too Simple
 
-Вероятность: средняя.
+Probability: medium.
 
-Влияние: высокое.
+Impact: high.
 
-Митигация:
+Mitigation:
 
-- добавлять bottlenecks: fuel, space, output blocking, power;
-- давать новые задачи после автоматизации;
-- делать диагностику понятной.
+- add bottlenecks: fuel, space, output blocking, power;
+- create new problems after automation;
+- make diagnostics clear.
 
-### Риск: производительность при множестве машин
+### Risk: Performance With Many Machines
 
-Вероятность: средняя.
+Probability: medium.
 
-Влияние: среднее/высокое.
+Impact: medium/high.
 
-Митигация:
+Mitigation:
 
-- не делать `_process` на каждой машине как финальное решение;
-- batching simulation tick;
-- профилировать до масштабирования контента.
+- do not use per-machine `_process` as the final solution;
+- batch simulation ticks;
+- profile before content scale-up.
 
-### Риск: мир процедурный, но не интересный
+### Risk: Procedural World Is Not Interesting
 
-Вероятность: средняя.
+Probability: medium.
 
-Влияние: высокое.
+Impact: high.
 
-Митигация:
+Mitigation:
 
-- сначала handcrafted test map;
-- добавить POI rules;
-- каждый биом должен иметь gameplay role.
+- start with a handcrafted test map;
+- add POI rules;
+- every biome must have a gameplay role.
 
-## Открытые вопросы
+## Open Questions
 
-- Какое финальное название?
-- Какой точный визуальный стиль: pixel art или hand-painted low-res?
-- Будет ли главный герой иметь character progression или только tool/base progression?
-- Насколько жесткой должна быть смерть?
-- Нужно ли порча еды?
-- Какой тип энергии лучший: радиусы, провода или гибрид?
-- Должны ли угрозы атаковать машины или только игрока?
-- Какая финальная цель мира?
-- Нужен ли сюжетный слой или достаточно environmental storytelling?
-- Будет ли карта бесконечной или большой конечной?
+- What is the final title?
+- What exact visual style: pixel art or hand-painted low-res?
+- Will the main character have character progression, or only tool/base progression?
+- How harsh should death be?
+- Is food spoilage needed?
+- Which energy model is best: radius, wires, or hybrid?
+- Should threats attack machines or only the player?
+- What is the world's final goal?
+- Is a story layer needed, or is environmental storytelling enough?
+- Is the map infinite or large but finite?
 
-## Решения для ближайшего прототипа
+## Decisions for the Next Prototype
 
-- Карта: handcrafted test map.
+- Map: handcrafted test map.
 - Survival: hunger + night threat.
 - Automation: collector + conveyor + furnace.
-- Build grid: да.
-- Energy: пока fuel-only, без сети.
-- Save/load: обязательно до конца M3.
-
+- Build grid: yes.
+- Energy: fuel-only for now, no network.
+- Save/load: required by the end of M3.

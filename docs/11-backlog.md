@@ -1,47 +1,47 @@
-# Бэклог
+# Backlog
 
-Статус: `Draft`
+Status: `Draft`
 
-## Правило
+## Rule
 
-Задача должна иметь понятный результат в игре. Если задача звучит как "сделать систему", ее нужно разбить до playable outcomes.
+A task should have a clear in-game result. If a task sounds like "build a system", break it down into playable outcomes.
 
 ## M0: Setup
 
-- [ ] Обновить Godot до 4.6.x stable.
-- [ ] Создать Godot project.
-- [ ] Инициализировать Git.
-- [ ] Добавить `.gitignore` для Godot.
-- [ ] Создать структуру папок `scenes`, `scripts`, `data`, `art`, `audio`.
-- [ ] Создать main scene.
-- [ ] Настроить input map.
-- [ ] Добавить placeholder sprites.
+- [ ] Update Godot to 4.6.x stable.
+- [ ] Create Godot project.
+- [ ] Initialize Git.
+- [ ] Add `.gitignore` for Godot.
+- [ ] Create folder structure: `scenes`, `scripts`, `data`, `art`, `audio`.
+- [ ] Create main scene.
+- [ ] Configure input map.
+- [ ] Add placeholder sprites.
 
-## M1: Hands in the dirt
+## M1: Hands in the Dirt
 
-- [ ] Игрок двигается в top-down.
-- [ ] Камера следует за игроком.
-- [ ] Есть тестовая карта.
-- [ ] Есть resource node: tree.
-- [ ] Есть resource node: stone.
-- [ ] Игрок может ударить resource node.
-- [ ] Resource node выдает item drop.
-- [ ] Inventory принимает item stack.
-- [ ] HUD показывает quickbar и базовые статы.
+- [ ] Player moves in top-down view.
+- [ ] Camera follows the player.
+- [ ] Test map exists.
+- [ ] Resource node exists: tree.
+- [ ] Resource node exists: stone.
+- [ ] Player can hit resource nodes.
+- [ ] Resource node drops an item.
+- [ ] Inventory accepts item stacks.
+- [ ] HUD shows quickbar and basic stats.
 
-## M2: First night
+## M2: First Night
 
-- [ ] Система времени суток.
-- [ ] Ночь визуально отличается.
-- [ ] Hunger убывает.
-- [ ] Food восстанавливает hunger.
-- [ ] Campfire строится.
-- [ ] Campfire дает свет/тепло.
-- [ ] Простая ночная угроза появляется после sunset.
-- [ ] Игрок может получить урон.
+- [ ] Day/night time system.
+- [ ] Night looks visually different.
+- [ ] Hunger decreases.
+- [ ] Food restores hunger.
+- [ ] Campfire can be built.
+- [ ] Campfire provides light/heat.
+- [ ] Simple night threat appears after sunset.
+- [ ] Player can take damage.
 - [ ] Death/respawn loop.
 
-## M3: First base
+## M3: First Base
 
 - [ ] Build mode.
 - [ ] Ghost preview.
@@ -49,30 +49,30 @@
 - [ ] Chest.
 - [ ] Workbench.
 - [ ] Furnace.
-- [ ] Recipes data.
+- [ ] Recipe data.
 - [ ] Manual crafting.
 - [ ] Station crafting.
 - [ ] Save/load buildings.
 
-## M4: First machine
+## M4: First Machine
 
-- [ ] Collector добывает ресурс.
-- [ ] Conveyor перемещает item.
-- [ ] Inserter переносит item.
-- [ ] Furnace принимает input/fuel.
-- [ ] Furnace производит ingot.
+- [ ] Collector extracts resources.
+- [ ] Conveyor moves items.
+- [ ] Inserter moves items.
+- [ ] Furnace accepts input/fuel.
+- [ ] Furnace produces ingots.
 - [ ] Output blocked state.
 - [ ] No fuel state.
 - [ ] Machine status icons.
-- [ ] Первая полная цепочка: ore -> ingot.
+- [ ] First full chain: ore -> ingot.
 
-## M5: Vertical slice
+## M5: Vertical Slice
 
-- [ ] 30-60 минут playable progression.
-- [ ] 3 зоны/биома.
-- [ ] Первое событие.
-- [ ] Простая защита базы.
-- [ ] Research/tech unlocks до Tier 2.
+- [ ] 30-60 minutes of playable progression.
+- [ ] 3 zones/biomes.
+- [ ] First event.
+- [ ] Simple base defense.
+- [ ] Research/tech unlocks up to Tier 2.
 - [ ] UI polish pass.
 - [ ] Audio pass.
 - [ ] Performance pass.
@@ -90,4 +90,3 @@
 - [ ] Tutorial/onboarding.
 - [ ] Gamepad support.
 - [ ] Modding investigation.
-

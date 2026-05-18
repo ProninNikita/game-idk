@@ -1,23 +1,23 @@
-# Стандарты кода и сцен
+# Code and Scene Standards
 
-Статус: `Draft`
+Status: `Draft`
 
-## Цель
+## Goal
 
-Код должен помогать быстро прототипировать, но не превращать проект в набор не связанных сцен. Эти правила можно ослаблять для throwaway-прототипов, но gameplay systems и save/load должны писаться аккуратно сразу.
+Code should support fast prototyping without turning the project into unrelated scenes. These rules can be relaxed for throwaway prototypes, but gameplay systems and save/load should be written carefully from the start.
 
 ## GDScript
 
-Правила:
+Rules:
 
-- использовать типы для публичных полей, аргументов и return values;
-- использовать `StringName` для id, action names и tags;
-- избегать magic strings в gameplay logic;
-- держать функции короткими, если они описывают разные уровни логики;
-- не смешивать UI, data mutation и world simulation в одной функции;
-- не использовать autoload как глобальную корзину.
+- use types for public fields, arguments, and return values;
+- use `StringName` for ids, action names, and tags;
+- avoid magic strings in gameplay logic;
+- keep functions short when they describe different logic levels;
+- do not mix UI, data mutation, and world simulation in one function;
+- do not use autoloads as a global junk drawer.
 
-Пример:
+Example:
 
 ```gdscript
 func can_accept_item(item_id: StringName, amount: int) -> bool:
@@ -26,12 +26,12 @@ func can_accept_item(item_id: StringName, amount: int) -> bool:
     return _storage.has_space_for(item_id, amount)
 ```
 
-## Именование
+## Naming
 
-### Файлы
+### Files
 
-- Сцены: `player.tscn`, `furnace.tscn`, `inventory_panel.tscn`.
-- Скрипты: `player_controller.gd`, `inventory_component.gd`.
+- Scenes: `player.tscn`, `furnace.tscn`, `inventory_panel.tscn`.
+- Scripts: `player_controller.gd`, `inventory_component.gd`.
 - Resources: `item_wood.tres`, `recipe_ingot.tres`, `building_furnace.tres`.
 
 ### Classes
@@ -44,7 +44,7 @@ func can_accept_item(item_id: StringName, amount: int) -> bool:
 
 ### IDs
 
-IDs пишутся в snake_case:
+IDs use snake_case:
 
 - `wood`
 - `stone_axe`
@@ -52,11 +52,11 @@ IDs пишутся в snake_case:
 - `machine_collector`
 - `recipe_iron_ingot`
 
-## Сигналы
+## Signals
 
-Сигналы использовать для событий между системами, но не для скрытой логики, которую трудно отследить.
+Use signals for events between systems, but not for hidden logic that becomes hard to trace.
 
-Хорошо:
+Good:
 
 - inventory changed;
 - machine state changed;
@@ -64,37 +64,37 @@ IDs пишутся в snake_case:
 - day phase changed;
 - building placed.
 
-Осторожно:
+Use carefully:
 
-- сигнал, который запускает цепочку из 5 неочевидных действий;
-- сигнал вместо обычного вызова внутри одного компонента;
-- глобальный сигнал без payload contract.
+- a signal that starts a chain of five non-obvious actions;
+- a signal replacing a normal call inside one component;
+- a global signal without a payload contract.
 
-Пример:
+Example:
 
 ```gdscript
 signal item_added(item_id: StringName, amount: int)
 signal machine_state_changed(machine_id: int, state: MachineState)
 ```
 
-## Сцены
+## Scenes
 
-Каждая сцена должна иметь понятную ответственность.
+Each scene should have a clear responsibility.
 
-Плохо:
+Bad:
 
-- `world.gd` управляет временем, UI, инвентарем, врагами, сохранением и крафтом.
+- `world.gd` controls time, UI, inventory, enemies, saving, and crafting.
 
-Хорошо:
+Good:
 
-- `world.gd` координирует world-level systems;
-- `inventory_component.gd` отвечает за предметы;
-- `save_manager.gd` сериализует;
-- `hud.gd` только отображает.
+- `world.gd` coordinates world-level systems;
+- `inventory_component.gd` handles items;
+- `save_manager.gd` serializes;
+- `hud.gd` only displays.
 
-## Node groups
+## Node Groups
 
-Groups использовать для широких категорий:
+Use groups for broad categories:
 
 - `interactable`;
 - `damageable`;
@@ -102,28 +102,28 @@ Groups использовать для широких категорий:
 - `buildings`;
 - `resource_nodes`.
 
-Не использовать groups как замену архитектуры. Если у объекта сложный contract, лучше компонент или интерфейсный метод.
+Do not use groups as a replacement for architecture. If an object has a complex contract, use a component or interface-style method.
 
-## Error handling
+## Error Handling
 
-Gameplay code должен падать громко в dev-сценариях и мягко в runtime.
+Gameplay code should fail loudly in development scenarios and gracefully at runtime.
 
-Для данных:
+For data:
 
-- при загрузке registry проверять duplicate ids;
-- проверять missing icons/scenes;
-- проверять recipes на существующие item ids;
-- логировать понятные ошибки.
+- check duplicate ids when loading the registry;
+- check missing icons/scenes;
+- validate recipes against existing item ids;
+- log clear errors.
 
-Для save:
+For saves:
 
-- не крашиться на corrupted save;
-- показывать fallback message;
-- держать backup save, если возможно.
+- do not crash on corrupted saves;
+- show a fallback message;
+- keep backup saves where possible.
 
-## Debug tools
+## Debug Tools
 
-Разрешенные debug helpers:
+Allowed debug helpers:
 
 - spawn item;
 - toggle day/night;
@@ -132,28 +132,27 @@ Gameplay code должен падать громко в dev-сценариях �
 - show chunk boundaries;
 - save/load hotkeys.
 
-Перед demo build:
+Before a demo build:
 
-- debug shortcuts отключить или спрятать за dev flag;
-- debug overlays не должны включаться случайно.
+- disable debug shortcuts or hide them behind a dev flag;
+- debug overlays should not turn on accidentally.
 
-## Git discipline
+## Git Discipline
 
-Когда Git будет включен:
+Once Git is enabled:
 
-- один commit - один смысл;
-- перед обновлением Godot делать commit;
-- не смешивать art import churn и gameplay code без причины;
-- не коммитить временные large files;
-- не править import metadata вручную без необходимости.
+- one commit, one meaning;
+- commit before updating Godot;
+- do not mix art import churn and gameplay code without reason;
+- do not commit temporary large files;
+- do not edit import metadata manually unless needed.
 
 ## Comments
 
-Комментарии нужны там, где решение не очевидно:
+Comments are useful when a decision is not obvious:
 
-- почему формула такая;
-- почему workaround нужен;
-- почему порядок операций важен.
+- why a formula has this shape;
+- why a workaround is needed;
+- why operation order matters.
 
-Не писать комментарии, которые пересказывают строку кода.
-
+Do not write comments that only repeat the line of code.

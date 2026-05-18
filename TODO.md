@@ -1,47 +1,47 @@
 # TODO
 
-Короткий чеклист ближайших задач для стартового вертикального прототипа top-down survival automation.
+A short checklist for the first top-down survival automation prototype.
 
-## Карта и мир
+## Map and World
 
-- [x] Создать стартовую карту 150x150 клеток.
-- [x] Разложить базовые зоны появления ресурсов: лес, каменные россыпи, рудные жилы, поля культур.
-- [x] Добавить простую навигацию игрока по карте с ограничением границ карты.
-- [ ] Проверить читаемость тайлов и объектов в Godot editor/runtime.
+- [x] Create the starting 150x150 tile map.
+- [x] Place basic resource zones: forest, stone clusters, ore veins, crop fields.
+- [x] Add simple player navigation with map boundary limits.
+- [ ] Check tile and object readability in the Godot editor/runtime.
 
-## Ресурсы
+## Resources
 
-- [x] Завести ресурсные узлы: дерево, камень, руда, культуры.
-- [x] Настроить прочность и количество выпадающих предметов для каждого типа.
-- [x] Сделать разрушение ресурсных узлов киркой.
-- [x] Добавить placeholder-обратную связь при ударе, повреждении и разрушении узла.
-- [ ] Добавить полноценную настройку времени добычи и tool modifiers.
+- [x] Add resource nodes: trees, stone, ore, crops.
+- [x] Configure durability and drop amounts for each resource type.
+- [x] Make resource nodes breakable with the pickaxe.
+- [x] Add placeholder feedback for hits, damage, and depletion.
+- [ ] Add proper mining time and tool modifiers.
 
-## Игрок и инструменты
+## Player and Tools
 
-- [x] Реализовать базовое движение игрока.
-- [x] Добавить кирку как стартовый инструмент на уровне поведения.
-- [x] Настроить область удара и проверку цели перед игроком.
-- [ ] Ограничить добычу по типам инструментов, когда появятся меч и отдельные инструменты.
+- [x] Implement basic player movement.
+- [x] Add the pickaxe as the starting tool at the behavior level.
+- [x] Configure the hit area and target check in front of the player.
+- [ ] Restrict harvesting by tool type once swords and separate tools are added.
 
-## Инвентарь
+## Inventory
 
-- [x] Добавить простой инвентарь с количеством предметов.
-- [x] Автоматически отправлять добытые ресурсы в инвентарь.
-- [x] Показать инвентарь в минимальном UI.
-- [x] Временно зафиксировать, что инвентарь безлимитный для прототипа.
-- [ ] Добавить лимиты стаков и переполнение после первого smoke test.
+- [x] Add a simple inventory with item counts.
+- [x] Automatically send gathered resources to the inventory.
+- [x] Show the inventory in a minimal UI.
+- [x] Temporarily define the prototype inventory as unlimited.
+- [ ] Add stack limits and overflow handling after the first smoke test.
 
-## Автоматизация
+## Automation
 
-- [ ] Определить первую простую производственную цепочку.
-- [ ] Добавить базовое размещаемое устройство для переработки или сбора.
-- [ ] Настроить входные и выходные слоты устройства.
-- [ ] Проверить, что ручной сбор и автоматизация используют одни и те же данные ресурсов.
+- [ ] Define the first simple production chain.
+- [ ] Add a basic placeable device for processing or gathering.
+- [ ] Configure input and output slots for the device.
+- [ ] Verify that manual gathering and automation use the same resource data.
 
-## Проверка прототипа
+## Prototype Verification
 
-- [ ] Собрать ручной smoke test: старт игры, движение, добыча дерева/камня/руды/культур, попадание в инвентарь.
-- [ ] Зафиксировать минимальные критерии готовности первой играбельной сборки.
-- [ ] Записать найденные баги и ограничения в `CHANGELOG.md` или отдельный список задач.
-- [ ] Запустить проект в Godot 4.6.x stable после установки/обновления редактора.
+- [ ] Run a manual smoke test: start game, move, gather wood/stone/ore/crops, verify inventory pickup.
+- [ ] Define the minimum readiness criteria for the first playable build.
+- [ ] Record found bugs and limitations in `CHANGELOG.md` or a separate task list.
+- [ ] Run the project in Godot 4.6.x stable after installing/updating the editor.
