@@ -38,6 +38,9 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added proximity pickup that respects inventory capacity and free slots.
 - Added a dedicated inventory UI with slots, stack counts, and capacity feedback.
 - Added mouse-based player facing and rotation.
+- Added a visible toolbelt/hotbar as the top inventory row, with the starting pickaxe locked in the first slot and 8 free hotbar slots after it.
+- Added pickup flow that fills hotbar slots before the separate inventory.
+- Added a separate inventory window toggled by the inventory key.
 
 ### Changed
 
@@ -45,6 +48,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - `Unreleased` includes planned work for manual harvesting of wood, stone, ore, and crops into the inventory.
 - TODO updated to reflect the first completed prototype steps.
 - Resource harvesting now drops items onto the ground instead of sending them directly to inventory.
+- Inventory UI now keeps the toolbelt visible and moves the full inventory into a toggleable window.
 
 ### Fixed
 

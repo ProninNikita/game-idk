@@ -35,6 +35,12 @@ A short checklist for the first top-down survival automation prototype.
 - [x] Add inventory capacity, slot limits, and free-slot checks for pickup.
 - [x] Build a dedicated inventory UI that shows slots, stack counts, and remaining capacity.
 - [x] Add stack limits and overflow handling after the first smoke test.
+- [x] Treat the top inventory row as the toolbelt/hotbar.
+- [x] Lock the first hotbar slot as occupied by the starting pickaxe.
+- [x] Provide 8 free hotbar slots after the starting pickaxe slot.
+- [x] Make pickups fill hotbar slots before filling the separate inventory.
+- [x] Add a separate inventory window toggled by the inventory key.
+- [x] Add a visible toolbar UI for the hotbar slots.
 - [ ] Add item definitions with per-item stack sizes instead of a shared prototype stack size.
 
 ## Automation

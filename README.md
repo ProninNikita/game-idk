@@ -57,6 +57,8 @@ The project currently has the first Godot skeleton:
 - destroyed resources drop items onto the ground;
 - nearby ground items are picked up if the inventory has space;
 - a slot-based inventory with a visible HUD panel;
+- a visible 9-slot toolbelt with the starting pickaxe locked in slot 1;
+- a full inventory window toggled with Tab or I;
 - mouse-based facing and harvesting direction;
 - code-drawn placeholders with no graphic assets yet.
 

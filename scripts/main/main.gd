@@ -33,6 +33,7 @@ func _ensure_input_actions() -> void:
 	_ensure_key_action(&"interact", KEY_E)
 	_ensure_key_action(&"attack", MOUSE_BUTTON_LEFT)
 	_ensure_key_action(&"inventory", KEY_TAB)
+	_ensure_key_action(&"inventory", KEY_I)
 
 
 func _ensure_key_action(action: StringName, keycode: int) -> void:
