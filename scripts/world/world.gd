@@ -3,6 +3,7 @@ class_name HearthlineWorld
 
 const RESOURCE_NODE_SCENE: PackedScene = preload("res://scenes/world/resource_node.tscn")
 const GROUND_ITEM_SCENE: PackedScene = preload("res://scenes/world/ground_item.tscn")
+const FURNACE_SCENE: PackedScene = preload("res://scenes/buildings/furnace.tscn")
 
 const RESOURCE_DEFS: Dictionary = {
 	&"tree": {
@@ -39,15 +40,26 @@ const RESOURCE_DEFS: Dictionary = {
 	},
 }
 
+const BUILDING_DEFS: Dictionary = {
+	&"furnace": {
+		"display_name": "Furnace",
+		"footprint": Vector2i(2, 2),
+		"scene": FURNACE_SCENE,
+		"color": Color(0.48, 0.42, 0.36),
+	},
+}
+
 @export var map_size: Vector2i = Vector2i(150, 150)
 @export var tile_size: int = 32
 @export var world_seed: int = 18052026
 
 @onready var resource_container: Node2D = $ResourceNodes
 @onready var ground_item_container: Node2D = $GroundItems
+@onready var building_container: Node2D = $Buildings
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _occupied: Dictionary = {}
+var _building_occupied: Dictionary = {}
 var _resource_count: int = 0
 
 
@@ -59,11 +71,14 @@ func _ready() -> void:
 func generate_world() -> void:
 	_rng.seed = world_seed
 	_occupied.clear()
+	_building_occupied.clear()
 	_resource_count = 0
 
 	for child: Node in resource_container.get_children():
 		child.queue_free()
 	for child: Node in ground_item_container.get_children():
+		child.queue_free()
+	for child: Node in building_container.get_children():
 		child.queue_free()
 
 	_spawn_resource_clusters(&"tree", 10, 42, 11)
@@ -93,6 +108,52 @@ func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2
 	item.call("setup", item_id, amount, spawn_position + scatter, source_color)
 	ground_item_container.add_child(item)
 	return item
+
+
+func get_tile_size() -> int:
+	return tile_size
+
+
+func world_to_grid(world_position: Vector2) -> Vector2i:
+	return Vector2i(floori(world_position.x / float(tile_size)), floori(world_position.y / float(tile_size)))
+
+
+func grid_to_world_center(grid_position: Vector2i, footprint: Vector2i = Vector2i.ONE) -> Vector2:
+	return Vector2(
+		float(grid_position.x * tile_size) + float(footprint.x * tile_size) * 0.5,
+		float(grid_position.y * tile_size) + float(footprint.y * tile_size) * 0.5
+	)
+
+
+func get_building_definition(building_id: StringName) -> Dictionary:
+	if not BUILDING_DEFS.has(building_id):
+		return {}
+	return BUILDING_DEFS[building_id] as Dictionary
+
+
+func can_place_building(building_id: StringName, grid_position: Vector2i) -> bool:
+	var definition: Dictionary = get_building_definition(building_id)
+	if definition.is_empty():
+		return false
+
+	var footprint: Vector2i = definition.get("footprint", Vector2i.ONE) as Vector2i
+	return _can_fit_footprint(grid_position, footprint)
+
+
+func place_building(building_id: StringName, grid_position: Vector2i) -> bool:
+	if not can_place_building(building_id, grid_position):
+		return false
+
+	var definition: Dictionary = get_building_definition(building_id)
+	var scene: PackedScene = definition.get("scene") as PackedScene
+	var footprint: Vector2i = definition.get("footprint", Vector2i.ONE) as Vector2i
+	var display_name: String = String(definition.get("display_name", String(building_id)))
+	var color: Color = definition.get("color", Color(0.48, 0.42, 0.36)) as Color
+	var building: Node = scene.instantiate()
+	building.call("setup", building_id, display_name, grid_position, footprint, tile_size, color)
+	building_container.add_child(building)
+	_mark_building_occupied(grid_position, footprint)
+	return true
 
 
 func _spawn_resource_clusters(resource_type: StringName, cluster_count: int, amount_per_cluster: int, radius: int) -> void:
@@ -146,6 +207,23 @@ func _try_spawn_resource(resource_type: StringName, grid_pos: Vector2i) -> bool:
 	_occupied[key] = true
 	_resource_count += 1
 	return true
+
+
+func _can_fit_footprint(grid_position: Vector2i, footprint: Vector2i) -> bool:
+	for x: int in range(grid_position.x, grid_position.x + footprint.x):
+		for y: int in range(grid_position.y, grid_position.y + footprint.y):
+			if x < 0 or y < 0 or x >= map_size.x or y >= map_size.y:
+				return false
+			var key: String = _grid_key(Vector2i(x, y))
+			if _occupied.has(key) or _building_occupied.has(key):
+				return false
+	return true
+
+
+func _mark_building_occupied(grid_position: Vector2i, footprint: Vector2i) -> void:
+	for x: int in range(grid_position.x, grid_position.x + footprint.x):
+		for y: int in range(grid_position.y, grid_position.y + footprint.y):
+			_building_occupied[_grid_key(Vector2i(x, y))] = true
 
 
 func _random_grid_position() -> Vector2i:

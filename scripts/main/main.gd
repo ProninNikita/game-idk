@@ -14,6 +14,7 @@ func _ready() -> void:
 	player.connect("inventory_changed", Callable(hud, "set_inventory"))
 	player.connect("inventory_slots_changed", Callable(hud, "set_inventory_slots"))
 	player.connect("action_hint_changed", Callable(hud, "set_hint"))
+	hud.connect("build_requested", Callable(player, "start_building_placement"))
 
 	hud.call("set_world_info", world.get("map_size"), world.call("get_resource_count"))
 	hud.call("set_inventory", player.call("get_inventory_snapshot"))

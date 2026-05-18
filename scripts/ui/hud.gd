@@ -1,6 +1,8 @@
 extends CanvasLayer
 class_name HearthlineHUD
 
+signal build_requested(building_id: StringName)
+
 const TOOLBELT_SLOT_COUNT: int = 9
 
 var _inventory_label: Label
@@ -9,6 +11,10 @@ var _world_label: Label
 var _toolbelt_grid: GridContainer
 var _inventory_window: PanelContainer
 var _inventory_grid: GridContainer
+var _inventory_content: VBoxContainer
+var _building_content: VBoxContainer
+var _upgrades_content: VBoxContainer
+var _main_menu_content: VBoxContainer
 var _toolbelt_labels: Array[Label] = []
 var _inventory_labels: Array[Label] = []
 
@@ -64,7 +70,10 @@ func set_hint(text: String) -> void:
 func toggle_inventory_window() -> void:
 	if _inventory_window == null:
 		return
+
 	_inventory_window.visible = not _inventory_window.visible
+	if _inventory_window.visible:
+		_select_category(&"inventory")
 
 
 func _build_status_panel() -> void:
@@ -140,15 +149,62 @@ func _build_inventory_window() -> void:
 	_inventory_window.anchor_top = 0.5
 	_inventory_window.anchor_right = 0.5
 	_inventory_window.anchor_bottom = 0.5
-	_inventory_window.offset_left = -430.0
-	_inventory_window.offset_top = -260.0
-	_inventory_window.offset_right = 430.0
-	_inventory_window.offset_bottom = 260.0
+	_inventory_window.offset_left = -500.0
+	_inventory_window.offset_top = -290.0
+	_inventory_window.offset_right = 500.0
+	_inventory_window.offset_bottom = 290.0
 	add_child(_inventory_window)
 
+	var root_margin: MarginContainer = MarginContainer.new()
+	root_margin.add_theme_constant_override("margin_left", 12)
+	root_margin.add_theme_constant_override("margin_top", 12)
+	root_margin.add_theme_constant_override("margin_right", 12)
+	root_margin.add_theme_constant_override("margin_bottom", 12)
+	_inventory_window.add_child(root_margin)
+
+	var root: HBoxContainer = HBoxContainer.new()
+	root.add_theme_constant_override("separation", 12)
+	root_margin.add_child(root)
+
+	var content_frame: PanelContainer = PanelContainer.new()
+	content_frame.custom_minimum_size = Vector2(760.0, 520.0)
+	root.add_child(content_frame)
+
+	var content_margin: MarginContainer = MarginContainer.new()
+	content_margin.add_theme_constant_override("margin_left", 10)
+	content_margin.add_theme_constant_override("margin_top", 10)
+	content_margin.add_theme_constant_override("margin_right", 10)
+	content_margin.add_theme_constant_override("margin_bottom", 10)
+	content_frame.add_child(content_margin)
+
+	var content_stack: VBoxContainer = VBoxContainer.new()
+	content_margin.add_child(content_stack)
+
+	_inventory_content = _build_inventory_content()
+	_building_content = _build_building_content()
+	_upgrades_content = _build_placeholder_content("Upgrades", "Upgrade systems are not available yet.")
+	_main_menu_content = _build_placeholder_content("Main Menu", "Main menu actions are not available yet.")
+
+	content_stack.add_child(_inventory_content)
+	content_stack.add_child(_building_content)
+	content_stack.add_child(_upgrades_content)
+	content_stack.add_child(_main_menu_content)
+
+	var category_box: VBoxContainer = VBoxContainer.new()
+	category_box.custom_minimum_size = Vector2(180.0, 520.0)
+	category_box.add_theme_constant_override("separation", 8)
+	root.add_child(category_box)
+
+	_add_category_button(category_box, "Inventory", &"inventory")
+	_add_category_button(category_box, "Building", &"building")
+	_add_category_button(category_box, "Upgrades", &"upgrades")
+	_add_category_button(category_box, "Main Menu", &"main_menu")
+	_select_category(&"inventory")
+
+
+func _build_inventory_content() -> VBoxContainer:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
-	_inventory_window.add_child(box)
 
 	var title: Label = Label.new()
 	title.text = "Inventory"
@@ -163,6 +219,70 @@ func _build_inventory_window() -> void:
 	_inventory_grid = GridContainer.new()
 	_inventory_grid.columns = TOOLBELT_SLOT_COUNT
 	box.add_child(_inventory_grid)
+	return box
+
+
+func _build_building_content() -> VBoxContainer:
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+
+	var title: Label = Label.new()
+	title.text = "Building"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+
+	var furnace_label: Label = Label.new()
+	furnace_label.text = "Furnace\nCost: 2 stone, 1 wood\nSize: 2x2"
+	furnace_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(furnace_label)
+
+	var furnace_button: Button = Button.new()
+	furnace_button.text = "Create Furnace"
+	furnace_button.pressed.connect(_request_furnace)
+	box.add_child(furnace_button)
+	return box
+
+
+func _build_placeholder_content(title_text: String, body_text: String) -> VBoxContainer:
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+
+	var title: Label = Label.new()
+	title.text = title_text
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+
+	var body: Label = Label.new()
+	body.text = body_text
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(body)
+	return box
+
+
+func _add_category_button(parent: VBoxContainer, text: String, category_id: StringName) -> void:
+	var button: Button = Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(160.0, 46.0)
+	button.pressed.connect(Callable(self, "_select_category").bind(category_id))
+	parent.add_child(button)
+
+
+func _select_category(category_id: StringName) -> void:
+	if _inventory_content != null:
+		_inventory_content.visible = category_id == &"inventory"
+	if _building_content != null:
+		_building_content.visible = category_id == &"building"
+	if _upgrades_content != null:
+		_upgrades_content.visible = category_id == &"upgrades"
+	if _main_menu_content != null:
+		_main_menu_content.visible = category_id == &"main_menu"
+
+
+func _request_furnace() -> void:
+	build_requested.emit(&"furnace")
+	if _inventory_window != null:
+		_inventory_window.visible = false
 
 
 func _update_toolbelt(slots: Array) -> void:
@@ -183,7 +303,7 @@ func _update_inventory_window(slots: Array) -> void:
 	if _inventory_grid == null:
 		return
 
-	_ensure_labels(_inventory_grid, _inventory_labels, slots.size(), Vector2(86.0, 48.0))
+	_ensure_labels(_inventory_grid, _inventory_labels, slots.size(), Vector2(78.0, 48.0))
 
 	for i: int in range(slots.size()):
 		var slot: Dictionary = slots[i]

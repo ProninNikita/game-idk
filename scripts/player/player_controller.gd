@@ -11,13 +11,22 @@ signal action_hint_changed(text: String)
 @export var attack_cooldown: float = 0.28
 @export var pickup_radius: float = 34.0
 @export var pickup_interval: float = 0.12
+@export var build_range: float = 128.0
 
 @onready var inventory: InventoryComponent = $Inventory
 @onready var camera: Camera2D = $Camera2D
 
+const BUILDING_COSTS: Dictionary = {
+	&"furnace": {
+		&"stone": 2,
+		&"wood": 1,
+	},
+}
+
 var world_bounds: Rect2 = Rect2()
 var facing: Vector2 = Vector2.DOWN
 var world: Node = null
+var pending_building_id: StringName = &""
 var _cooldown_left: float = 0.0
 var _last_hint_time: float = 0.0
 var _pickup_left: float = 0.0
@@ -46,8 +55,13 @@ func _physics_process(delta: float) -> void:
 		_pickup_left = pickup_interval
 		_try_pickup_ground_items()
 
-	if Input.is_action_just_pressed("attack") or Input.is_action_just_pressed("interact"):
+	if pending_building_id != &"" and Input.is_action_just_pressed("attack"):
+		_try_place_pending_building()
+	elif Input.is_action_just_pressed("attack") or Input.is_action_just_pressed("interact"):
 		_try_harvest()
+
+	if pending_building_id != &"" and Input.is_action_just_pressed("ui_cancel"):
+		cancel_building_placement()
 
 
 func set_world(new_world: Node) -> void:
@@ -71,6 +85,33 @@ func get_inventory_slots_snapshot() -> Array[Dictionary]:
 	return inventory.get_slots()
 
 
+func start_building_placement(building_id: StringName) -> void:
+	if world == null:
+		_emit_temporary_hint("World is not ready")
+		return
+	if not world.has_method("get_building_definition"):
+		_emit_temporary_hint("Building system is not ready")
+		return
+
+	var definition: Dictionary = world.call("get_building_definition", building_id) as Dictionary
+	if definition.is_empty():
+		_emit_temporary_hint("Unknown building")
+		return
+	if not _has_building_cost(building_id):
+		_emit_temporary_hint("Need %s" % _format_building_cost(building_id))
+		return
+
+	pending_building_id = building_id
+	_emit_temporary_hint("Place %s near the player. Left click to build, Esc to cancel." % String(definition.get("display_name", building_id)))
+	queue_redraw()
+
+
+func cancel_building_placement() -> void:
+	pending_building_id = &""
+	_emit_temporary_hint("Building placement canceled")
+	queue_redraw()
+
+
 func _try_harvest() -> void:
 	if _cooldown_left > 0.0:
 		return
@@ -92,6 +133,34 @@ func _try_harvest() -> void:
 		_emit_temporary_hint("Dropped %s x%d" % [String(item_id), amount])
 	else:
 		_emit_temporary_hint("%s damaged" % target.display_name)
+
+
+func _try_place_pending_building() -> void:
+	if pending_building_id == &"":
+		return
+	if world == null:
+		return
+
+	var grid_position: Vector2i = _get_pending_build_grid_position()
+	if not _is_pending_building_in_range(grid_position):
+		_emit_temporary_hint("Build closer to the player")
+		return
+	if not bool(world.call("can_place_building", pending_building_id, grid_position)):
+		_emit_temporary_hint("Cannot build there")
+		return
+	if not _has_building_cost(pending_building_id):
+		_emit_temporary_hint("Need %s" % _format_building_cost(pending_building_id))
+		return
+
+	_pay_building_cost(pending_building_id)
+	var placed: bool = bool(world.call("place_building", pending_building_id, grid_position))
+	if not placed:
+		_emit_temporary_hint("Cannot build there")
+		return
+
+	_emit_temporary_hint("Built Furnace")
+	pending_building_id = &""
+	queue_redraw()
 
 
 func _find_resource_target() -> HarvestableResourceNode:
@@ -209,3 +278,82 @@ func _draw() -> void:
 	var angle: float = facing.angle()
 	draw_arc(Vector2.ZERO, attack_range, angle - 0.35, angle + 0.35, 12, Color(1.0, 1.0, 1.0, 0.22), 2.0)
 	draw_circle(Vector2.ZERO, pickup_radius, Color(0.55, 0.85, 1.0, 0.10), false, 1.0)
+
+	if pending_building_id != &"":
+		_draw_pending_building_preview()
+
+
+func _get_pending_build_grid_position() -> Vector2i:
+	if world == null or not world.has_method("world_to_grid"):
+		return Vector2i.ZERO
+	return world.call("world_to_grid", get_global_mouse_position()) as Vector2i
+
+
+func _get_pending_building_footprint() -> Vector2i:
+	if world == null:
+		return Vector2i.ONE
+	var definition: Dictionary = world.call("get_building_definition", pending_building_id) as Dictionary
+	if definition.is_empty():
+		return Vector2i.ONE
+	return definition.get("footprint", Vector2i.ONE) as Vector2i
+
+
+func _is_pending_building_in_range(grid_position: Vector2i) -> bool:
+	if world == null or not world.has_method("grid_to_world_center"):
+		return false
+
+	var footprint: Vector2i = _get_pending_building_footprint()
+	var center: Vector2 = world.call("grid_to_world_center", grid_position, footprint) as Vector2
+	return global_position.distance_to(center) <= build_range
+
+
+func _has_building_cost(building_id: StringName) -> bool:
+	if not BUILDING_COSTS.has(building_id):
+		return true
+
+	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
+	for item_id: Variant in cost.keys():
+		var typed_item_id: StringName = StringName(item_id)
+		var required: int = int(cost[item_id])
+		if inventory.get_count(typed_item_id) < required:
+			return false
+
+	return true
+
+
+func _pay_building_cost(building_id: StringName) -> void:
+	if not BUILDING_COSTS.has(building_id):
+		return
+
+	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
+	for item_id: Variant in cost.keys():
+		var typed_item_id: StringName = StringName(item_id)
+		var required: int = int(cost[item_id])
+		inventory.remove_item(typed_item_id, required)
+
+
+func _format_building_cost(building_id: StringName) -> String:
+	if not BUILDING_COSTS.has(building_id):
+		return "no materials"
+
+	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
+	var parts: Array[String] = []
+	for item_id: Variant in cost.keys():
+		parts.append("%d %s" % [int(cost[item_id]), String(item_id)])
+	return ", ".join(parts)
+
+
+func _draw_pending_building_preview() -> void:
+	if world == null:
+		return
+
+	var grid_position: Vector2i = _get_pending_build_grid_position()
+	var footprint: Vector2i = _get_pending_building_footprint()
+	var tile_size: int = int(world.call("get_tile_size"))
+	var top_left: Vector2 = Vector2(float(grid_position.x * tile_size), float(grid_position.y * tile_size))
+	var size: Vector2 = Vector2(float(footprint.x * tile_size), float(footprint.y * tile_size))
+	var local_rect_position: Vector2 = top_left - global_position
+	var can_place: bool = _is_pending_building_in_range(grid_position) and bool(world.call("can_place_building", pending_building_id, grid_position)) and _has_building_cost(pending_building_id)
+	var color: Color = Color(0.35, 0.95, 0.48, 0.35) if can_place else Color(0.95, 0.25, 0.20, 0.35)
+	draw_rect(Rect2(local_rect_position, size), color, true)
+	draw_rect(Rect2(local_rect_position, size), color.darkened(0.35), false, 2.0)

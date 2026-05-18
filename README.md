@@ -59,6 +59,8 @@ The project currently has the first Godot skeleton:
 - a slot-based inventory with a visible HUD panel;
 - a visible 9-slot toolbelt with the starting pickaxe locked in slot 1;
 - a full inventory window toggled with Tab or I;
+- inventory window categories for Inventory, Building, Upgrades, and Main Menu;
+- a placeable 2x2 Furnace built from 2 stone and 1 wood;
 - mouse-based facing and harvesting direction;
 - code-drawn placeholders with no graphic assets yet.
 

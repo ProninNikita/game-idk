@@ -41,7 +41,20 @@ A short checklist for the first top-down survival automation prototype.
 - [x] Make pickups fill hotbar slots before filling the separate inventory.
 - [x] Add a separate inventory window toggled by the inventory key.
 - [x] Add a visible toolbar UI for the hotbar slots.
+- [x] Add right-side inventory window categories: Inventory, Building, Upgrades, Main Menu.
 - [ ] Add item definitions with per-item stack sizes instead of a shared prototype stack size.
+
+## Building
+
+- [x] Add a working Building category in the inventory window.
+- [x] Add a furnace building recipe costing 2 stone and 1 wood.
+- [x] Add building placement mode after pressing Create Furnace.
+- [x] Restrict furnace placement to free grid cells near the player.
+- [x] Add a 2x2 furnace footprint.
+- [x] Spend furnace materials only after successful placement.
+- [ ] Add a dedicated building placement cursor and clearer blocked-cell feedback.
+- [ ] Add building removal and refund rules.
+- [ ] Save and load placed buildings.
 
 ## Automation
 

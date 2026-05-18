@@ -41,6 +41,9 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added a visible toolbelt/hotbar as the top inventory row, with the starting pickaxe locked in the first slot and 8 free hotbar slots after it.
 - Added pickup flow that fills hotbar slots before the separate inventory.
 - Added a separate inventory window toggled by the inventory key.
+- Added right-side inventory window categories: Inventory, Building, Upgrades, and Main Menu.
+- Added the first placeable building: Furnace, with a 2x2 footprint and a cost of 2 stone + 1 wood.
+- Added furnace placement mode after pressing Create Furnace in the Building category.
 
 ### Changed
 
@@ -49,6 +52,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - TODO updated to reflect the first completed prototype steps.
 - Resource harvesting now drops items onto the ground instead of sending them directly to inventory.
 - Inventory UI now keeps the toolbelt visible and moves the full inventory into a toggleable window.
+- Building placement validates free grid cells near the player and spends materials only after successful placement.
 
 ### Fixed
 
@@ -63,6 +67,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added the `ItemDef` Resource class for future item definitions.
 - The project was migrated by the Godot 4.6.2 editor and now includes script `.gd.uid` files.
 - Inventory storage now uses finite slots and stack limits instead of a single unlimited item-count dictionary.
+- World placement now tracks occupied building cells separately from resource cells.
 
 ### Known Issues
 
