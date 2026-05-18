@@ -21,6 +21,7 @@
 | [12-decisions-and-risks.md](12-decisions-and-risks.md) | Журнал решений, риски и открытые вопросы. |
 | [13-coding-standards.md](13-coding-standards.md) | Стиль GDScript, сцены, сигналы, структура кода. |
 | [14-content-pipeline.md](14-content-pipeline.md) | Как добавлять предметы, рецепты, здания, биомы и ассеты. |
+| [TODO.md](../TODO.md) | Текущий чеклист задач прототипа. |
 | [CHANGELOG.md](../CHANGELOG.md) | История версий, новых фич, изменений и исправлений. |
 
 ## Как пользоваться
