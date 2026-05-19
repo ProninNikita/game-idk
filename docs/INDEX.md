@@ -21,6 +21,7 @@ This documentation set keeps the project from drifting into chaos: it should mak
 | [12-decisions-and-risks.md](12-decisions-and-risks.md) | Decision log, risks, and open questions. |
 | [13-coding-standards.md](13-coding-standards.md) | GDScript style, scenes, signals, and code structure. |
 | [14-content-pipeline.md](14-content-pipeline.md) | How to add items, recipes, buildings, biomes, and assets. |
+| [AGENTS.md](../AGENTS.md) | Persistent instructions for future AI/coding sessions. |
 | [TODO.md](../TODO.md) | Current prototype task checklist. |
 | [CHANGELOG.md](../CHANGELOG.md) | Version history, new features, changes, and fixes. |
 

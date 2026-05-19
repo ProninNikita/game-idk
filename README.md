@@ -33,6 +33,7 @@ Start here:
 - [Decisions, Risks, and Questions](docs/12-decisions-and-risks.md)
 - [Code and Scene Standards](docs/13-coding-standards.md)
 - [Content Pipeline](docs/14-content-pipeline.md)
+- [Agent Session Instructions](AGENTS.md)
 - [Prototype TODO](TODO.md)
 - [Changelog](CHANGELOG.md)
 
