@@ -73,6 +73,9 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added atomic inventory removal for prototype building costs and station recipe inputs.
 - Added refund handling when building placement fails after prototype cost payment.
 - Fixed HUD clicks leaking into mining or building placement while inventory or station UI is open.
+- Fixed station crafting so recipe start re-checks interaction range and station UI closes when the station becomes invalid.
+- Fixed the HUD inventory summary and capacity display so they no longer overwrite each other.
+- Added building occupancy release when placed buildings leave the scene tree.
 
 ### Technical
 

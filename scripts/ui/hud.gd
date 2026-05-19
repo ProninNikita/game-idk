@@ -9,6 +9,7 @@ signal gameplay_input_block_changed(blocked: bool)
 const TOOLBELT_SLOT_COUNT: int = 9
 
 var _inventory_label: Label
+var _inventory_capacity_label: Label
 var _hint_label: Label
 var _world_label: Label
 var _toolbelt_grid: GridContainer
@@ -142,6 +143,10 @@ func _build_status_panel() -> void:
 	_inventory_label = Label.new()
 	_inventory_label.text = "Inventory: empty"
 	box.add_child(_inventory_label)
+
+	_inventory_capacity_label = Label.new()
+	_inventory_capacity_label.text = "Capacity: 0/0 slots used"
+	box.add_child(_inventory_capacity_label)
 
 	_hint_label = Label.new()
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -572,7 +577,7 @@ func _update_inventory_window(slots: Array) -> void:
 
 
 func _update_inventory_capacity(slots: Array) -> void:
-	if _inventory_label == null:
+	if _inventory_capacity_label == null:
 		return
 
 	var used_slots: int = 0
@@ -580,7 +585,7 @@ func _update_inventory_capacity(slots: Array) -> void:
 		if not slot.is_empty():
 			used_slots += 1
 
-	_inventory_label.text = "Inventory: %d/%d slots used" % [used_slots, slots.size()]
+	_inventory_capacity_label.text = "Capacity: %d/%d slots used" % [used_slots, slots.size()]
 
 
 func _format_slot_text(index: int, slot: Dictionary, compact: bool) -> String:

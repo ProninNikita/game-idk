@@ -81,6 +81,7 @@ const BUILDING_DEFS: Dictionary = {
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _occupied: Dictionary = {}
 var _building_occupied: Dictionary = {}
+var _building_cells_by_instance: Dictionary = {}
 var _resource_count: int = 0
 
 
@@ -93,6 +94,7 @@ func generate_world() -> void:
 	_rng.seed = world_seed
 	_occupied.clear()
 	_building_occupied.clear()
+	_building_cells_by_instance.clear()
 	_resource_count = 0
 
 	for child: Node in resource_container.get_children():
@@ -173,7 +175,7 @@ func place_building(building_id: StringName, grid_position: Vector2i) -> bool:
 	var building: Node = scene.instantiate()
 	building.call("setup", building_id, display_name, grid_position, footprint, tile_size, color)
 	building_container.add_child(building)
-	_mark_building_occupied(grid_position, footprint)
+	_register_building_occupancy(building, grid_position, footprint)
 	return true
 
 
@@ -246,10 +248,35 @@ func _can_fit_footprint(grid_position: Vector2i, footprint: Vector2i) -> bool:
 	return true
 
 
-func _mark_building_occupied(grid_position: Vector2i, footprint: Vector2i) -> void:
+func _register_building_occupancy(building: Node, grid_position: Vector2i, footprint: Vector2i) -> void:
+	var instance_id: int = building.get_instance_id()
+	var cells: Array[String] = _get_footprint_keys(grid_position, footprint)
+	_building_cells_by_instance[instance_id] = cells
+	for key: String in cells:
+		_building_occupied[key] = instance_id
+
+	building.tree_exiting.connect(_on_building_tree_exiting.bind(instance_id), CONNECT_ONE_SHOT)
+
+
+func _on_building_tree_exiting(instance_id: int) -> void:
+	_release_building_occupancy(instance_id)
+
+
+func _release_building_occupancy(instance_id: int) -> void:
+	var cells: Array = _building_cells_by_instance.get(instance_id, []) as Array
+	for key_value: Variant in cells:
+		var key: String = key_value as String
+		if int(_building_occupied.get(key, 0)) == instance_id:
+			_building_occupied.erase(key)
+	_building_cells_by_instance.erase(instance_id)
+
+
+func _get_footprint_keys(grid_position: Vector2i, footprint: Vector2i) -> Array[String]:
+	var cells: Array[String] = []
 	for x: int in range(grid_position.x, grid_position.x + footprint.x):
 		for y: int in range(grid_position.y, grid_position.y + footprint.y):
-			_building_occupied[_grid_key(Vector2i(x, y))] = true
+			cells.append(_grid_key(Vector2i(x, y)))
+	return cells
 
 
 func _random_grid_position() -> Vector2i:

@@ -88,9 +88,12 @@ func _physics_process(delta: float) -> void:
 	if pending_building_id != &"" and Input.is_action_just_pressed("ui_cancel"):
 		cancel_building_placement()
 
-	if active_station != null and _station_update_left <= 0.0:
-		_station_update_left = 0.15
-		_refresh_active_station_ui()
+	if active_station != null:
+		if not _is_active_station_available():
+			close_station_ui()
+		elif _station_update_left <= 0.0:
+			_station_update_left = 0.15
+			_refresh_active_station_ui()
 
 
 func set_world(new_world: Node) -> void:
@@ -151,9 +154,9 @@ func close_station_ui() -> void:
 
 
 func start_station_recipe(recipe_id: StringName) -> void:
-	if active_station == null or not is_instance_valid(active_station):
+	if not _is_active_station_available():
 		close_station_ui()
-		_emit_temporary_hint("No station selected")
+		_emit_temporary_hint("No station in range")
 		return
 	if active_station.is_crafting():
 		_emit_temporary_hint("%s is already crafting" % active_station.display_name)
@@ -406,10 +409,23 @@ func _ensure_station_connected(station: BuildingInstance) -> void:
 		station.crafting_changed.connect(changed_callable)
 
 
-func _refresh_active_station_ui() -> void:
+func _is_active_station_available() -> bool:
 	if active_station == null:
-		return
+		return false
 	if not is_instance_valid(active_station):
+		return false
+	if active_station.is_queued_for_deletion():
+		return false
+	if not active_station.is_inside_tree():
+		return false
+	if not active_station.has_station_recipes():
+		return false
+
+	return global_position.distance_to(active_station.global_position) <= station_interact_range
+
+
+func _refresh_active_station_ui() -> void:
+	if not _is_active_station_available():
 		close_station_ui()
 		return
 
