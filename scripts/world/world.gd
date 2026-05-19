@@ -8,6 +8,8 @@ const FORGE_SCENE: PackedScene = preload("res://scenes/buildings/forge.tscn")
 const WORKBENCH_SCENE: PackedScene = preload("res://scenes/buildings/workbench.tscn")
 const FENCE_SCENE: PackedScene = preload("res://scenes/buildings/fence.tscn")
 
+const DYNAMIC_PLACEMENT_BLOCKER_GROUPS: Array[StringName] = [&"player", &"players", &"placement_blockers", &"dynamic_blockers"]
+
 const RESOURCE_DEFS: Dictionary = {
 	&"tree": {
 		"display_name": "Tree",
@@ -221,7 +223,7 @@ func _try_spawn_resource(resource_type: StringName, grid_pos: Vector2i) -> bool:
 		return false
 
 	var key: String = _grid_key(grid_pos)
-	if _occupied.has(key):
+	if _occupied.has(key) or _building_occupied.has(key):
 		return false
 
 	var node: HarvestableResourceNode = RESOURCE_NODE_SCENE.instantiate() as HarvestableResourceNode
@@ -234,10 +236,16 @@ func _try_spawn_resource(resource_type: StringName, grid_pos: Vector2i) -> bool:
 
 
 func _on_resource_depleted(grid_pos: Vector2i) -> void:
-	_occupied.erase(_grid_key(grid_pos))
+	var key: String = _grid_key(grid_pos)
+	if not _occupied.has(key):
+		return
+
+	_occupied.erase(key)
+	_resource_count = maxi(_resource_count - 1, 0)
 
 
 func _can_fit_footprint(grid_position: Vector2i, footprint: Vector2i) -> bool:
+	var footprint_keys: Dictionary = {}
 	for x: int in range(grid_position.x, grid_position.x + footprint.x):
 		for y: int in range(grid_position.y, grid_position.y + footprint.y):
 			if x < 0 or y < 0 or x >= map_size.x or y >= map_size.y:
@@ -245,7 +253,35 @@ func _can_fit_footprint(grid_position: Vector2i, footprint: Vector2i) -> bool:
 			var key: String = _grid_key(Vector2i(x, y))
 			if _occupied.has(key) or _building_occupied.has(key):
 				return false
+			footprint_keys[key] = true
+
+	if _has_dynamic_placement_blocker(footprint_keys):
+		return false
 	return true
+
+
+func _has_dynamic_placement_blocker(footprint_keys: Dictionary) -> bool:
+	if not is_inside_tree():
+		return false
+
+	var checked_instances: Dictionary = {}
+	for group_name: StringName in DYNAMIC_PLACEMENT_BLOCKER_GROUPS:
+		for node: Node in get_tree().get_nodes_in_group(group_name):
+			var instance_id: int = node.get_instance_id()
+			if checked_instances.has(instance_id):
+				continue
+			checked_instances[instance_id] = true
+
+			if not node is Node2D:
+				continue
+			if node.is_queued_for_deletion():
+				continue
+
+			var blocker: Node2D = node as Node2D
+			if footprint_keys.has(_grid_key(world_to_grid(blocker.global_position))):
+				return true
+
+	return false
 
 
 func _register_building_occupancy(building: Node, grid_position: Vector2i, footprint: Vector2i) -> void:

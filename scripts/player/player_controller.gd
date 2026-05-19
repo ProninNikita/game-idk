@@ -62,7 +62,9 @@ func _physics_process(delta: float) -> void:
 	_pickup_left = max(0.0, _pickup_left - delta)
 	_station_update_left = max(0.0, _station_update_left - delta)
 
-	var input_vector: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var input_vector: Vector2 = Vector2.ZERO
+	if not gameplay_input_blocked:
+		input_vector = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = input_vector * move_speed
 
 	_update_mouse_facing()
@@ -70,7 +72,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_clamp_to_world()
 
-	if _pickup_left <= 0.0:
+	if not gameplay_input_blocked and _pickup_left <= 0.0:
 		_pickup_left = pickup_interval
 		_try_pickup_ground_items()
 
@@ -141,6 +143,9 @@ func start_building_placement(building_id: StringName) -> void:
 	var definition: Dictionary = world.call("get_building_definition", building_id) as Dictionary
 	if definition.is_empty():
 		_emit_temporary_hint("Unknown building")
+		return
+	if not BUILDING_COSTS.has(building_id):
+		_emit_temporary_hint("Missing building cost definition")
 		return
 	if not _has_building_cost(building_id):
 		_emit_temporary_hint("Need %s" % _format_building_cost(building_id))
@@ -583,7 +588,7 @@ func _is_pending_building_in_range(grid_position: Vector2i) -> bool:
 
 func _has_building_cost(building_id: StringName) -> bool:
 	if not BUILDING_COSTS.has(building_id):
-		return true
+		return false
 
 	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
 	return inventory.can_remove_items(cost)
@@ -591,7 +596,7 @@ func _has_building_cost(building_id: StringName) -> bool:
 
 func _pay_building_cost(building_id: StringName) -> bool:
 	if not BUILDING_COSTS.has(building_id):
-		return true
+		return false
 
 	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
 	return inventory.try_remove_items(cost)
@@ -612,7 +617,7 @@ func _refund_building_cost(building_id: StringName) -> void:
 
 func _format_building_cost(building_id: StringName) -> String:
 	if not BUILDING_COSTS.has(building_id):
-		return "no materials"
+		return "missing cost definition"
 
 	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
 	var parts: Array[String] = []

@@ -8,6 +8,43 @@ const BUILDING_NAMES: Dictionary = {
 	&"fence": "Fence",
 }
 
+class FailedPlacementWorld:
+	extends Node
+
+	var backing_world: HearthlineWorld = null
+
+
+	func _init(new_backing_world: HearthlineWorld) -> void:
+		backing_world = new_backing_world
+
+
+	func get_building_definition(building_id: StringName) -> Dictionary:
+		return backing_world.get_building_definition(building_id)
+
+
+	func get_tile_size() -> int:
+		return backing_world.get_tile_size()
+
+
+	func world_to_grid(world_position: Vector2) -> Vector2i:
+		return backing_world.world_to_grid(world_position)
+
+
+	func grid_to_world_center(grid_position: Vector2i, footprint: Vector2i = Vector2i.ONE) -> Vector2:
+		return backing_world.grid_to_world_center(grid_position, footprint)
+
+
+	func can_place_building(building_id: StringName, grid_position: Vector2i) -> bool:
+		return backing_world.can_place_building(building_id, grid_position)
+
+
+	func place_building(_building_id: StringName, _grid_position: Vector2i) -> bool:
+		return false
+
+
+	func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2, source_color: Color = Color(0.92, 0.78, 0.28)) -> Node:
+		return backing_world.spawn_ground_item(item_id, amount, spawn_position, source_color)
+
 var _main: Node = null
 var _world: HearthlineWorld = null
 var _player: PlayerController = null
@@ -84,6 +121,7 @@ func _verify_inventory_window_buttons() -> void:
 	await _open_inventory_with_action()
 	_expect(_is_inventory_visible(), "Inventory opens with the inventory action")
 	_expect(_player.gameplay_input_blocked, "Gameplay input is blocked while inventory is open")
+	await _verify_ui_blocks_movement()
 
 	await _press_button_by_text(_hud, "Inventory")
 	_expect(_is_content_visible("_inventory_content"), "Inventory category button shows inventory content")
@@ -105,6 +143,7 @@ func _verify_harvest_drop_pickup() -> void:
 	if resource == null:
 		return
 
+	var resource_count_before: int = _world.get_resource_count()
 	var depleted_grid: Vector2i = resource.grid_position
 	var drop_item_id: StringName = resource.drop_item_id
 	var inventory_before: int = _player.inventory.get_count(drop_item_id)
@@ -121,6 +160,7 @@ func _verify_harvest_drop_pickup() -> void:
 
 	_expect(_count_ground_items(drop_item_id) > ground_before, "Harvesting drops items on the ground")
 	_expect(_world.can_place_building(&"fence", depleted_grid), "Depleted resource cells become buildable")
+	_expect(_world.get_resource_count() == resource_count_before - 1, "Resource count decrements when a resource depletes")
 
 	var ground_item: Node2D = _find_ground_item(drop_item_id)
 	_expect(ground_item != null, "Harvested ground item can be found")
@@ -141,6 +181,8 @@ func _verify_building_buttons_and_placement() -> void:
 		&"stone": 80,
 		&"ore": 30,
 	})
+	_expect(not _world.can_place_building(&"fence", _world.world_to_grid(_player.global_position)), "Buildings cannot be placed on the player")
+	await _verify_failed_building_placement_rolls_back_cost()
 
 	var furnace_grid: Vector2i = await _place_building_from_ui(&"furnace")
 	_expect(_find_building_at(&"furnace", furnace_grid) != null, "Furnace is placed from the Building UI")
@@ -150,6 +192,40 @@ func _verify_building_buttons_and_placement() -> void:
 
 	var workbench_grid: Vector2i = await _place_building_from_ui(&"workbench")
 	_expect(_find_building_at(&"workbench", workbench_grid) != null, "Workbench is placed from the Building UI")
+
+
+func _verify_failed_building_placement_rolls_back_cost() -> void:
+	var building_id: StringName = &"furnace"
+	var grid_position: Vector2i = _find_free_grid_near_player(building_id)
+	_expect(grid_position.x > -9000, "Found free placement grid for failed Furnace placement")
+	if grid_position.x <= -9000:
+		return
+
+	var wood_before: int = _player.inventory.get_count(&"wood")
+	var stone_before: int = _player.inventory.get_count(&"stone")
+	var furnace_before: BuildingInstance = _find_building_at(building_id, grid_position)
+	_expect(furnace_before == null, "Rollback check grid starts empty")
+
+	var original_world: Node = _player.world
+	var failed_world: FailedPlacementWorld = FailedPlacementWorld.new(_world)
+	_main.add_child(failed_world)
+	_player.set_world(failed_world)
+	_player.start_building_placement(building_id)
+	_expect(_player.pending_building_id == building_id, "Furnace placement mode starts for rollback check")
+
+	var placed: bool = _player.try_place_pending_building_at_grid(grid_position)
+	await process_frame
+	await physics_frame
+
+	_player.set_world(original_world)
+	_player.cancel_building_placement()
+	failed_world.queue_free()
+	await process_frame
+
+	_expect(not placed, "Failed Furnace placement reports failure")
+	_expect(_find_building_at(building_id, grid_position) == null, "Failed Furnace placement does not create a building")
+	_expect(_player.inventory.get_count(&"wood") == wood_before, "Failed Furnace placement refunds wood")
+	_expect(_player.inventory.get_count(&"stone") == stone_before, "Failed Furnace placement refunds stone")
 
 
 func _verify_station_buttons_crafting_and_pickup() -> void:
@@ -178,12 +254,33 @@ func _verify_station_auto_close() -> void:
 	if furnace == null:
 		return
 
+	await _verify_inventory_toggle_closes_station(furnace)
+
 	await _open_station(furnace)
 	_expect(_is_station_visible(), "Station window is visible before range check")
 	_player.global_position = furnace.global_position + Vector2(_player.station_interact_range + 180.0, 0.0)
 	await _physics_steps(4)
 	_expect(_player.active_station == null, "Station interaction auto-closes when player leaves range")
 	_expect(not _is_station_visible(), "Station UI hides after auto-close")
+
+
+func _verify_ui_blocks_movement() -> void:
+	var position_before: Vector2 = _player.global_position
+	Input.action_press(&"move_right")
+	await _physics_steps(8)
+	Input.action_release(&"move_right")
+	await _physics_steps(2)
+	_expect(_player.global_position.distance_to(position_before) < 1.0, "Open UI blocks player movement")
+
+
+func _verify_inventory_toggle_closes_station(station: BuildingInstance) -> void:
+	await _open_station(station)
+	_expect(_is_station_visible(), "Station window is visible before inventory toggle")
+	await _tap_action(&"inventory")
+	await process_frame
+	_expect(not _is_station_visible(), "Inventory toggle closes station UI first")
+	_expect(_is_inventory_visible(), "Inventory opens after station UI closes")
+	await _close_inventory_with_action()
 
 
 func _verify_building_occupancy_release() -> void:

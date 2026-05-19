@@ -20,13 +20,13 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Auto-close station UI when the player moves out of interaction range.
 - [x] Split HUD item summary and inventory capacity so one label does not overwrite the other.
 - [x] Track placed building occupancy by building instance and release cells when a building leaves the tree.
-- [ ] Add dynamic placement blockers so buildings cannot be placed on the player or future actors.
+- [x] Add dynamic placement blockers so buildings cannot be placed on the player or future actors.
 - [ ] Add all-or-nothing placement transactions that validate placement and cost through one authoritative path.
-- [ ] Make UI blocking stop movement and automatic pickup while inventory or station UI is open.
-- [ ] Prevent inventory and station windows from being open at the same time.
-- [ ] Make building placement fail closed when a building definition has no explicit cost definition.
-- [ ] Keep resource count and world debug metrics in sync when resources deplete or respawn.
-- [ ] Ensure automated smoke tests do not leave generated files or dirty working tree state.
+- [x] Make UI blocking stop movement and automatic pickup while inventory or station UI is open.
+- [x] Prevent inventory and station windows from being open at the same time.
+- [x] Make building placement fail closed when a building definition has no explicit cost definition.
+- [x] Keep resource count and world debug metrics in sync when resources deplete or respawn.
+- [x] Ensure automated smoke tests do not leave generated files or dirty working tree state.
 
 ### P1 - Architecture Foundations
 
@@ -75,9 +75,9 @@ These tasks come from the architecture review and should be finished before addi
 - [ ] Add headless tests for atomic inventory removal and locked slots.
 - [ ] Add headless tests for station crafting, output drops, and future station slots.
 - [ ] Add headless tests for save/load round trips.
-- [ ] Add a timeout around the pre-commit smoke runner so commits cannot hang forever if Godot stalls.
+- [x] Add a timeout around the pre-commit smoke runner so commits cannot hang forever if Godot stalls.
 - [ ] Add a smoke-test path that uses real viewport mouse/button events for UI click leak coverage.
-- [ ] Add smoke-test coverage for failed building placement cost rollback.
+- [x] Add smoke-test coverage for failed building placement cost rollback.
 - [ ] Add viewport-size smoke coverage for the inventory and station UI.
 
 ## Prototype Features
@@ -101,7 +101,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Spawn ground item drops when destroyed resource nodes deplete.
 - [ ] Add proper mining time and tool modifiers.
 - [ ] Add resource respawn or regeneration rules.
-- [ ] Make future resource respawn and chunk spawning check building occupancy before placing resources.
+- [x] Make future resource respawn and chunk spawning check building occupancy before placing resources.
 - [ ] Move resource definitions into data resources.
 
 ### Player and Tools
@@ -189,8 +189,8 @@ These tasks come from the architecture review and should be finished before addi
 - [ ] Add one authoritative gameplay mode owner.
 - [x] Split HUD item summary from capacity display.
 - [ ] Stop rebuilding station recipe rows every progress update.
-- [ ] Make inventory and station windows mutually exclusive.
-- [ ] Block movement and automatic pickup while blocking gameplay input.
+- [x] Make inventory and station windows mutually exclusive.
+- [x] Block movement and automatic pickup while blocking gameplay input.
 - [ ] Make the inventory window responsive below the default 1280px viewport width.
 - [ ] Add focused keyboard/gamepad navigation later.
 - [ ] Add pause/main menu behavior.
@@ -200,7 +200,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Run an automated smoke test: start game, move, gather, place buildings, craft station outputs, and pick up output drops.
 - [x] Verify that harvested resource cells can be built on.
 - [x] Verify that UI clicks do not trigger mining or building placement.
-- [ ] Verify that failed building placement does not consume materials.
+- [x] Verify that failed building placement does not consume materials.
 - [x] Verify that station output stays on the ground until picked up.
 - [ ] Define the minimum readiness criteria for the first playable build.
 - [ ] Record found bugs and limitations in `CHANGELOG.md` or a separate task list.

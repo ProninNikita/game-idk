@@ -107,10 +107,25 @@ func toggle_inventory_window() -> void:
 	if _inventory_window == null:
 		return
 
-	_inventory_window.visible = not _inventory_window.visible
 	if _inventory_window.visible:
+		_inventory_window.visible = false
+	else:
+		_request_station_close_if_open()
+		if _station_window != null and _station_window.visible:
+			_emit_gameplay_input_block_state()
+			return
+
+		_inventory_window.visible = true
 		_select_category(&"inventory")
 	_emit_gameplay_input_block_state()
+
+
+func is_inventory_window_visible() -> bool:
+	return _inventory_window != null and _inventory_window.visible
+
+
+func is_station_window_visible() -> bool:
+	return _station_window != null and _station_window.visible
 
 
 func _build_status_panel() -> void:
@@ -412,6 +427,11 @@ func _request_station_recipe(recipe_id: StringName) -> void:
 
 func _request_station_close() -> void:
 	station_close_requested.emit()
+
+
+func _request_station_close_if_open() -> void:
+	if _station_window != null and _station_window.visible:
+		station_close_requested.emit()
 
 
 func _render_station(snapshot: Dictionary) -> void:

@@ -79,6 +79,11 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Fixed station crafting so recipe start re-checks interaction range and station UI closes when the station becomes invalid.
 - Fixed the HUD inventory summary and capacity display so they no longer overwrite each other.
 - Added building occupancy release when placed buildings leave the scene tree.
+- Fixed gameplay input blocking so open inventory and station UI also stop player movement and automatic pickup.
+- Fixed inventory and station UI overlap by closing station UI before opening the inventory window.
+- Fixed building placement checks so players and future dynamic blocker groups occupy their current grid cell.
+- Fixed resource debug counts so depleted resource nodes decrement the tracked resource total.
+- Fixed missing building cost definitions so placement now fails closed instead of allowing free builds.
 
 ### Technical
 
@@ -91,6 +96,9 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Inventory storage now uses finite slots and stack limits instead of a single unlimited item-count dictionary.
 - World placement now tracks occupied building cells separately from resource cells.
 - Player facing, station targeting, and pending building placement now expose explicit world-position/grid methods for automated checks and future non-mouse input.
+- Resource spawning now rejects cells occupied by existing buildings, preparing the same guard for future respawn and chunk spawning.
+- The pre-commit smoke runner now has a configurable timeout and fails if the smoke test creates new untracked files or changes the tracked working tree diff.
+- Added smoke coverage for UI movement blocking, station/inventory mutual exclusion, dynamic player placement blockers, resource-count cleanup, and failed placement cost rollback.
 
 ### Known Issues
 

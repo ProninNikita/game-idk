@@ -60,9 +60,11 @@ The project currently has the first Godot skeleton:
 - a visible 9-slot toolbelt with the starting pickaxe locked in slot 1;
 - a full inventory window toggled with Tab or I;
 - inventory window categories for Inventory, Building, Upgrades, and Main Menu;
+- inventory and station windows are mutually exclusive, and open blocking UI stops movement and automatic pickup;
 - a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots;
 - building slots for Furnace, Forge, Workbench, and Fence;
 - placeable 2x2 Furnace, Forge, and Workbench placeholders, plus a placeable 1x1 Fence;
+- building placement rejects occupied resource, building, and dynamic blocker cells such as the player;
 - station UI that opens with E when the cursor is over a nearby Furnace, Forge, or Workbench;
 - 10-second station recipes for Coal, Iron Ingot, Iron Armor, and Fence;
 - completed station craft outputs drop onto the ground near the station for pickup;
@@ -79,6 +81,8 @@ Run the current headless gameplay smoke test with:
 scripts/qa/run_pre_commit_smoke.sh
 ```
 
+The smoke runner has a default 120-second timeout and fails if the run creates new untracked files or changes the tracked working tree diff.
+
 Enable the versioned pre-commit hook once per clone:
 
 ```sh
@@ -87,4 +91,4 @@ git config core.hooksPath .githooks
 
 ## Current Architecture Review Status
 
-The current prototype loop passes the headless smoke test, but the next major work should focus on the architecture backlog in [TODO.md](TODO.md): shared data definitions, station-owned crafting, save/load-safe world generation, stronger UI mode ownership, and more reliable automated UI input coverage.
+The current prototype loop passes the headless smoke test, and the first P0 stability fixes are closed. The next major work should focus on the architecture backlog in [TODO.md](TODO.md): shared data definitions, all-or-nothing placement transactions, station-owned crafting, save/load-safe world generation, a single gameplay mode owner, and real viewport UI input coverage.
