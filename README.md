@@ -84,3 +84,7 @@ Enable the versioned pre-commit hook once per clone:
 ```sh
 git config core.hooksPath .githooks
 ```
+
+## Current Architecture Review Status
+
+The current prototype loop passes the headless smoke test, but the next major work should focus on the architecture backlog in [TODO.md](TODO.md): shared data definitions, station-owned crafting, save/load-safe world generation, stronger UI mode ownership, and more reliable automated UI input coverage.

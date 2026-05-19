@@ -58,8 +58,10 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 ### Changed
 
 - README and documentation index now link to the changelog.
+- README now calls out the current architecture review status and points to the active TODO backlog.
 - `Unreleased` includes planned work for manual harvesting of wood, stone, ore, and crops into the inventory.
 - TODO updated to reflect the first completed prototype steps.
+- TODO now records the latest architecture review findings for data definitions, station simulation, save/load, UI modes, smoke test reliability, and scaling risks.
 - Resource harvesting now drops items onto the ground instead of sending them directly to inventory.
 - Inventory UI now keeps the toolbelt visible and moves the full inventory into a toggleable window.
 - Building placement validates free grid cells near the player and spends materials only after successful placement.
