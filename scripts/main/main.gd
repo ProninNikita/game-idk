@@ -14,12 +14,17 @@ func _ready() -> void:
 	player.connect("inventory_changed", Callable(hud, "set_inventory"))
 	player.connect("inventory_slots_changed", Callable(hud, "set_inventory_slots"))
 	player.connect("action_hint_changed", Callable(hud, "set_hint"))
+	player.connect("station_opened", Callable(hud, "show_station"))
+	player.connect("station_updated", Callable(hud, "update_station"))
+	player.connect("station_closed", Callable(hud, "hide_station"))
 	hud.connect("build_requested", Callable(player, "start_building_placement"))
+	hud.connect("station_recipe_requested", Callable(player, "start_station_recipe"))
+	hud.connect("station_close_requested", Callable(player, "close_station_ui"))
 
 	hud.call("set_world_info", world.get("map_size"), world.call("get_resource_count"))
 	hud.call("set_inventory", player.call("get_inventory_snapshot"))
 	hud.call("set_inventory_slots", player.call("get_inventory_slots_snapshot"))
-	hud.call("set_hint", "WASD - move | Mouse - aim | LMB/E - mine | Walk over drops to pick up")
+	hud.call("set_hint", "WASD - move | Mouse - aim | LMB - mine/build | E - mine/open station | Walk over drops to pick up")
 
 
 func _ensure_input_actions() -> void:

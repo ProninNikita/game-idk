@@ -47,6 +47,12 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added Building category slots for Furnace, Forge, and Workbench.
 - Added placeable 2x2 Forge and Workbench placeholders with material costs.
 - Added a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots.
+- Added station UI opened with E while pointing at a nearby Furnace, Forge, or Workbench.
+- Added 10-second station crafting timers.
+- Added Furnace recipes: 2 wood to 1 coal, and 1 ore + 1 coal to 1 iron ingot.
+- Added Forge recipe: 10 iron ingots to 1 iron armor.
+- Added Workbench recipe: 5 wood to 1 fence.
+- Added a craftable and placeable 1x1 Fence building.
 
 ### Changed
 
@@ -56,6 +62,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Resource harvesting now drops items onto the ground instead of sending them directly to inventory.
 - Inventory UI now keeps the toolbelt visible and moves the full inventory into a toggleable window.
 - Building placement validates free grid cells near the player and spends materials only after successful placement.
+- Station recipes consume ingredients when crafting starts and deliver output to the player inventory when crafting completes.
 
 ### Fixed
 

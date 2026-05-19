@@ -6,6 +6,7 @@ const GROUND_ITEM_SCENE: PackedScene = preload("res://scenes/world/ground_item.t
 const FURNACE_SCENE: PackedScene = preload("res://scenes/buildings/furnace.tscn")
 const FORGE_SCENE: PackedScene = preload("res://scenes/buildings/forge.tscn")
 const WORKBENCH_SCENE: PackedScene = preload("res://scenes/buildings/workbench.tscn")
+const FENCE_SCENE: PackedScene = preload("res://scenes/buildings/fence.tscn")
 
 const RESOURCE_DEFS: Dictionary = {
 	&"tree": {
@@ -60,6 +61,12 @@ const BUILDING_DEFS: Dictionary = {
 		"footprint": Vector2i(2, 2),
 		"scene": WORKBENCH_SCENE,
 		"color": Color(0.48, 0.31, 0.17),
+	},
+	&"fence": {
+		"display_name": "Fence",
+		"footprint": Vector2i(1, 1),
+		"scene": FENCE_SCENE,
+		"color": Color(0.39, 0.24, 0.12),
 	},
 }
 

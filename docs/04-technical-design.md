@@ -210,6 +210,15 @@ Current prototype buildings:
 - `furnace`: 2x2 footprint, costs 2 stone and 1 wood.
 - `forge`: 2x2 footprint, costs 4 stone and 2 ore.
 - `workbench`: 2x2 footprint, costs 2 wood and 1 stone.
+- `fence`: 1x1 footprint, costs 1 fence item.
+
+Current prototype station behavior:
+
+- interact with stations by pointing at a nearby station and pressing E;
+- each active station can run one 10-second craft at a time;
+- ingredients are removed from the player inventory when crafting starts;
+- outputs are sent to the player inventory when crafting completes, with overflow dropped near the station;
+- station recipes currently live in `building_instance.gd` and should move into data resources once item definitions mature.
 
 ## Save/Load
 

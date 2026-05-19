@@ -60,15 +60,22 @@ A short checklist for the first top-down survival automation prototype.
 - [x] Add 2x2 forge and workbench footprints.
 - [x] Spend furnace materials only after successful placement.
 - [x] Spend forge and workbench materials only after successful placement.
+- [x] Add a craftable 1x1 fence building.
+- [x] Allow fence placement after crafting a fence item at the workbench.
 - [ ] Add a dedicated building placement cursor and clearer blocked-cell feedback.
 - [ ] Add building removal and refund rules.
 - [ ] Save and load placed buildings.
 
 ## Automation
 
-- [ ] Define the first simple production chain.
-- [ ] Add a basic placeable device for processing or gathering.
-- [ ] Configure input and output slots for the device.
+- [x] Define the first simple production chain: wood to coal, ore and coal to iron ingots, ingots to iron armor, wood to fence.
+- [x] Add station interaction UI opened by pressing E while the cursor is over a nearby station.
+- [x] Add 10-second craft timers for station recipes.
+- [x] Add furnace recipes for coal and iron ingots.
+- [x] Add a forge recipe for iron armor.
+- [x] Add a workbench recipe for fences.
+- [ ] Add machine input and output slots instead of crafting directly from the player inventory.
+- [ ] Add a basic placeable device for automated processing or gathering.
 - [ ] Verify that manual gathering and automation use the same resource data.
 
 ## Prototype Verification

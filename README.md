@@ -61,8 +61,10 @@ The project currently has the first Godot skeleton:
 - a full inventory window toggled with Tab or I;
 - inventory window categories for Inventory, Building, Upgrades, and Main Menu;
 - a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots;
-- building slots for Furnace, Forge, and Workbench;
-- placeable 2x2 Furnace, Forge, and Workbench placeholders with material costs;
+- building slots for Furnace, Forge, Workbench, and Fence;
+- placeable 2x2 Furnace, Forge, and Workbench placeholders, plus a placeable 1x1 Fence;
+- station UI that opens with E when the cursor is over a nearby Furnace, Forge, or Workbench;
+- 10-second station recipes for Coal, Iron Ingot, Iron Armor, and Fence;
 - mouse-based facing and harvesting direction;
 - code-drawn placeholders with no graphic assets yet.
 

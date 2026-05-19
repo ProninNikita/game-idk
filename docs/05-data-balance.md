@@ -122,6 +122,17 @@ Balance output/sec and player attention/sec, not only raw throughput.
 | Farming | water + seeds | stable food |
 | Defense | stone + light + energy | night safety |
 
+## Current Prototype Recipes
+
+| Station | Input | Output | Time |
+| --- | --- | --- | --- |
+| Furnace | 2 wood | 1 coal | 10s |
+| Furnace | 1 ore + 1 coal | 1 iron ingot | 10s |
+| Forge | 10 iron ingots | 1 iron armor | 10s |
+| Workbench | 5 wood | 1 fence | 10s |
+
+The current fence item is a build token for a 1x1 fence building.
+
 ## Exploration Balance
 
 Rule: a new biome should provide at least one of three things:

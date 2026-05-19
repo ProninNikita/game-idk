@@ -78,6 +78,13 @@ Should show:
 
 Do not build a huge tech tree in MVP. A categorized recipe list is enough.
 
+Current prototype station UI:
+
+- opens when the cursor is over a nearby Furnace, Forge, or Workbench and the player presses E;
+- shows recipe inputs, output, and 10-second craft time;
+- disables recipe buttons while a station is crafting or when the player lacks ingredients;
+- closes with the Close button or Esc.
+
 ## Building UI
 
 Required states:
