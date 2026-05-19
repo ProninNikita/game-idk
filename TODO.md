@@ -47,6 +47,7 @@ These tasks come from the architecture review and should be finished before addi
 
 ### P3 - Save, Load, and Tests
 
+- [x] Add an automated pre-commit gameplay smoke test for the current prototype loop.
 - [ ] Add save schema versioning.
 - [ ] Add `to_save_data()` and `from_save_data()` for world state, player inventory, buildings, stations, ground items, and removed resources.
 - [ ] Save generated-world diffs instead of serializing the whole generated map.
@@ -170,11 +171,11 @@ These tasks come from the architecture review and should be finished before addi
 
 ## Prototype Verification
 
-- [ ] Run a manual smoke test: start game, move, gather wood/stone/ore/crops, place buildings, craft station outputs, and pick up output drops.
-- [ ] Verify that harvested resource cells can be built on.
-- [ ] Verify that UI clicks do not trigger mining or building placement.
+- [x] Run an automated smoke test: start game, move, gather, place buildings, craft station outputs, and pick up output drops.
+- [x] Verify that harvested resource cells can be built on.
+- [x] Verify that UI clicks do not trigger mining or building placement.
 - [ ] Verify that failed building placement does not consume materials.
-- [ ] Verify that station output stays on the ground until picked up.
+- [x] Verify that station output stays on the ground until picked up.
 - [ ] Define the minimum readiness criteria for the first playable build.
 - [ ] Record found bugs and limitations in `CHANGELOG.md` or a separate task list.
-- [ ] Run the project in Godot 4.6.x stable after each architecture pass.
+- [x] Run the project in Godot 4.6.x stable after each architecture pass.

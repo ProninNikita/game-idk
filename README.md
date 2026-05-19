@@ -70,3 +70,17 @@ The project currently has the first Godot skeleton:
 - code-drawn placeholders with no graphic assets yet.
 
 To run it: open `project.godot` in Godot 4.6.x stable and launch the main scene.
+
+## Automated Smoke Test
+
+Run the current headless gameplay smoke test with:
+
+```sh
+scripts/qa/run_pre_commit_smoke.sh
+```
+
+Enable the versioned pre-commit hook once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```

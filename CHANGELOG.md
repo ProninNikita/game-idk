@@ -53,6 +53,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added Forge recipe: 10 iron ingots to 1 iron armor.
 - Added Workbench recipe: 5 wood to 1 fence.
 - Added a craftable and placeable 1x1 Fence building.
+- Added a headless pre-commit gameplay smoke test and versioned git hook.
 
 ### Changed
 
@@ -80,12 +81,14 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 ### Technical
 
 - Added `.gitignore` for the Godot project.
+- Added `.githooks/pre-commit` to run the automated gameplay smoke test before commits.
 - Added `scenes/` and `scripts/` structure for Godot.
 - Map resources are spawned as separate interactive scenes, while the ground is drawn by one world node instead of creating 22,500 Node objects.
 - Added the `ItemDef` Resource class for future item definitions.
 - The project was migrated by the Godot 4.6.2 editor and now includes script `.gd.uid` files.
 - Inventory storage now uses finite slots and stack limits instead of a single unlimited item-count dictionary.
 - World placement now tracks occupied building cells separately from resource cells.
+- Player facing, station targeting, and pending building placement now expose explicit world-position/grid methods for automated checks and future non-mouse input.
 
 ### Known Issues
 

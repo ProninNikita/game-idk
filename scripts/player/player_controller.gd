@@ -121,6 +121,15 @@ func set_gameplay_input_blocked(blocked: bool) -> void:
 	gameplay_input_blocked = blocked
 
 
+func face_towards_world_position(target_position: Vector2) -> void:
+	var to_target: Vector2 = target_position - global_position
+	if to_target.length_squared() <= 4.0:
+		return
+
+	facing = to_target.normalized()
+	queue_redraw()
+
+
 func start_building_placement(building_id: StringName) -> void:
 	if world == null:
 		_emit_temporary_hint("World is not ready")
@@ -220,35 +229,49 @@ func _try_place_pending_building() -> void:
 		return
 
 	var grid_position: Vector2i = _get_pending_build_grid_position()
+	try_place_pending_building_at_grid(grid_position)
+
+
+func try_place_pending_building_at_grid(grid_position: Vector2i) -> bool:
+	if pending_building_id == &"":
+		return false
+	if world == null:
+		return false
+
 	if not _is_pending_building_in_range(grid_position):
 		_emit_temporary_hint("Build closer to the player")
-		return
+		return false
 	if not bool(world.call("can_place_building", pending_building_id, grid_position)):
 		_emit_temporary_hint("Cannot build there")
-		return
+		return false
 	if not _has_building_cost(pending_building_id):
 		_emit_temporary_hint("Need %s" % _format_building_cost(pending_building_id))
-		return
+		return false
 
 	if not _pay_building_cost(pending_building_id):
 		_emit_temporary_hint("Need %s" % _format_building_cost(pending_building_id))
-		return
+		return false
 
 	var placed: bool = bool(world.call("place_building", pending_building_id, grid_position))
 	if not placed:
 		_refund_building_cost(pending_building_id)
 		_emit_temporary_hint("Cannot build there")
-		return
+		return false
 
 	var definition: Dictionary = world.call("get_building_definition", pending_building_id) as Dictionary
 	var display_name: String = String(definition.get("display_name", String(pending_building_id)))
 	_emit_temporary_hint("Built %s" % display_name)
 	pending_building_id = &""
 	queue_redraw()
+	return true
 
 
 func _try_open_station() -> bool:
-	var station: BuildingInstance = _find_station_target()
+	return try_open_station_at_world_position(get_global_mouse_position())
+
+
+func try_open_station_at_world_position(target_position: Vector2) -> bool:
+	var station: BuildingInstance = _find_station_target_at_point(target_position)
 	if station == null:
 		return false
 
@@ -260,7 +283,10 @@ func _try_open_station() -> bool:
 
 
 func _find_station_target() -> BuildingInstance:
-	var mouse_position: Vector2 = get_global_mouse_position()
+	return _find_station_target_at_point(get_global_mouse_position())
+
+
+func _find_station_target_at_point(target_position: Vector2) -> BuildingInstance:
 	var best_station: BuildingInstance = null
 	var best_score: float = INF
 
@@ -275,10 +301,10 @@ func _find_station_target() -> BuildingInstance:
 			continue
 		if global_position.distance_to(station.global_position) > station_interact_range:
 			continue
-		if not _is_point_inside_building(station, mouse_position):
+		if not _is_point_inside_building(station, target_position):
 			continue
 
-		var score: float = mouse_position.distance_squared_to(station.global_position)
+		var score: float = target_position.distance_squared_to(station.global_position)
 		if score < best_score:
 			best_score = score
 			best_station = station
@@ -332,12 +358,7 @@ func _clamp_to_world() -> void:
 
 
 func _update_mouse_facing() -> void:
-	var to_mouse: Vector2 = get_global_mouse_position() - global_position
-	if to_mouse.length_squared() <= 4.0:
-		return
-
-	facing = to_mouse.normalized()
-	queue_redraw()
+	face_towards_world_position(get_global_mouse_position())
 
 
 func _try_pickup_ground_items() -> void:
