@@ -48,6 +48,41 @@ func remove_item(item_id: StringName, amount: int) -> int:
 
 	_ensure_slots()
 	_ensure_starting_pickaxe()
+	return _remove_item_internal(item_id, amount, true)
+
+
+func can_remove_items(cost: Dictionary) -> bool:
+	_ensure_slots()
+	_ensure_starting_pickaxe()
+
+	for item_id_value: Variant in cost.keys():
+		var item_id: StringName = StringName(item_id_value)
+		var required: int = int(cost[item_id_value])
+		if required <= 0:
+			continue
+		if _get_removable_count(item_id) < required:
+			return false
+
+	return true
+
+
+func try_remove_items(cost: Dictionary) -> bool:
+	if not can_remove_items(cost):
+		return false
+
+	for item_id_value: Variant in cost.keys():
+		var item_id: StringName = StringName(item_id_value)
+		var required: int = int(cost[item_id_value])
+		if required > 0:
+			_remove_item_internal(item_id, required, false)
+
+	changed.emit(get_items())
+	return true
+
+
+func _remove_item_internal(item_id: StringName, amount: int, emit_changed: bool) -> int:
+	if amount <= 0:
+		return 0
 
 	var remaining: int = amount
 	var removed: int = 0
@@ -76,8 +111,21 @@ func remove_item(item_id: StringName, amount: int) -> int:
 			slot["amount"] = slot_amount
 			slots[i] = slot
 
-	changed.emit(get_items())
+	if emit_changed:
+		changed.emit(get_items())
 	return removed
+
+
+func _get_removable_count(item_id: StringName) -> int:
+	var total: int = 0
+	for slot: Dictionary in slots:
+		if slot.is_empty():
+			continue
+		if bool(slot.get("locked", false)):
+			continue
+		if StringName(slot.get("item_id", &"")) == item_id:
+			total += int(slot.get("amount", 0))
+	return total
 
 
 func get_count(item_id: StringName) -> int:

@@ -224,10 +224,15 @@ func _try_spawn_resource(resource_type: StringName, grid_pos: Vector2i) -> bool:
 
 	var node: HarvestableResourceNode = RESOURCE_NODE_SCENE.instantiate() as HarvestableResourceNode
 	node.setup(resource_type, grid_pos, tile_size, RESOURCE_DEFS[resource_type] as Dictionary)
+	node.depleted.connect(_on_resource_depleted)
 	resource_container.add_child(node)
 	_occupied[key] = true
 	_resource_count += 1
 	return true
+
+
+func _on_resource_depleted(grid_pos: Vector2i) -> void:
+	_occupied.erase(_grid_key(grid_pos))
 
 
 func _can_fit_footprint(grid_position: Vector2i, footprint: Vector2i) -> bool:

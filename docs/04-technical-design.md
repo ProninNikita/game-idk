@@ -217,7 +217,7 @@ Current prototype station behavior:
 - interact with stations by pointing at a nearby station and pressing E;
 - each active station can run one 10-second craft at a time;
 - ingredients are removed from the player inventory when crafting starts;
-- outputs are sent to the player inventory when crafting completes, with overflow dropped near the station;
+- outputs are dropped near the station when crafting completes;
 - station recipes currently live in `building_instance.gd` and should move into data resources once item definitions mature.
 
 ## Save/Load

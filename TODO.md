@@ -2,6 +2,35 @@
 
 A short checklist for the first top-down survival automation prototype.
 
+## Architecture and Code Review Priorities
+
+### P0 - Correctness Boundaries
+
+- [ ] Clean up occupancy ownership: centralize placed-object cell reservation and release, make footprint queries authoritative, and clear cells when buildings are removed, replaced, or fail to load.
+- [x] Clear resource cell occupancy when harvested resource nodes deplete.
+- [ ] Define the building lifecycle: preview, paid, placed, active, and removed states should unregister occupancy, station references, UI focus, and save data at the correct time.
+- [ ] Make building payments transactional: validate placement and costs together, spend ingredients only after placement commits, and roll back partial changes on failure.
+- [x] Refund prototype building costs if placement fails after cost payment.
+- [x] Add atomic inventory removal for prototype building costs and station recipe inputs.
+- [ ] Separate UI/gameplay modal state: route inventory, building, station, and main menu modes through one modal owner so input, placement, movement, and cursor targeting cannot conflict.
+- [x] Block prototype gameplay actions while inventory or station UI is open, and prevent HUD mouse clicks from leaking into mining or placement.
+- [ ] Add save/load boundaries for buildings, stations, inventories, ground drops, and production timers; load invalid data defensively without corrupting occupancy or inventory.
+
+### P1 - Data and Systems Contracts
+
+- [ ] Add a data registry for items, recipes, buildings, stations, footprints, stack sizes, icons, and save ids; remove duplicated literals from UI and gameplay scripts.
+- [ ] Introduce typed world/contracts for buildable, interactable, inventory, station, and saveable behavior so systems do not depend on scene or node-name assumptions.
+- [ ] Split station input and output inventories from the player inventory; recipes should consume only station inputs and place results into station outputs.
+- [x] Drop completed prototype station craft outputs to the ground near the station instead of inserting them directly into the player inventory.
+- [ ] Drop station overflow output to the ground when output inventory is full, using existing ground-drop pickup rules and clear ownership/positioning.
+- [ ] Add a machine scheduler that processes station jobs and timers independently from UI visibility and survives pause, save, and load transitions.
+- [ ] Make UI row updates data-driven so inventory, building, upgrades, and station rows refresh from registry/state changes instead of manual per-row wiring.
+
+### P2 - Validation and Project Hygiene
+
+- [ ] Add tests for placement occupancy, payment rollback, inventory atomic removal, station input/output flow, overflow ground drops, scheduler ticks, and save/load reconstruction.
+- [ ] Sync docs after architecture changes: update `README.md`, `CHANGELOG.md`, and gameplay notes once implementation lands.
+
 ## Map and World
 
 - [x] Create the starting 150x150 tile map.

@@ -85,7 +85,7 @@ Every automation should replace a repeated manual action:
 - Forge: 10 iron ingots -> 1 iron armor.
 - Workbench: 5 wood -> 1 fence.
 
-All current station recipes take 10 seconds and use the player inventory as temporary input/output storage until machine slots are implemented.
+All current station recipes take 10 seconds, consume inputs from the player inventory, and drop outputs on the ground near the station until machine slots are implemented.
 
 ### Post-MVP Machines
 

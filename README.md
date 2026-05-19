@@ -65,6 +65,7 @@ The project currently has the first Godot skeleton:
 - placeable 2x2 Furnace, Forge, and Workbench placeholders, plus a placeable 1x1 Fence;
 - station UI that opens with E when the cursor is over a nearby Furnace, Forge, or Workbench;
 - 10-second station recipes for Coal, Iron Ingot, Iron Armor, and Fence;
+- completed station craft outputs drop onto the ground near the station for pickup;
 - mouse-based facing and harvesting direction;
 - code-drawn placeholders with no graphic assets yet.
 

@@ -20,6 +20,7 @@ func _ready() -> void:
 	hud.connect("build_requested", Callable(player, "start_building_placement"))
 	hud.connect("station_recipe_requested", Callable(player, "start_station_recipe"))
 	hud.connect("station_close_requested", Callable(player, "close_station_ui"))
+	hud.connect("gameplay_input_block_changed", Callable(player, "set_gameplay_input_blocked"))
 
 	hud.call("set_world_info", world.get("map_size"), world.call("get_resource_count"))
 	hud.call("set_inventory", player.call("get_inventory_snapshot"))

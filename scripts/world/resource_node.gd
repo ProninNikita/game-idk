@@ -1,6 +1,8 @@
 extends StaticBody2D
 class_name HarvestableResourceNode
 
+signal depleted(grid_position: Vector2i)
+
 var resource_type: StringName = &"tree"
 var display_name: String = "Resource"
 var drop_item_id: StringName = &"wood"
@@ -56,6 +58,7 @@ func hit(damage: int, tool_tags: Array) -> Dictionary:
 
 	if health <= 0:
 		_depleted = true
+		depleted.emit(grid_position)
 		remove_from_group("resource_nodes")
 		set_deferred("collision_layer", 0)
 		set_deferred("collision_mask", 0)

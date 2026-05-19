@@ -62,13 +62,17 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Resource harvesting now drops items onto the ground instead of sending them directly to inventory.
 - Inventory UI now keeps the toolbelt visible and moves the full inventory into a toggleable window.
 - Building placement validates free grid cells near the player and spends materials only after successful placement.
-- Station recipes consume ingredients when crafting starts and deliver output to the player inventory when crafting completes.
+- Station recipes consume ingredients when crafting starts and drop completed outputs on the ground near the station.
 
 ### Fixed
 
 - Fixed Godot 4.6 issues where GDScript warnings about inferred Variant types stopped parsing as errors.
 - Added input actions to `project.godot`, so movement and actions exist before runtime setup.
 - Fixed the inventory toggle so Tab/I can close the inventory after clicking category buttons.
+- Fixed harvested resource cells staying blocked for future building placement.
+- Added atomic inventory removal for prototype building costs and station recipe inputs.
+- Added refund handling when building placement fails after prototype cost payment.
+- Fixed HUD clicks leaking into mining or building placement while inventory or station UI is open.
 
 ### Technical
 

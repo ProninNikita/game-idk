@@ -4,6 +4,7 @@ class_name HearthlineHUD
 signal build_requested(building_id: StringName)
 signal station_recipe_requested(recipe_id: StringName)
 signal station_close_requested()
+signal gameplay_input_block_changed(blocked: bool)
 
 const TOOLBELT_SLOT_COUNT: int = 9
 
@@ -85,6 +86,7 @@ func show_station(snapshot: Dictionary) -> void:
 
 	_station_window.visible = true
 	_render_station(snapshot)
+	_emit_gameplay_input_block_state()
 
 
 func update_station(snapshot: Dictionary) -> void:
@@ -97,6 +99,7 @@ func hide_station() -> void:
 	if _station_window == null:
 		return
 	_station_window.visible = false
+	_emit_gameplay_input_block_state()
 
 
 func toggle_inventory_window() -> void:
@@ -106,6 +109,7 @@ func toggle_inventory_window() -> void:
 	_inventory_window.visible = not _inventory_window.visible
 	if _inventory_window.visible:
 		_select_category(&"inventory")
+	_emit_gameplay_input_block_state()
 
 
 func _build_status_panel() -> void:
@@ -394,6 +398,7 @@ func _request_building(building_id: StringName) -> void:
 	build_requested.emit(building_id)
 	if _inventory_window != null:
 		_inventory_window.visible = false
+	_emit_gameplay_input_block_state()
 
 
 func _request_station_recipe(recipe_id: StringName) -> void:
@@ -495,6 +500,12 @@ func _format_item_name(item_id: StringName) -> String:
 func _clear_children(parent: Node) -> void:
 	for child: Node in parent.get_children():
 		child.queue_free()
+
+
+func _emit_gameplay_input_block_state() -> void:
+	var inventory_open: bool = _inventory_window != null and _inventory_window.visible
+	var station_open: bool = _station_window != null and _station_window.visible
+	gameplay_input_block_changed.emit(inventory_open or station_open)
 
 
 func _build_placeholder_content(title_text: String, body_text: String) -> VBoxContainer:

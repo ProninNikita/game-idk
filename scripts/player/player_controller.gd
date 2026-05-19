@@ -43,6 +43,7 @@ var facing: Vector2 = Vector2.DOWN
 var world: Node = null
 var pending_building_id: StringName = &""
 var active_station: BuildingInstance = null
+var gameplay_input_blocked: bool = false
 var _cooldown_left: float = 0.0
 var _last_hint_time: float = 0.0
 var _pickup_left: float = 0.0
@@ -73,12 +74,15 @@ func _physics_process(delta: float) -> void:
 		_pickup_left = pickup_interval
 		_try_pickup_ground_items()
 
-	if pending_building_id != &"" and Input.is_action_just_pressed("attack"):
+	var attack_pressed: bool = Input.is_action_just_pressed("attack") and not gameplay_input_blocked and not _is_mouse_over_ui()
+	var interact_pressed: bool = Input.is_action_just_pressed("interact") and not gameplay_input_blocked
+
+	if pending_building_id != &"" and attack_pressed:
 		_try_place_pending_building()
-	elif Input.is_action_just_pressed("interact"):
+	elif interact_pressed:
 		if not _try_open_station():
 			_try_harvest()
-	elif Input.is_action_just_pressed("attack"):
+	elif attack_pressed:
 		_try_harvest()
 
 	if pending_building_id != &"" and Input.is_action_just_pressed("ui_cancel"):
@@ -108,6 +112,10 @@ func get_inventory_snapshot() -> Dictionary:
 
 func get_inventory_slots_snapshot() -> Array[Dictionary]:
 	return inventory.get_slots()
+
+
+func set_gameplay_input_blocked(blocked: bool) -> void:
+	gameplay_input_blocked = blocked
 
 
 func start_building_placement(building_id: StringName) -> void:
@@ -162,7 +170,11 @@ func start_station_recipe(recipe_id: StringName) -> void:
 		_refresh_active_station_ui()
 		return
 
-	_pay_recipe_inputs(recipe)
+	if not _pay_recipe_inputs(recipe):
+		_emit_temporary_hint("Need %s" % _format_recipe_inputs(recipe))
+		_refresh_active_station_ui()
+		return
+
 	var started: bool = active_station.start_craft(recipe_id)
 	if not started:
 		_refund_recipe_inputs(recipe)
@@ -215,9 +227,13 @@ func _try_place_pending_building() -> void:
 		_emit_temporary_hint("Need %s" % _format_building_cost(pending_building_id))
 		return
 
-	_pay_building_cost(pending_building_id)
+	if not _pay_building_cost(pending_building_id):
+		_emit_temporary_hint("Need %s" % _format_building_cost(pending_building_id))
+		return
+
 	var placed: bool = bool(world.call("place_building", pending_building_id, grid_position))
 	if not placed:
+		_refund_building_cost(pending_building_id)
 		_emit_temporary_hint("Cannot build there")
 		return
 
@@ -371,6 +387,10 @@ func _sort_ground_items_by_distance(a: Node, b: Node) -> bool:
 	return global_position.distance_squared_to(a.global_position) < global_position.distance_squared_to(b.global_position)
 
 
+func _is_mouse_over_ui() -> bool:
+	return get_viewport().gui_get_hovered_control() != null
+
+
 func _on_inventory_changed(items: Dictionary) -> void:
 	inventory_changed.emit(items)
 	inventory_slots_changed.emit(inventory.get_slots())
@@ -416,20 +436,12 @@ func _build_station_snapshot(station: BuildingInstance) -> Dictionary:
 
 func _has_recipe_inputs(recipe: Dictionary) -> bool:
 	var inputs: Dictionary = recipe.get("inputs", {}) as Dictionary
-	for item_id_value: Variant in inputs.keys():
-		var item_id: StringName = StringName(item_id_value)
-		var required: int = int(inputs[item_id_value])
-		if inventory.get_count(item_id) < required:
-			return false
-	return true
+	return inventory.can_remove_items(inputs)
 
 
-func _pay_recipe_inputs(recipe: Dictionary) -> void:
+func _pay_recipe_inputs(recipe: Dictionary) -> bool:
 	var inputs: Dictionary = recipe.get("inputs", {}) as Dictionary
-	for item_id_value: Variant in inputs.keys():
-		var item_id: StringName = StringName(item_id_value)
-		var required: int = int(inputs[item_id_value])
-		inventory.remove_item(item_id, required)
+	return inventory.try_remove_items(inputs)
 
 
 func _refund_recipe_inputs(recipe: Dictionary) -> void:
@@ -478,12 +490,13 @@ func _on_station_craft_completed(station: Node, recipe: Dictionary) -> void:
 	if output_item_id == &"" or output_amount <= 0:
 		return
 
-	var leftover: int = inventory.add_item_with_leftover(output_item_id, output_amount)
-	if leftover > 0 and world != null and world.has_method("spawn_ground_item"):
+	if world != null and world.has_method("spawn_ground_item"):
 		var drop_position: Vector2 = global_position
 		if station is Node2D:
 			drop_position = (station as Node2D).global_position
-		world.call("spawn_ground_item", output_item_id, leftover, drop_position, _get_item_debug_color(output_item_id))
+		world.call("spawn_ground_item", output_item_id, output_amount, drop_position, _get_item_debug_color(output_item_id))
+	else:
+		inventory.add_item_with_leftover(output_item_id, output_amount)
 
 	_emit_temporary_hint("Crafted %s" % _format_item_name(output_item_id))
 	if active_station != null and station == active_station:
@@ -536,24 +549,28 @@ func _has_building_cost(building_id: StringName) -> bool:
 		return true
 
 	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
-	for item_id: Variant in cost.keys():
-		var typed_item_id: StringName = StringName(item_id)
-		var required: int = int(cost[item_id])
-		if inventory.get_count(typed_item_id) < required:
-			return false
-
-	return true
+	return inventory.can_remove_items(cost)
 
 
-func _pay_building_cost(building_id: StringName) -> void:
+func _pay_building_cost(building_id: StringName) -> bool:
+	if not BUILDING_COSTS.has(building_id):
+		return true
+
+	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
+	return inventory.try_remove_items(cost)
+
+
+func _refund_building_cost(building_id: StringName) -> void:
 	if not BUILDING_COSTS.has(building_id):
 		return
 
 	var cost: Dictionary = BUILDING_COSTS[building_id] as Dictionary
-	for item_id: Variant in cost.keys():
-		var typed_item_id: StringName = StringName(item_id)
-		var required: int = int(cost[item_id])
-		inventory.remove_item(typed_item_id, required)
+	for item_id_value: Variant in cost.keys():
+		var item_id: StringName = StringName(item_id_value)
+		var amount: int = int(cost[item_id_value])
+		var leftover: int = inventory.add_item_with_leftover(item_id, amount)
+		if leftover > 0 and world != null and world.has_method("spawn_ground_item"):
+			world.call("spawn_ground_item", item_id, leftover, global_position, _get_item_debug_color(item_id))
 
 
 func _format_building_cost(building_id: StringName) -> String:
