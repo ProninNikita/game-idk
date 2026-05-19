@@ -205,6 +205,12 @@ Building definition:
 - collision layer;
 - footprint rules.
 
+Current prototype buildings:
+
+- `furnace`: 2x2 footprint, costs 2 stone and 1 wood.
+- `forge`: 2x2 footprint, costs 4 stone and 2 ore.
+- `workbench`: 2x2 footprint, costs 2 wood and 1 stone.
+
 ## Save/Load
 
 Save:

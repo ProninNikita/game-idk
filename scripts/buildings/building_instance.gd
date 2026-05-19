@@ -59,3 +59,12 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, 12.0, Color(0.95, 0.42, 0.16))
 		draw_circle(Vector2.ZERO, 7.0, Color(1.0, 0.78, 0.25))
 		draw_line(Vector2(-18.0, -18.0), Vector2(18.0, -18.0), Color(0.10, 0.09, 0.08), 3.0)
+	elif building_id == &"forge":
+		draw_rect(Rect2(Vector2(-18.0, -8.0), Vector2(36.0, 16.0)), Color(0.12, 0.12, 0.14), true)
+		draw_rect(Rect2(Vector2(-12.0, -16.0), Vector2(24.0, 8.0)), Color(0.70, 0.72, 0.76), true)
+		draw_circle(Vector2(0.0, 10.0), 6.0, Color(0.96, 0.48, 0.18))
+	elif building_id == &"workbench":
+		draw_rect(Rect2(Vector2(-22.0, -10.0), Vector2(44.0, 18.0)), Color(0.42, 0.24, 0.12), true)
+		draw_line(Vector2(-16.0, 10.0), Vector2(-16.0, 22.0), Color(0.16, 0.09, 0.04), 3.0)
+		draw_line(Vector2(16.0, 10.0), Vector2(16.0, 22.0), Color(0.16, 0.09, 0.04), 3.0)
+		draw_circle(Vector2(12.0, -2.0), 4.0, Color(0.72, 0.74, 0.78))

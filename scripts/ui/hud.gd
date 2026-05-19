@@ -25,7 +25,7 @@ func _ready() -> void:
 	_build_inventory_window()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("inventory"):
 		toggle_inventory_window()
 		get_viewport().set_input_as_handled()
@@ -149,9 +149,9 @@ func _build_inventory_window() -> void:
 	_inventory_window.anchor_top = 0.5
 	_inventory_window.anchor_right = 0.5
 	_inventory_window.anchor_bottom = 0.5
-	_inventory_window.offset_left = -500.0
+	_inventory_window.offset_left = -620.0
 	_inventory_window.offset_top = -290.0
-	_inventory_window.offset_right = 500.0
+	_inventory_window.offset_right = 620.0
 	_inventory_window.offset_bottom = 290.0
 	add_child(_inventory_window)
 
@@ -166,8 +166,13 @@ func _build_inventory_window() -> void:
 	root.add_theme_constant_override("separation", 12)
 	root_margin.add_child(root)
 
+	var equipment_frame: PanelContainer = PanelContainer.new()
+	equipment_frame.custom_minimum_size = Vector2(180.0, 520.0)
+	root.add_child(equipment_frame)
+	_build_equipment_panel(equipment_frame)
+
 	var content_frame: PanelContainer = PanelContainer.new()
-	content_frame.custom_minimum_size = Vector2(760.0, 520.0)
+	content_frame.custom_minimum_size = Vector2(820.0, 520.0)
 	root.add_child(content_frame)
 
 	var content_margin: MarginContainer = MarginContainer.new()
@@ -231,16 +236,83 @@ func _build_building_content() -> VBoxContainer:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
-	var furnace_label: Label = Label.new()
-	furnace_label.text = "Furnace\nCost: 2 stone, 1 wood\nSize: 2x2"
-	furnace_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(furnace_label)
+	var help: Label = Label.new()
+	help.text = "Choose a building, then place it near the player."
+	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(help)
 
-	var furnace_button: Button = Button.new()
-	furnace_button.text = "Create Furnace"
-	furnace_button.pressed.connect(_request_furnace)
-	box.add_child(furnace_button)
+	var building_grid: GridContainer = GridContainer.new()
+	building_grid.columns = 3
+	box.add_child(building_grid)
+
+	_add_building_slot(building_grid, &"furnace", "Furnace", "Cost: 2 stone, 1 wood\nSize: 2x2")
+	_add_building_slot(building_grid, &"forge", "Forge", "Cost: 4 stone, 2 ore\nSize: 2x2")
+	_add_building_slot(building_grid, &"workbench", "Workbench", "Cost: 2 wood, 1 stone\nSize: 2x2")
 	return box
+
+
+func _build_equipment_panel(parent: PanelContainer) -> void:
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	parent.add_child(margin)
+
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	margin.add_child(box)
+
+	var title: Label = Label.new()
+	title.text = "Character"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+
+	_add_equipment_slot(box, "Helmet")
+	_add_equipment_slot(box, "Armor")
+	_add_equipment_slot(box, "Gloves")
+	_add_equipment_slot(box, "Boots")
+	_add_equipment_slot(box, "Belt")
+	_add_equipment_slot(box, "Amulet")
+
+
+func _add_equipment_slot(parent: VBoxContainer, slot_name: String) -> void:
+	var label: Label = Label.new()
+	label.custom_minimum_size = Vector2(150.0, 42.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.text = "%s\nEmpty" % slot_name
+	label.modulate = Color(0.82, 0.86, 0.90)
+	parent.add_child(label)
+
+
+func _add_building_slot(parent: GridContainer, building_id: StringName, title: String, details: String) -> void:
+	var slot: VBoxContainer = VBoxContainer.new()
+	slot.custom_minimum_size = Vector2(240.0, 150.0)
+	slot.add_theme_constant_override("separation", 6)
+	parent.add_child(slot)
+
+	var name_label: Label = Label.new()
+	name_label.text = title
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	slot.add_child(name_label)
+
+	var details_label: Label = Label.new()
+	details_label.text = details
+	details_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	details_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	slot.add_child(details_label)
+
+	var button: Button = Button.new()
+	button.text = "Create"
+	button.pressed.connect(Callable(self, "_request_building").bind(building_id))
+	slot.add_child(button)
+
+
+func _request_building(building_id: StringName) -> void:
+	build_requested.emit(building_id)
+	if _inventory_window != null:
+		_inventory_window.visible = false
 
 
 func _build_placeholder_content(title_text: String, body_text: String) -> VBoxContainer:
@@ -277,12 +349,6 @@ func _select_category(category_id: StringName) -> void:
 		_upgrades_content.visible = category_id == &"upgrades"
 	if _main_menu_content != null:
 		_main_menu_content.visible = category_id == &"main_menu"
-
-
-func _request_furnace() -> void:
-	build_requested.emit(&"furnace")
-	if _inventory_window != null:
-		_inventory_window.visible = false
 
 
 func _update_toolbelt(slots: Array) -> void:

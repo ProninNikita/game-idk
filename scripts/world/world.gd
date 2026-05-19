@@ -4,6 +4,8 @@ class_name HearthlineWorld
 const RESOURCE_NODE_SCENE: PackedScene = preload("res://scenes/world/resource_node.tscn")
 const GROUND_ITEM_SCENE: PackedScene = preload("res://scenes/world/ground_item.tscn")
 const FURNACE_SCENE: PackedScene = preload("res://scenes/buildings/furnace.tscn")
+const FORGE_SCENE: PackedScene = preload("res://scenes/buildings/forge.tscn")
+const WORKBENCH_SCENE: PackedScene = preload("res://scenes/buildings/workbench.tscn")
 
 const RESOURCE_DEFS: Dictionary = {
 	&"tree": {
@@ -46,6 +48,18 @@ const BUILDING_DEFS: Dictionary = {
 		"footprint": Vector2i(2, 2),
 		"scene": FURNACE_SCENE,
 		"color": Color(0.48, 0.42, 0.36),
+	},
+	&"forge": {
+		"display_name": "Forge",
+		"footprint": Vector2i(2, 2),
+		"scene": FORGE_SCENE,
+		"color": Color(0.36, 0.38, 0.42),
+	},
+	&"workbench": {
+		"display_name": "Workbench",
+		"footprint": Vector2i(2, 2),
+		"scene": WORKBENCH_SCENE,
+		"color": Color(0.48, 0.31, 0.17),
 	},
 }
 

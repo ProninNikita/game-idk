@@ -42,16 +42,24 @@ A short checklist for the first top-down survival automation prototype.
 - [x] Add a separate inventory window toggled by the inventory key.
 - [x] Add a visible toolbar UI for the hotbar slots.
 - [x] Add right-side inventory window categories: Inventory, Building, Upgrades, Main Menu.
+- [x] Add a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots.
+- [x] Keep the inventory key able to close the window after clicking category buttons.
 - [ ] Add item definitions with per-item stack sizes instead of a shared prototype stack size.
+- [ ] Add actual equipping and stat effects for the character equipment slots.
 
 ## Building
 
 - [x] Add a working Building category in the inventory window.
 - [x] Add a furnace building recipe costing 2 stone and 1 wood.
+- [x] Add a forge building slot and recipe costing 4 stone and 2 ore.
+- [x] Add a workbench building slot and recipe costing 2 wood and 1 stone.
 - [x] Add building placement mode after pressing Create Furnace.
+- [x] Add building placement mode for each Building category slot.
 - [x] Restrict furnace placement to free grid cells near the player.
 - [x] Add a 2x2 furnace footprint.
+- [x] Add 2x2 forge and workbench footprints.
 - [x] Spend furnace materials only after successful placement.
+- [x] Spend forge and workbench materials only after successful placement.
 - [ ] Add a dedicated building placement cursor and clearer blocked-cell feedback.
 - [ ] Add building removal and refund rules.
 - [ ] Save and load placed buildings.

@@ -60,7 +60,9 @@ The project currently has the first Godot skeleton:
 - a visible 9-slot toolbelt with the starting pickaxe locked in slot 1;
 - a full inventory window toggled with Tab or I;
 - inventory window categories for Inventory, Building, Upgrades, and Main Menu;
-- a placeable 2x2 Furnace built from 2 stone and 1 wood;
+- a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots;
+- building slots for Furnace, Forge, and Workbench;
+- placeable 2x2 Furnace, Forge, and Workbench placeholders with material costs;
 - mouse-based facing and harvesting direction;
 - code-drawn placeholders with no graphic assets yet.
 

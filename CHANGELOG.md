@@ -44,6 +44,9 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added right-side inventory window categories: Inventory, Building, Upgrades, and Main Menu.
 - Added the first placeable building: Furnace, with a 2x2 footprint and a cost of 2 stone + 1 wood.
 - Added furnace placement mode after pressing Create Furnace in the Building category.
+- Added Building category slots for Furnace, Forge, and Workbench.
+- Added placeable 2x2 Forge and Workbench placeholders with material costs.
+- Added a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots.
 
 ### Changed
 
@@ -58,6 +61,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 
 - Fixed Godot 4.6 issues where GDScript warnings about inferred Variant types stopped parsing as errors.
 - Added input actions to `project.godot`, so movement and actions exist before runtime setup.
+- Fixed the inventory toggle so Tab/I can close the inventory after clicking category buttons.
 
 ### Technical
 

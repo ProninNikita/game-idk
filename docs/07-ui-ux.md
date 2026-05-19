@@ -59,6 +59,9 @@ Principles:
 MVP:
 
 - open/close;
+- close reliably with Tab or I even after category buttons receive focus;
+- right-side categories for Inventory, Building, Upgrades, and Main Menu;
+- left-side character equipment slots for Helmet, Armor, Gloves, Boots, Belt, and Amulet;
 - drag/drop;
 - transfer to chest;
 - quickbar assignment.
@@ -79,6 +82,7 @@ Do not build a huge tech tree in MVP. A categorized recipe list is enough.
 
 Required states:
 
+- building slots for available stations;
 - ghost preview;
 - valid placement;
 - invalid placement with reason;

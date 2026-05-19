@@ -21,6 +21,14 @@ const BUILDING_COSTS: Dictionary = {
 		&"stone": 2,
 		&"wood": 1,
 	},
+	&"forge": {
+		&"stone": 4,
+		&"ore": 2,
+	},
+	&"workbench": {
+		&"wood": 2,
+		&"stone": 1,
+	},
 }
 
 var world_bounds: Rect2 = Rect2()
@@ -158,7 +166,9 @@ func _try_place_pending_building() -> void:
 		_emit_temporary_hint("Cannot build there")
 		return
 
-	_emit_temporary_hint("Built Furnace")
+	var definition: Dictionary = world.call("get_building_definition", pending_building_id) as Dictionary
+	var display_name: String = String(definition.get("display_name", String(pending_building_id)))
+	_emit_temporary_hint("Built %s" % display_name)
 	pending_building_id = &""
 	queue_redraw()
 

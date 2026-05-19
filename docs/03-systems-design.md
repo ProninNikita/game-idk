@@ -73,6 +73,7 @@ Every automation should replace a repeated manual action:
 - `Conveyor`: moves items in a direction.
 - `Inserter/Arm`: transfers items between a machine and a container.
 - `Furnace`: turns ore + fuel into ingots.
+- `Forge`: crafts stronger metal tools and weapon parts.
 - `Workbench/Assembler`: crafts a simple recipe.
 - `Chest`: stores items.
 - `Generator`: turns fuel into energy.
