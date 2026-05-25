@@ -7,8 +7,8 @@ var resource_type: StringName = &"tree"
 var display_name: String = "Resource"
 var drop_item_id: StringName = &"wood"
 var drop_amount: int = 1
-var max_health: int = 3
-var health: int = 3
+var max_health: float = 3.0
+var health: float = 3.0
 var grid_position: Vector2i = Vector2i.ZERO
 var tile_size: int = 32
 var debug_color: Color = Color(0.35, 0.75, 0.28)
@@ -33,7 +33,7 @@ func setup(type: StringName, grid_pos: Vector2i, cell_size: int, definition: Dic
 	display_name = String(definition.get("display_name", String(type)))
 	drop_item_id = StringName(definition.get("drop_item_id", type))
 	drop_amount = int(definition.get("drop_amount", 1))
-	max_health = int(definition.get("max_health", 3))
+	max_health = float(definition.get("max_health", 3))
 	health = max_health
 	debug_color = definition.get("color", debug_color) as Color
 	collision_radius = float(definition.get("radius", 12.0))
@@ -44,7 +44,7 @@ func setup(type: StringName, grid_pos: Vector2i, cell_size: int, definition: Dic
 		queue_redraw()
 
 
-func hit(damage: int, tool_tags: Array) -> Dictionary:
+func hit(damage: float, tool_tags: Array) -> Dictionary:
 	if _depleted:
 		return {}
 	if damage <= 0:
@@ -53,7 +53,7 @@ func hit(damage: int, tool_tags: Array) -> Dictionary:
 		return {}
 
 	health -= damage
-	_hit_flash = 1.0
+	_hit_flash = maxf(_hit_flash, 0.55)
 	queue_redraw()
 
 	if health <= 0:
@@ -98,7 +98,9 @@ func _apply_collision_shape() -> void:
 
 func _draw() -> void:
 	var color: Color = debug_color.lerp(Color.WHITE, _hit_flash * 0.65)
-	var health_ratio: float = clampf(float(health) / float(max_health), 0.0, 1.0)
+	var health_ratio: float = 0.0
+	if max_health > 0.0:
+		health_ratio = clampf(health / max_health, 0.0, 1.0)
 
 	if resource_type == &"tree":
 		draw_rect(Rect2(Vector2(-4, -4), Vector2(8, 17)), Color(0.34, 0.20, 0.10), true)

@@ -24,15 +24,15 @@ A task should have a clear in-game result. If a task sounds like "build a system
 - [ ] Test map exists.
 - [ ] Resource node exists: tree.
 - [ ] Resource node exists: stone.
-- [ ] Player can hit resource nodes.
+- [ ] Player can lock the Multitool Cutter onto resource nodes.
 - [ ] Resource node drops an item.
 - [ ] Inventory accepts item stacks.
 - [ ] HUD shows quickbar and basic stats.
 
 ## M2: First Night
 
-- [ ] Day/night time system.
-- [ ] Night looks visually different.
+- [x] Day/night time system.
+- [x] Night looks visually different.
 - [ ] Hunger decreases.
 - [ ] Food restores hunger.
 - [ ] Campfire can be built.

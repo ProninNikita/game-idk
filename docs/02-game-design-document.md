@@ -58,9 +58,13 @@ Expected rhythm:
 
 ## Game Start
 
+The player survives a crash landing in a small escape capsule. The capsule's usable supplies are nearly gone; the one reliable tool is a **Multitool Cutter** that can cut resources, assist construction, and later damage simple threats through a lock-on beam.
+
 The player appears in a relatively safe area:
 
 - basic wood/stone/food are nearby;
+- the escape capsule gives a clear starting landmark;
+- the Multitool Cutter teaches gathering, building, and future defense through one consistent interaction;
 - night danger exists, but the first night should be survivable;
 - 1-2 interesting points are visible nearby;
 - the first screen should show direction: resources, base space, and the edge of danger.
@@ -76,6 +80,7 @@ The player appears in a relatively safe area:
 ### Gathering
 
 - Manual gathering is quick and tactile.
+- The Multitool Cutter locks onto a nearby target and deals gradual damage while the lock is valid.
 - Tools affect speed, yield, and resource access.
 - Some resources require stations or automation.
 

@@ -61,6 +61,7 @@ func _run() -> void:
 	print("[smoke] Starting pre-commit gameplay smoke test")
 	await _load_main_scene()
 	await _verify_startup_state()
+	await _verify_time_of_day_cycle()
 	await _verify_movement_and_mouse_facing()
 	await _verify_inventory_window_buttons()
 	await _verify_harvest_drop_pickup()
@@ -100,8 +101,40 @@ func _verify_startup_state() -> void:
 	_expect(slots.size() >= _player.inventory.toolbelt_slot_count, "Inventory has toolbelt slots")
 	if not slots.is_empty():
 		var first_slot: Dictionary = slots[0]
-		_expect(StringName(first_slot.get("item_id", &"")) == &"pickaxe", "First hotbar slot contains the pickaxe")
-		_expect(bool(first_slot.get("locked", false)), "Pickaxe slot is locked")
+		_expect(StringName(first_slot.get("item_id", &"")) == &"multitool_cutter", "First hotbar slot contains the Multitool Cutter")
+		_expect(bool(first_slot.get("locked", false)), "Multitool Cutter slot is locked")
+
+
+func _verify_time_of_day_cycle() -> void:
+	var original_day_length: float = _world.day_length_seconds
+	var original_cycle_enabled: bool = _world.time_cycle_enabled
+
+	_world.time_cycle_enabled = false
+	_world.set_time_of_day(6.0, 1)
+	_expect(_get_world_phase_id() == &"morning", "Time phase is Morning from 06:00")
+	_world.set_time_of_day(8.99, 1)
+	_expect(_get_world_phase_id() == &"morning", "Time phase stays Morning before 09:00")
+	_world.set_time_of_day(9.0, 1)
+	_expect(_get_world_phase_id() == &"day", "Time phase is Day from 09:00")
+	_world.set_time_of_day(16.0, 1)
+	_expect(_get_world_phase_id() == &"evening", "Time phase is Evening from 16:00")
+	_world.set_time_of_day(22.0, 1)
+	_expect(_get_world_phase_id() == &"night", "Time phase is Night from 22:00")
+	_world.set_time_of_day(5.99, 1)
+	_expect(_get_world_phase_id() == &"night", "Time phase stays Night before 06:00")
+
+	_world.day_length_seconds = 24.0
+	_world.time_cycle_enabled = true
+	_world.set_time_of_day(6.0, 1)
+	var minute_before: int = _get_world_time_minutes()
+	_world.call("_process", 0.5)
+	await process_frame
+	var minute_after: int = _get_world_time_minutes()
+	_expect(minute_after > minute_before, "Time of day advances dynamically")
+
+	_world.day_length_seconds = original_day_length
+	_world.time_cycle_enabled = original_cycle_enabled
+	_world.set_time_of_day(6.0, 1)
 
 
 func _verify_movement_and_mouse_facing() -> void:
@@ -152,11 +185,43 @@ func _verify_harvest_drop_pickup() -> void:
 	_player.global_position = resource.global_position + Vector2(-28.0, 0.0)
 	await _warp_mouse_to_global(resource.global_position)
 	_player.facing = Vector2.RIGHT
-	for hit_index: int in range(resource.max_health + 1):
-		_player.set("_cooldown_left", 0.0)
-		_player.call("_try_harvest")
+	_player.call("_try_start_cutter_lock")
+	await process_frame
+	_expect(_player.get("_cutter_target") == resource, "Multitool Cutter locks on to the resource")
+
+	var health_after_lock: float = resource.health
+	_player.call("_update_cutter_lock", 0.25)
+	await process_frame
+	_expect(resource.health < health_after_lock, "Multitool Cutter deals gradual damage while locked")
+
+	await _warp_mouse_to_global(_player.global_position + Vector2(0.0, 80.0))
+	_player.call("_update_mouse_facing")
+	_player.call("_update_cutter_lock", 0.1)
+	await process_frame
+	_expect(_player.facing.y > 0.70, "Multitool Cutter beam can be steered while active")
+
+	await _warp_mouse_to_global(resource.global_position)
+	_player.call("_update_mouse_facing")
+	var position_before_moving_cut: Vector2 = _player.global_position
+	Input.action_press(&"move_down")
+	await _physics_steps(4)
+	Input.action_release(&"move_down")
+	await _physics_steps(1)
+	_expect(_player.global_position.y > position_before_moving_cut.y + 1.0, "Player can move while the Multitool Cutter is active")
+
+	var health_after_moving: float = resource.health
+	_player.face_towards_world_position(resource.global_position)
+	_player.call("_update_cutter_lock", 0.25)
+	await process_frame
+	_expect(resource.health < health_after_moving, "Multitool Cutter keeps damaging after moving when aimed at the target")
+
+	var cutter_steps: int = ceili(resource.max_health / _player.cutter_damage_per_second * 6.0) + 4
+	for step_index: int in range(cutter_steps):
+		if not is_instance_valid(resource) or resource.is_queued_for_deletion():
+			break
+		_player.face_towards_world_position(resource.global_position)
+		_player.call("_update_cutter_lock", 0.2)
 		await process_frame
-		await physics_frame
 
 	_expect(_count_ground_items(drop_item_id) > ground_before, "Harvesting drops items on the ground")
 	_expect(_world.can_place_building(&"fence", depleted_grid), "Depleted resource cells become buildable")
@@ -313,6 +378,7 @@ func _craft_recipe_and_pickup(station: BuildingInstance, recipe_title: String, o
 	var output_item: Node2D = _find_ground_item(output_item_id)
 	_expect(output_item != null, "%s ground output exists" % recipe_title)
 	if output_item != null:
+		_expect(not _is_point_inside_building_footprint(station, output_item.global_position), "%s output drops outside the station footprint" % recipe_title)
 		_player.global_position = output_item.global_position
 		_player.set("_pickup_left", 0.0)
 		_player.call("_try_pickup_ground_items")
@@ -554,6 +620,22 @@ func _find_ground_item(item_id: StringName) -> Node2D:
 			best_score = score
 			best_item = item
 	return best_item
+
+
+func _is_point_inside_building_footprint(building: BuildingInstance, point: Vector2) -> bool:
+	var size: Vector2 = Vector2(float(building.footprint.x * building.tile_size), float(building.footprint.y * building.tile_size))
+	var rect: Rect2 = Rect2(building.global_position - size * 0.5, size)
+	return rect.has_point(point)
+
+
+func _get_world_phase_id() -> StringName:
+	var snapshot: Dictionary = _world.get_time_of_day_snapshot()
+	return StringName(snapshot.get("phase_id", &""))
+
+
+func _get_world_time_minutes() -> int:
+	var snapshot: Dictionary = _world.get_time_of_day_snapshot()
+	return int(snapshot.get("hour", 0)) * 60 + int(snapshot.get("minute", 0))
 
 
 func _find_button_by_text(parent: Node, text: String) -> Button:

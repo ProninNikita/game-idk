@@ -11,7 +11,7 @@ The player should understand what is happening with the character, base, and pro
 | Action | Keyboard/Mouse |
 | --- | --- |
 | Movement | WASD |
-| Interact / use tool | Left Mouse Button or E |
+| Interact / lock Multitool Cutter | Left Mouse Button or E |
 | Alternate action | Right Mouse Button |
 | Inventory | Tab or I |
 | Crafting/build menu | B |
@@ -44,6 +44,8 @@ MVP HUD:
 - contextual prompt.
 
 HUD should not cover the center of the screen or the grid under the player.
+
+Current prototype HUD shows the current day number, time-of-day phase, and 24-hour time.
 
 ## Inventory
 
@@ -84,6 +86,16 @@ Current prototype station UI:
 - shows recipe inputs, output, and 10-second craft time;
 - disables recipe buttons while a station is crafting or when the player lacks ingredients;
 - closes with the Close button or Esc.
+
+## Tool Targeting
+
+Current prototype cutter behavior:
+
+- LMB or E activates the Multitool Cutter beam and locks onto a nearby resource target in the aim direction;
+- the player can move while the cutter is active;
+- the beam follows the mouse and can be steered between targets while cutting;
+- the cutter applies gradual damage to the current target under the beam;
+- building placement still uses LMB after a building has been selected.
 
 ## Building UI
 

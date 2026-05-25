@@ -85,6 +85,8 @@ These tasks come from the architecture review and should be finished before addi
 ### Map and World
 
 - [x] Create the starting 150x150 tile map.
+- [x] Add a prototype time-of-day cycle with Morning, Day, Evening, and Night phases.
+- [x] Add dynamic world tinting for the time-of-day cycle.
 - [x] Place basic resource zones: forest, stone clusters, ore veins, crop fields.
 - [x] Add simple player navigation with map boundary limits.
 - [x] Keep harvested resource cells buildable after depletion.
@@ -96,7 +98,9 @@ These tasks come from the architecture review and should be finished before addi
 
 - [x] Add resource nodes: trees, stone, ore, crops.
 - [x] Configure durability and drop amounts for each resource type.
-- [x] Make resource nodes breakable with the pickaxe.
+- [x] Make resource nodes breakable with the Multitool Cutter.
+- [x] Replace instant resource hits with gradual lock-on cutter damage.
+- [x] Allow the player to move and steer the cutter beam while cutting.
 - [x] Add placeholder feedback for hits, damage, and depletion.
 - [x] Spawn ground item drops when destroyed resource nodes deplete.
 - [ ] Add proper mining time and tool modifiers.
@@ -107,9 +111,10 @@ These tasks come from the architecture review and should be finished before addi
 ### Player and Tools
 
 - [x] Implement basic player movement.
-- [x] Add the pickaxe as the starting tool at the behavior level.
+- [x] Add the Multitool Cutter as the starting tool, builder, and future weapon at the behavior level.
 - [x] Configure the hit area and target check in front of the player.
 - [x] Rotate or face the player toward the mouse cursor during aiming and harvesting.
+- [ ] Add the first damageable monster target that uses the Multitool Cutter lock-on damage path.
 - [ ] Restrict harvesting by tool type once swords and separate tools are added.
 - [ ] Add tool durability or upgrade rules.
 - [ ] Add equipment effects for armor and accessory slots.
@@ -124,8 +129,8 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Build a dedicated inventory UI that shows slots, stack counts, and remaining capacity.
 - [x] Add stack limits and overflow handling after the first smoke test.
 - [x] Treat the top inventory row as the toolbelt/hotbar.
-- [x] Lock the first hotbar slot as occupied by the starting pickaxe.
-- [x] Provide 8 free hotbar slots after the starting pickaxe slot.
+- [x] Lock the first hotbar slot as occupied by the starting Multitool Cutter.
+- [x] Provide 8 free hotbar slots after the starting Multitool Cutter slot.
 - [x] Make pickups fill hotbar slots before filling the separate inventory.
 - [x] Add a separate inventory window toggled by the inventory key.
 - [x] Add a visible toolbar UI for the hotbar slots.
@@ -167,6 +172,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Add a forge recipe for iron armor.
 - [x] Add a workbench recipe for fences.
 - [x] Drop completed craft outputs near the station for pickup.
+- [x] Drop completed craft outputs outside the station footprint so they remain visible.
 - [x] Re-check station range before crafting.
 - [x] Auto-close station UI when interaction becomes invalid.
 - [ ] Add machine input and output slots instead of crafting directly from the player inventory.
@@ -188,6 +194,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Keep gameplay actions blocked while inventory or station UI is open.
 - [ ] Add one authoritative gameplay mode owner.
 - [x] Split HUD item summary from capacity display.
+- [x] Show the current day, time, and time-of-day phase in the HUD.
 - [ ] Stop rebuilding station recipe rows every progress update.
 - [x] Make inventory and station windows mutually exclusive.
 - [x] Block movement and automatic pickup while blocking gameplay input.
@@ -202,6 +209,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Verify that UI clicks do not trigger mining or building placement.
 - [x] Verify that failed building placement does not consume materials.
 - [x] Verify that station output stays on the ground until picked up.
+- [x] Verify time-of-day phase boundaries and dynamic time advancement.
 - [ ] Define the minimum readiness criteria for the first playable build.
 - [ ] Record found bugs and limitations in `CHANGELOG.md` or a separate task list.
 - [x] Run the project in Godot 4.6.x stable after each architecture pass.

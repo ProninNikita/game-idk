@@ -166,6 +166,11 @@ func get_station_snapshot() -> Dictionary:
 	}
 
 
+func get_output_drop_position() -> Vector2:
+	var half_size: Vector2 = Vector2(float(footprint.x * tile_size), float(footprint.y * tile_size)) * 0.5
+	return global_position + Vector2(0.0, half_size.y + 20.0)
+
+
 func _apply_collision_shape() -> void:
 	if collision_shape == null:
 		return

@@ -37,6 +37,15 @@ Light is not only visibility:
 - it improves base readability;
 - it can consume fuel/energy.
 
+Current prototype time phases:
+
+- Morning: 06:00-09:00.
+- Day: 09:00-16:00.
+- Evening: 16:00-22:00.
+- Night: 22:00-06:00.
+
+The current prototype uses a 12-minute full day by default and applies a smooth world tint as time advances. Threats, cold, light radius, and heat safety are still future systems.
+
 ### Health
 
 Health is lost from:
@@ -52,6 +61,20 @@ Regeneration:
 - slow natural regen while fed;
 - faster recovery through food/medicine;
 - campfires or shelter can improve recovery.
+
+## Player Tool
+
+### Multitool Cutter
+
+The current starting tool is the Multitool Cutter recovered from the escape capsule supplies. It should serve as the first shared verb for gathering, construction support, and emergency defense.
+
+Prototype rules:
+
+- pressing the tool action activates the beam and locks onto a nearby valid target in the current aim direction;
+- while active, the player can move and steer the beam with the mouse;
+- the cutter deals gradual damage over time to the current target under the beam;
+- depleted resources drop items on the ground through the existing pickup flow;
+- future monsters should use the same lock-on damage path before specialized weapons are added.
 
 ## Automation
 
@@ -85,7 +108,7 @@ Every automation should replace a repeated manual action:
 - Forge: 10 iron ingots -> 1 iron armor.
 - Workbench: 5 wood -> 1 fence.
 
-All current station recipes take 10 seconds, consume inputs from the player inventory, and drop outputs on the ground near the station until machine slots are implemented.
+All current station recipes take 10 seconds, consume inputs from the player inventory, and drop outputs on the ground outside the station footprint until machine slots are implemented.
 
 ### Post-MVP Machines
 

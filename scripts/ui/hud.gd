@@ -12,6 +12,7 @@ var _inventory_label: Label
 var _inventory_capacity_label: Label
 var _hint_label: Label
 var _world_label: Label
+var _time_label: Label
 var _toolbelt_grid: GridContainer
 var _inventory_window: PanelContainer
 var _inventory_grid: GridContainer
@@ -47,6 +48,16 @@ func set_world_info(map_size: Vector2i, resource_count: int) -> void:
 	if _world_label == null:
 		return
 	_world_label.text = "Map: %dx%d | Resources: %d" % [map_size.x, map_size.y, resource_count]
+
+
+func set_time_of_day(snapshot: Dictionary) -> void:
+	if _time_label == null:
+		return
+
+	var day: int = int(snapshot.get("day", 1))
+	var phase_name: String = String(snapshot.get("phase_name", "Morning"))
+	var display_time: String = String(snapshot.get("display_time", "06:00"))
+	_time_label.text = "Time: Day %d | %s | %s" % [day, phase_name, display_time]
 
 
 func set_inventory(items: Dictionary) -> void:
@@ -137,7 +148,7 @@ func _build_status_panel() -> void:
 	margin.offset_left = 12.0
 	margin.offset_top = 12.0
 	margin.offset_right = 390.0
-	margin.offset_bottom = 160.0
+	margin.offset_bottom = 184.0
 	add_child(margin)
 
 	var panel: PanelContainer = PanelContainer.new()
@@ -154,6 +165,10 @@ func _build_status_panel() -> void:
 	_world_label = Label.new()
 	_world_label.text = "World: loading"
 	box.add_child(_world_label)
+
+	_time_label = Label.new()
+	_time_label.text = "Time: loading"
+	box.add_child(_time_label)
 
 	_inventory_label = Label.new()
 	_inventory_label.text = "Inventory: empty"
@@ -619,10 +634,10 @@ func _format_slot_text(index: int, slot: Dictionary, compact: bool) -> String:
 	var amount: int = int(slot.get("amount", 0))
 	var locked: bool = bool(slot.get("locked", false))
 
-	if locked and item_id == &"pickaxe":
+	if locked and item_id == &"multitool_cutter":
 		if compact:
-			return "%d\nPickaxe" % slot_number
-		return "%02d\nPickaxe" % slot_number
+			return "%d\nCutter" % slot_number
+		return "%02d\nMultitool Cutter" % slot_number
 
 	if compact:
 		return "%d\n%s x%d" % [slot_number, String(item_id), amount]

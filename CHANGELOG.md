@@ -22,23 +22,27 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 
 ## [Unreleased]
 
+No unreleased changes.
+
+## [0.1.1] - 2026-05-26
+
 ### Added
 
 - Version and change history document.
 - Git-ready structure for the project start.
-- Added `TODO.md` with a checklist for the first prototype: 150x150 map, resources, pickaxe, inventory, and first automation.
+- Added `TODO.md` with a checklist for the first prototype: 150x150 map, resources, Multitool Cutter, inventory, and first automation.
 - README now links to `TODO.md`.
 - Added the initial Godot project with `project.godot` and the main scene.
 - Added a procedural 150x150 debug map.
 - Added resource nodes: trees, stone, ore, and wild crops.
-- Added a top-down player controller with a starting pickaxe and harvesting area.
+- Added a top-down player controller with a starting Multitool Cutter and harvesting area.
 - Added a simple unlimited inventory and HUD with resource counts.
 - Added code-drawn placeholder visuals with no graphic assets, so they can be replaced by sprites later.
 - Added ground item drops from destroyed resource nodes.
 - Added proximity pickup that respects inventory capacity and free slots.
 - Added a dedicated inventory UI with slots, stack counts, and capacity feedback.
 - Added mouse-based player facing and rotation.
-- Added a visible toolbelt/hotbar as the top inventory row, with the starting pickaxe locked in the first slot and 8 free hotbar slots after it.
+- Added a visible toolbelt/hotbar as the top inventory row, with the starting Multitool Cutter locked in the first slot and 8 free hotbar slots after it.
 - Added pickup flow that fills hotbar slots before the separate inventory.
 - Added a separate inventory window toggled by the inventory key.
 - Added right-side inventory window categories: Inventory, Building, Upgrades, and Main Menu.
@@ -54,6 +58,9 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Added Workbench recipe: 5 wood to 1 fence.
 - Added a craftable and placeable 1x1 Fence building.
 - Added a headless pre-commit gameplay smoke test and versioned git hook.
+- Added a dynamic time-of-day cycle with Morning, Day, Evening, and Night phases.
+- Added a HUD clock for the current day, phase, and 24-hour time.
+- Added dynamic world tinting for time-of-day transitions.
 
 ### Changed
 
@@ -66,6 +73,10 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Inventory UI now keeps the toolbelt visible and moves the full inventory into a toggleable window.
 - Building placement validates free grid cells near the player and spends materials only after successful placement.
 - Station recipes consume ingredients when crafting starts and drop completed outputs on the ground near the station.
+- Station craft outputs now drop outside the station footprint so they stay visible and easier to pick up.
+- The opening premise now starts after an escape capsule crash, with the Multitool Cutter as the player's first tool, construction aid, and future defensive weapon.
+- Resource harvesting now uses Multitool Cutter lock-on damage over time instead of instant pickaxe-style hit damage.
+- The Multitool Cutter beam can now be steered with the mouse while the player keeps moving during resource cutting.
 
 ### Fixed
 
@@ -84,6 +95,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Fixed building placement checks so players and future dynamic blocker groups occupy their current grid cell.
 - Fixed resource debug counts so depleted resource nodes decrement the tracked resource total.
 - Fixed missing building cost definitions so placement now fails closed instead of allowing free builds.
+- Fixed completed station outputs being visually hidden under station placeholders, especially dark Coal drops.
 
 ### Technical
 
@@ -99,6 +111,7 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 - Resource spawning now rejects cells occupied by existing buildings, preparing the same guard for future respawn and chunk spawning.
 - The pre-commit smoke runner now has a configurable timeout and fails if the smoke test creates new untracked files or changes the tracked working tree diff.
 - Added smoke coverage for UI movement blocking, station/inventory mutual exclusion, dynamic player placement blockers, resource-count cleanup, and failed placement cost rollback.
+- Added smoke coverage for time-of-day phase boundaries, dynamic time advancement, and station outputs dropping outside station footprints.
 
 ### Known Issues
 

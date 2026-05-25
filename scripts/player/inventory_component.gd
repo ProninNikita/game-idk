@@ -3,7 +3,8 @@ class_name InventoryComponent
 
 signal changed(items: Dictionary)
 
-const STARTING_TOOL_ID: StringName = &"pickaxe"
+const STARTING_TOOL_ID: StringName = &"multitool_cutter"
+const LEGACY_STARTING_TOOL_ID: StringName = &"pickaxe"
 
 @export var slot_count: int = 27
 @export var toolbelt_slot_count: int = 9
@@ -14,7 +15,7 @@ var slots: Array[Dictionary] = []
 
 func _ready() -> void:
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 
 
 func add_item(item_id: StringName, amount: int) -> int:
@@ -27,7 +28,7 @@ func add_item_with_leftover(item_id: StringName, amount: int) -> int:
 		return 0
 
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 
 	var remaining: int = amount
 	var max_stack: int = get_stack_size(item_id)
@@ -47,13 +48,13 @@ func remove_item(item_id: StringName, amount: int) -> int:
 		return 0
 
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 	return _remove_item_internal(item_id, amount, true)
 
 
 func can_remove_items(cost: Dictionary) -> bool:
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 
 	for item_id_value: Variant in cost.keys():
 		var item_id: StringName = StringName(item_id_value)
@@ -152,7 +153,7 @@ func get_items() -> Dictionary:
 
 func get_slots() -> Array[Dictionary]:
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 	var copy: Array[Dictionary] = []
 	for slot: Dictionary in slots:
 		copy.append(slot.duplicate())
@@ -168,7 +169,7 @@ func get_acceptable_amount(item_id: StringName, amount: int) -> int:
 		return 0
 
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 	var remaining: int = amount
 	var max_stack: int = get_stack_size(item_id)
 
@@ -196,7 +197,7 @@ func get_acceptable_amount(item_id: StringName, amount: int) -> int:
 
 func get_free_slot_count() -> int:
 	_ensure_slots()
-	_ensure_starting_pickaxe()
+	_ensure_starting_tool()
 	var count: int = 0
 	for slot: Dictionary in slots:
 		if slot.is_empty():
@@ -205,7 +206,7 @@ func get_free_slot_count() -> int:
 
 
 func get_stack_size(_item_id: StringName) -> int:
-	if _item_id == STARTING_TOOL_ID:
+	if _item_id == STARTING_TOOL_ID or _item_id == LEGACY_STARTING_TOOL_ID:
 		return 1
 	return default_stack_size
 
@@ -224,26 +225,20 @@ func _ensure_slots() -> void:
 		slots.pop_back()
 
 
-func _ensure_starting_pickaxe() -> void:
+func _ensure_starting_tool() -> void:
 	_ensure_slots()
 	if slots.is_empty():
 		return
 
 	var first_slot: Dictionary = slots[0]
-	if first_slot.is_empty():
+	var item_id: StringName = StringName(first_slot.get("item_id", &""))
+	if first_slot.is_empty() or item_id == STARTING_TOOL_ID or item_id == LEGACY_STARTING_TOOL_ID:
 		slots[0] = {
 			"item_id": STARTING_TOOL_ID,
 			"amount": 1,
 			"locked": true,
 			"slot_type": &"tool",
 		}
-		return
-
-	if StringName(first_slot.get("item_id", &"")) == STARTING_TOOL_ID:
-		first_slot["amount"] = 1
-		first_slot["locked"] = true
-		first_slot["slot_type"] = &"tool"
-		slots[0] = first_slot
 
 
 func _merge_into_existing_slots(item_id: StringName, amount: int, max_stack: int, start_index: int, end_index: int) -> int:

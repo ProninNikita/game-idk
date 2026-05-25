@@ -37,7 +37,7 @@ The repository includes a headless gameplay smoke test:
 scripts/qa/run_pre_commit_smoke.sh
 ```
 
-The test loads the main scene, checks startup state, moves the player, validates aim/facing behavior, harvests a resource, verifies ground drops and pickup, opens and clicks every current inventory category button, uses every current Building Create button, places Furnace, Forge, Workbench, and Fence, opens station UI, clicks Craft and Close station buttons, fast-forwards station crafting, verifies outputs stay on the ground until pickup, checks station auto-close out of range, and verifies building occupancy is released when a building leaves the tree.
+The test loads the main scene, checks startup state, verifies time-of-day phase boundaries and dynamic advancement, moves the player, validates aim/facing behavior, locks the Multitool Cutter onto a resource, verifies gradual cutter damage, verifies beam steering and player movement while cutting, verifies ground drops and pickup, opens and clicks every current inventory category button, uses every current Building Create button, places Furnace, Forge, Workbench, and Fence, opens station UI, clicks Craft and Close station buttons, fast-forwards station crafting, verifies outputs stay on the ground outside station footprints until pickup, checks station auto-close out of range, and verifies building occupancy is released when a building leaves the tree.
 
 Enable the versioned git hook once per clone:
 

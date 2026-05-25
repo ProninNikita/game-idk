@@ -1,6 +1,8 @@
 extends Node2D
 class_name HearthlineWorld
 
+signal time_of_day_changed(snapshot: Dictionary)
+
 const RESOURCE_NODE_SCENE: PackedScene = preload("res://scenes/world/resource_node.tscn")
 const GROUND_ITEM_SCENE: PackedScene = preload("res://scenes/world/ground_item.tscn")
 const FURNACE_SCENE: PackedScene = preload("res://scenes/buildings/furnace.tscn")
@@ -9,6 +11,29 @@ const WORKBENCH_SCENE: PackedScene = preload("res://scenes/buildings/workbench.t
 const FENCE_SCENE: PackedScene = preload("res://scenes/buildings/fence.tscn")
 
 const DYNAMIC_PLACEMENT_BLOCKER_GROUPS: Array[StringName] = [&"player", &"players", &"placement_blockers", &"dynamic_blockers"]
+const HOURS_PER_DAY: float = 24.0
+const MINUTES_PER_HOUR: int = 60
+const TIME_EMIT_INTERVAL_MINUTES: int = 1
+const MORNING_START_HOUR: float = 6.0
+const DAY_START_HOUR: float = 9.0
+const EVENING_START_HOUR: float = 16.0
+const NIGHT_START_HOUR: float = 22.0
+
+const PHASE_NAMES: Dictionary = {
+	&"morning": "Morning",
+	&"day": "Day",
+	&"evening": "Evening",
+	&"night": "Night",
+}
+
+const TIME_TINT_KEYS: Array[Dictionary] = [
+	{"hour": 0.0, "color": Color(0.34, 0.40, 0.58)},
+	{"hour": MORNING_START_HOUR, "color": Color(0.92, 0.75, 0.58)},
+	{"hour": DAY_START_HOUR, "color": Color(1.0, 1.0, 0.96)},
+	{"hour": EVENING_START_HOUR, "color": Color(1.0, 0.78, 0.52)},
+	{"hour": NIGHT_START_HOUR, "color": Color(0.34, 0.40, 0.58)},
+	{"hour": HOURS_PER_DAY, "color": Color(0.34, 0.40, 0.58)},
+]
 
 const RESOURCE_DEFS: Dictionary = {
 	&"tree": {
@@ -75,6 +100,9 @@ const BUILDING_DEFS: Dictionary = {
 @export var map_size: Vector2i = Vector2i(150, 150)
 @export var tile_size: int = 32
 @export var world_seed: int = 18052026
+@export var day_length_seconds: float = 720.0
+@export_range(0.0, 23.99, 0.01) var start_hour: float = MORNING_START_HOUR
+@export var time_cycle_enabled: bool = true
 
 @onready var resource_container: Node2D = $ResourceNodes
 @onready var ground_item_container: Node2D = $GroundItems
@@ -85,11 +113,29 @@ var _occupied: Dictionary = {}
 var _building_occupied: Dictionary = {}
 var _building_cells_by_instance: Dictionary = {}
 var _resource_count: int = 0
+var _time_of_day_hours: float = MORNING_START_HOUR
+var _day_count: int = 1
+var _last_emitted_minute: int = -1
+var _last_emitted_phase: StringName = &""
+var _daylight_modulate: CanvasModulate = null
 
 
 func _ready() -> void:
+	_time_of_day_hours = wrapf(start_hour, 0.0, HOURS_PER_DAY)
+	_ensure_daylight_modulate()
+	_apply_time_of_day_visuals()
 	generate_world()
+	_emit_time_of_day_changed(true)
 	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if not time_cycle_enabled:
+		return
+	if day_length_seconds <= 0.0:
+		return
+
+	_advance_time_of_day(delta)
 
 
 func generate_world() -> void:
@@ -125,6 +171,39 @@ func get_world_bounds() -> Rect2:
 
 func get_resource_count() -> int:
 	return _resource_count
+
+
+func get_time_of_day_snapshot() -> Dictionary:
+	var hour: int = floori(_time_of_day_hours)
+	var minute: int = floori((_time_of_day_hours - float(hour)) * float(MINUTES_PER_HOUR))
+	var phase_id: StringName = get_time_phase_id(_time_of_day_hours)
+	return {
+		"day": _day_count,
+		"hour": hour,
+		"minute": minute,
+		"phase_id": phase_id,
+		"phase_name": String(PHASE_NAMES.get(phase_id, "Unknown")),
+		"display_time": "%02d:%02d" % [hour, minute],
+	}
+
+
+func set_time_of_day(hour: float, day: int = -1) -> void:
+	_time_of_day_hours = wrapf(hour, 0.0, HOURS_PER_DAY)
+	if day > 0:
+		_day_count = day
+	_apply_time_of_day_visuals()
+	_emit_time_of_day_changed(true)
+
+
+func get_time_phase_id(hour: float) -> StringName:
+	var wrapped_hour: float = wrapf(hour, 0.0, HOURS_PER_DAY)
+	if wrapped_hour >= MORNING_START_HOUR and wrapped_hour < DAY_START_HOUR:
+		return &"morning"
+	if wrapped_hour >= DAY_START_HOUR and wrapped_hour < EVENING_START_HOUR:
+		return &"day"
+	if wrapped_hour >= EVENING_START_HOUR and wrapped_hour < NIGHT_START_HOUR:
+		return &"evening"
+	return &"night"
 
 
 func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2, source_color: Color = Color(0.92, 0.78, 0.28)) -> Node:
@@ -179,6 +258,64 @@ func place_building(building_id: StringName, grid_position: Vector2i) -> bool:
 	building_container.add_child(building)
 	_register_building_occupancy(building, grid_position, footprint)
 	return true
+
+
+func _advance_time_of_day(delta: float) -> void:
+	var previous_hour: float = _time_of_day_hours
+	_time_of_day_hours += delta * HOURS_PER_DAY / day_length_seconds
+	if _time_of_day_hours >= HOURS_PER_DAY:
+		_time_of_day_hours = fmod(_time_of_day_hours, HOURS_PER_DAY)
+		if previous_hour > _time_of_day_hours:
+			_day_count += 1
+
+	_apply_time_of_day_visuals()
+	_emit_time_of_day_changed(false)
+
+
+func _ensure_daylight_modulate() -> void:
+	if _daylight_modulate != null:
+		return
+
+	_daylight_modulate = CanvasModulate.new()
+	_daylight_modulate.name = "DaylightModulate"
+	add_child(_daylight_modulate)
+
+
+func _apply_time_of_day_visuals() -> void:
+	_ensure_daylight_modulate()
+	if _daylight_modulate == null:
+		return
+
+	_daylight_modulate.color = _get_time_tint(_time_of_day_hours)
+
+
+func _emit_time_of_day_changed(force: bool) -> void:
+	var current_minute: int = floori(_time_of_day_hours * float(MINUTES_PER_HOUR))
+	var current_phase: StringName = get_time_phase_id(_time_of_day_hours)
+	var minute_changed: bool = absi(current_minute - _last_emitted_minute) >= TIME_EMIT_INTERVAL_MINUTES
+	if not force and not minute_changed and current_phase == _last_emitted_phase:
+		return
+
+	_last_emitted_minute = current_minute
+	_last_emitted_phase = current_phase
+	time_of_day_changed.emit(get_time_of_day_snapshot())
+
+
+func _get_time_tint(hour: float) -> Color:
+	var wrapped_hour: float = wrapf(hour, 0.0, HOURS_PER_DAY)
+	for i: int in range(TIME_TINT_KEYS.size() - 1):
+		var from_key: Dictionary = TIME_TINT_KEYS[i]
+		var to_key: Dictionary = TIME_TINT_KEYS[i + 1]
+		var from_hour: float = float(from_key["hour"])
+		var to_hour: float = float(to_key["hour"])
+		if wrapped_hour < from_hour or wrapped_hour > to_hour:
+			continue
+
+		var segment_length: float = maxf(to_hour - from_hour, 0.01)
+		var segment_progress: float = clampf((wrapped_hour - from_hour) / segment_length, 0.0, 1.0)
+		return (from_key["color"] as Color).lerp(to_key["color"] as Color, segment_progress)
+
+	return TIME_TINT_KEYS[0]["color"] as Color
 
 
 func _spawn_resource_clusters(resource_type: StringName, cluster_count: int, amount_per_cluster: int, radius: int) -> void:

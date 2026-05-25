@@ -18,6 +18,8 @@ Balance should support three feelings:
 - Night: 4-6 real-time minutes.
 - Stack: 20/50/99 depending on item type.
 
+Current prototype time uses a 12-minute full day. Its phase windows are Morning 06:00-09:00, Day 09:00-16:00, Evening 16:00-22:00, and Night 22:00-06:00.
+
 ## Item Categories
 
 | Category | Examples | Stack | Notes |

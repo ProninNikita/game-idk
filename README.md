@@ -52,13 +52,17 @@ Build a vertical prototype on one small map:
 The project currently has the first Godot skeleton:
 
 - a 150x150 tile map;
+- a dynamic time-of-day cycle with Morning, Day, Evening, and Night phases;
+- a HUD clock that shows the current day, phase, and 24-hour time;
+- world tinting that shifts as the day moves into evening and night;
+- a crash-landing premise where the player starts with only a Multitool Cutter from the escape capsule supplies;
 - procedural placement of trees, stone, ore, and wild crops;
 - a player with top-down movement;
-- a starting pickaxe behavior that breaks nearby resources;
+- a starting Multitool Cutter that locks onto nearby resources and applies gradual cutting damage;
 - destroyed resources drop items onto the ground;
 - nearby ground items are picked up if the inventory has space;
 - a slot-based inventory with a visible HUD panel;
-- a visible 9-slot toolbelt with the starting pickaxe locked in slot 1;
+- a visible 9-slot toolbelt with the starting Multitool Cutter locked in slot 1;
 - a full inventory window toggled with Tab or I;
 - inventory window categories for Inventory, Building, Upgrades, and Main Menu;
 - inventory and station windows are mutually exclusive, and open blocking UI stops movement and automatic pickup;
@@ -68,8 +72,8 @@ The project currently has the first Godot skeleton:
 - building placement rejects occupied resource, building, and dynamic blocker cells such as the player;
 - station UI that opens with E when the cursor is over a nearby Furnace, Forge, or Workbench;
 - 10-second station recipes for Coal, Iron Ingot, Iron Armor, and Fence;
-- completed station craft outputs drop onto the ground near the station for pickup;
-- mouse-based facing and harvesting direction;
+- completed station craft outputs drop onto the ground outside the station footprint for pickup;
+- mouse-based facing and cutter targeting direction;
 - code-drawn placeholders with no graphic assets yet.
 
 To run it: open `project.godot` in Godot 4.6.x stable and launch the main scene.

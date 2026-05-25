@@ -9,9 +9,8 @@ signal station_updated(snapshot: Dictionary)
 signal station_closed()
 
 @export var move_speed: float = 220.0
-@export var attack_range: float = 46.0
-@export var pickaxe_damage: int = 1
-@export var attack_cooldown: float = 0.28
+@export var cutter_lock_range: float = 62.0
+@export var cutter_damage_per_second: float = 2.0
 @export var pickup_radius: float = 34.0
 @export var pickup_interval: float = 0.12
 @export var build_range: float = 128.0
@@ -20,6 +19,9 @@ signal station_closed()
 @onready var inventory: InventoryComponent = $Inventory
 @onready var camera: Camera2D = $Camera2D
 
+const CUTTER_TOOL_TAGS: Array[StringName] = [&"cutting", &"harvesting", &"combat"]
+const CUTTER_LOCK_MIN_DOT: float = 0.72
+const CUTTER_LOCK_PADDING: float = 8.0
 const BUILDING_COSTS: Dictionary = {
 	&"furnace": {
 		&"stone": 2,
@@ -44,7 +46,8 @@ var world: Node = null
 var pending_building_id: StringName = &""
 var active_station: BuildingInstance = null
 var gameplay_input_blocked: bool = false
-var _cooldown_left: float = 0.0
+var _cutter_active: bool = false
+var _cutter_target: Node2D = null
 var _last_hint_time: float = 0.0
 var _pickup_left: float = 0.0
 var _station_update_left: float = 0.0
@@ -57,7 +60,6 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_cooldown_left = max(0.0, _cooldown_left - delta)
 	_last_hint_time = max(0.0, _last_hint_time - delta)
 	_pickup_left = max(0.0, _pickup_left - delta)
 	_station_update_left = max(0.0, _station_update_left - delta)
@@ -76,6 +78,8 @@ func _physics_process(delta: float) -> void:
 		_pickup_left = pickup_interval
 		_try_pickup_ground_items()
 
+	_update_cutter_lock(delta)
+
 	var attack_pressed: bool = Input.is_action_just_pressed("attack") and not gameplay_input_blocked and not _is_mouse_over_ui()
 	var interact_pressed: bool = Input.is_action_just_pressed("interact") and not gameplay_input_blocked
 
@@ -83,9 +87,9 @@ func _physics_process(delta: float) -> void:
 		_try_place_pending_building()
 	elif interact_pressed:
 		if not _try_open_station():
-			_try_harvest()
+			_try_start_cutter_lock()
 	elif attack_pressed:
-		_try_harvest()
+		_try_start_cutter_lock()
 
 	if pending_building_id != &"" and Input.is_action_just_pressed("ui_cancel"):
 		cancel_building_placement()
@@ -152,6 +156,7 @@ func start_building_placement(building_id: StringName) -> void:
 		return
 
 	pending_building_id = building_id
+	_clear_cutter_lock(false)
 	_emit_temporary_hint("Place %s near the player. Left click to build, Esc to cancel." % String(definition.get("display_name", building_id)))
 	queue_redraw()
 
@@ -205,26 +210,47 @@ func start_station_recipe(recipe_id: StringName) -> void:
 
 
 func _try_harvest() -> void:
-	if _cooldown_left > 0.0:
-		return
+	_try_start_cutter_lock()
 
-	_cooldown_left = attack_cooldown
-	var target: HarvestableResourceNode = _find_resource_target()
+
+func _try_start_cutter_lock() -> void:
+	var target: Node2D = _find_cutter_target()
+	_cutter_active = true
+	_cutter_target = target
 	if target == null:
-		_emit_temporary_hint("No resource in pickaxe range")
+		_emit_temporary_hint("Cutter active")
+		queue_redraw()
 		return
 
-	var drop: Dictionary = target.hit(pickaxe_damage, [&"mining", &"cutting", &"harvesting"])
+	_emit_temporary_hint("Cutter locked: %s" % _get_target_display_name(target))
+	queue_redraw()
+
+
+func _update_cutter_lock(delta: float) -> void:
+	if not _cutter_active:
+		return
+	if gameplay_input_blocked:
+		_clear_cutter_lock(false)
+		return
+
+	_cutter_target = _find_cutter_target()
+	if _cutter_target == null:
+		queue_redraw()
+		return
+
+	var drop: Dictionary = _cutter_target.call("hit", cutter_damage_per_second * delta, CUTTER_TOOL_TAGS) as Dictionary
 	if drop.has("item_id"):
 		var item_id: StringName = StringName(drop["item_id"])
 		var amount: int = int(drop.get("amount", 1))
-		var drop_position: Vector2 = drop.get("position", target.global_position) as Vector2
+		var drop_position: Vector2 = drop.get("position", _cutter_target.global_position) as Vector2
 		var drop_color: Color = drop.get("color", Color(0.92, 0.78, 0.28)) as Color
 		if world != null and world.has_method("spawn_ground_item"):
 			world.call("spawn_ground_item", item_id, amount, drop_position, drop_color)
-		_emit_temporary_hint("Dropped %s x%d" % [String(item_id), amount])
-	else:
-		_emit_temporary_hint("%s damaged" % target.display_name)
+		_emit_temporary_hint("Cutter extracted %s x%d" % [String(item_id), amount])
+		_clear_cutter_lock(false)
+		return
+
+	queue_redraw()
 
 
 func _try_place_pending_building() -> void:
@@ -280,6 +306,7 @@ func try_open_station_at_world_position(target_position: Vector2) -> bool:
 	if station == null:
 		return false
 
+	_clear_cutter_lock(false)
 	active_station = station
 	_ensure_station_connected(station)
 	station_opened.emit(_build_station_snapshot(station))
@@ -324,33 +351,105 @@ func _is_point_inside_building(building: BuildingInstance, point: Vector2) -> bo
 
 
 func _find_resource_target() -> HarvestableResourceNode:
-	var best_target: HarvestableResourceNode = null
+	return _find_cutter_target() as HarvestableResourceNode
+
+
+func _find_cutter_target() -> Node2D:
+	var best_target: Node2D = null
 	var best_score: float = INF
+	var checked_instances: Dictionary = {}
+	var target_groups: Array[StringName] = [&"resource_nodes", &"damageable"]
+	var beam_end: Vector2 = _get_cutter_beam_end_world()
+	var aim_vector: Vector2 = beam_end - global_position
+	var beam_length: float = aim_vector.length()
+	if beam_length <= 0.01:
+		return null
+	var aim_direction: Vector2 = aim_vector / beam_length
 
-	for node: Node in get_tree().get_nodes_in_group("resource_nodes"):
-		if not is_instance_valid(node):
-			continue
-		if not node is HarvestableResourceNode:
-			continue
+	for group_name: StringName in target_groups:
+		for node: Node in get_tree().get_nodes_in_group(group_name):
+			if not is_instance_valid(node):
+				continue
+			if node.is_queued_for_deletion():
+				continue
+			if not node is Node2D:
+				continue
+			if not node.has_method("hit"):
+				continue
+			var instance_id: int = node.get_instance_id()
+			if checked_instances.has(instance_id):
+				continue
+			checked_instances[instance_id] = true
 
-		var resource: HarvestableResourceNode = node as HarvestableResourceNode
-		var to_target: Vector2 = resource.global_position - global_position
-		var distance: float = to_target.length()
-		if distance > attack_range:
-			continue
-
-		var direction_score: float = 1.0
-		if distance > 0.01:
-			direction_score = facing.dot(to_target.normalized())
-			if direction_score < -0.15:
+			var target: Node2D = node as Node2D
+			var to_target: Vector2 = target.global_position - global_position
+			var distance: float = to_target.length()
+			if distance <= 0.01:
+				continue
+			if distance > beam_length + CUTTER_LOCK_PADDING:
 				continue
 
-		var score: float = distance - direction_score * 18.0
-		if score < best_score:
-			best_score = score
-			best_target = resource
+			var direction_score: float = aim_direction.dot(to_target / distance)
+			if direction_score < CUTTER_LOCK_MIN_DOT:
+				continue
+
+			var target_radius: float = _get_target_lock_radius(target)
+			var perpendicular_distance: float = absf(aim_direction.cross(to_target))
+			if perpendicular_distance > target_radius + CUTTER_LOCK_PADDING:
+				continue
+
+			var score: float = perpendicular_distance * 3.0 + distance * 0.05 - direction_score
+			if score < best_score:
+				best_score = score
+				best_target = target
 
 	return best_target
+
+
+func _is_cutter_target_available(target: Node2D) -> bool:
+	if target == null:
+		return false
+	if not is_instance_valid(target):
+		return false
+	if target.is_queued_for_deletion():
+		return false
+	if not target.is_inside_tree():
+		return false
+	if not target.has_method("hit"):
+		return false
+	return global_position.distance_to(target.global_position) <= cutter_lock_range + CUTTER_LOCK_PADDING
+
+
+func _clear_cutter_lock(show_hint: bool = true) -> void:
+	if not _cutter_active and _cutter_target == null:
+		return
+
+	_cutter_active = false
+	_cutter_target = null
+	if show_hint:
+		_emit_temporary_hint("Cutter lock released")
+	queue_redraw()
+
+
+func _get_target_display_name(target: Node) -> String:
+	var display_name_value: Variant = target.get("display_name")
+	if display_name_value != null and String(display_name_value) != "":
+		return String(display_name_value)
+	return target.name
+
+
+func _get_target_lock_radius(target: Node) -> float:
+	var radius_value: Variant = target.get("collision_radius")
+	if radius_value != null:
+		return float(radius_value)
+	return 12.0
+
+
+func _get_cutter_beam_end_world() -> Vector2:
+	var direction: Vector2 = facing
+	if direction.length_squared() <= 0.01:
+		direction = Vector2.DOWN
+	return global_position + direction.normalized() * cutter_lock_range
 
 
 func _clamp_to_world() -> void:
@@ -511,7 +610,7 @@ func _format_item_name(item_id: StringName) -> String:
 
 func _get_item_debug_color(item_id: StringName) -> Color:
 	if item_id == &"coal":
-		return Color(0.08, 0.08, 0.08)
+		return Color(0.18, 0.17, 0.15)
 	if item_id == &"iron_ingot":
 		return Color(0.72, 0.74, 0.76)
 	if item_id == &"iron_armor":
@@ -533,9 +632,7 @@ func _on_station_craft_completed(station: Node, recipe: Dictionary) -> void:
 		return
 
 	if world != null and world.has_method("spawn_ground_item"):
-		var drop_position: Vector2 = global_position
-		if station is Node2D:
-			drop_position = (station as Node2D).global_position
+		var drop_position: Vector2 = _get_station_output_drop_position(station)
 		world.call("spawn_ground_item", output_item_id, output_amount, drop_position, _get_item_debug_color(output_item_id))
 	else:
 		inventory.add_item_with_leftover(output_item_id, output_amount)
@@ -543,6 +640,14 @@ func _on_station_craft_completed(station: Node, recipe: Dictionary) -> void:
 	_emit_temporary_hint("Crafted %s" % _format_item_name(output_item_id))
 	if active_station != null and station == active_station:
 		_refresh_active_station_ui()
+
+
+func _get_station_output_drop_position(station: Node) -> Vector2:
+	if station is BuildingInstance:
+		return (station as BuildingInstance).get_output_drop_position()
+	if station is Node2D:
+		return (station as Node2D).global_position
+	return global_position
 
 
 func _emit_temporary_hint(text: String) -> void:
@@ -555,8 +660,14 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 11.0, Color(0.05, 0.10, 0.16), false, 2.0)
 	draw_line(Vector2.ZERO, facing * 17.0, Color(1.0, 0.95, 0.55), 3.0)
 	var angle: float = facing.angle()
-	draw_arc(Vector2.ZERO, attack_range, angle - 0.35, angle + 0.35, 12, Color(1.0, 1.0, 1.0, 0.22), 2.0)
+	draw_arc(Vector2.ZERO, cutter_lock_range, angle - 0.35, angle + 0.35, 12, Color(1.0, 1.0, 1.0, 0.22), 2.0)
 	draw_circle(Vector2.ZERO, pickup_radius, Color(0.55, 0.85, 1.0, 0.10), false, 1.0)
+	if _cutter_active:
+		var local_beam_end: Vector2 = to_local(_get_cutter_beam_end_world())
+		draw_line(Vector2.ZERO, local_beam_end, Color(0.35, 0.92, 1.0, 0.82), 3.0)
+		if _cutter_target != null and is_instance_valid(_cutter_target):
+			var local_target_position: Vector2 = to_local(_cutter_target.global_position)
+			draw_circle(local_target_position, 8.0, Color(0.35, 0.92, 1.0, 0.25), false, 2.0)
 
 	if pending_building_id != &"":
 		_draw_pending_building_preview()
