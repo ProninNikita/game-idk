@@ -21,7 +21,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Split HUD item summary and inventory capacity so one label does not overwrite the other.
 - [x] Track placed building occupancy by building instance and release cells when a building leaves the tree.
 - [x] Add dynamic placement blockers so buildings cannot be placed on the player or future actors.
-- [ ] Add all-or-nothing placement transactions that validate placement and cost through one authoritative path.
+- [x] Add all-or-nothing placement transactions that validate placement and cost through one authoritative path.
 - [x] Make UI blocking stop movement and automatic pickup while inventory or station UI is open.
 - [x] Prevent inventory and station windows from being open at the same time.
 - [x] Make building placement fail closed when a building definition has no explicit cost definition.
@@ -30,36 +30,36 @@ These tasks come from the architecture review and should be finished before addi
 
 ### P1 - Architecture Foundations
 
-- [ ] Add `ItemDef`, `RecipeDef`, and `BuildingDef` data resources for ids, names, costs, recipes, footprints, stack sizes, icons, and save ids.
-- [ ] Add a `DataRegistry` or equivalent loader so UI, building placement, crafting, and inventory read from the same definitions.
-- [ ] Remove duplicated building costs and recipe text from `hud.gd`, `player_controller.gd`, `world.gd`, and `building_instance.gd`.
-- [ ] Type core references directly where possible, especially `PlayerController.world` and `main.gd` scene references.
+- [x] Add `ItemDef`, `ResourceDef`, `RecipeDef`, and `BuildingDef` data resources for ids, names, costs, recipes, footprints, stack sizes, icons, drops, durability, and save ids.
+- [x] Add a `DataRegistry` or equivalent loader so UI, building placement, crafting, and inventory read from the same definitions.
+- [x] Remove duplicated building costs and recipe text from `hud.gd`, `player_controller.gd`, `world.gd`, and `building_instance.gd`.
+- [x] Type core references directly where possible, especially `PlayerController.world` and `main.gd` scene references.
 - [ ] Replace broad group/string contracts with small explicit contracts for buildable, harvestable, pickup, station, inventory, and saveable behavior.
-- [ ] Create a single gameplay mode owner for normal play, inventory, station UI, build placement, pause, and main menu.
-- [ ] Make building scenes self-describing through a definition id or definition resource.
-- [ ] Add typed item stack and inventory slot models instead of anonymous slot dictionaries.
-- [ ] Validate every runtime item id against the item registry before inventory, pickup, recipe, or save operations.
-- [ ] Protect inventory resizing and save migrations from silently deleting items when slot counts shrink.
-- [ ] Separate item, recipe, building, resource, and station id namespaces or use typed definition references.
-- [ ] Move UI display text for costs, recipes, durations, and item names into shared definitions.
-- [ ] Replace global group scans for resources, drops, and stations with spatial queries, local detection areas, or chunk registries before scaling item/building counts.
+- [x] Create a single gameplay mode owner for normal play, inventory, station UI, build placement, pause, and main menu.
+- [x] Make building scenes self-describing through a definition id or definition resource.
+- [x] Add typed item stack and inventory slot models instead of anonymous slot dictionaries.
+- [x] Validate every runtime item id against the item registry before inventory, pickup, recipe, or save operations.
+- [x] Protect inventory resizing and save migrations from silently deleting items when slot counts shrink.
+- [x] Separate item, recipe, building, resource, and station id namespaces or use typed definition references.
+- [x] Move UI display text for costs, recipes, durations, and item names into shared definitions.
+- [x] Replace global group scans for resources, drops, and stations with spatial queries, local detection areas, or chunk registries before scaling item/building counts.
 
 ### P2 - Stations, Automation, and Simulation
 
-- [ ] Add station input slots.
-- [ ] Add station output slots.
-- [ ] Make station recipes consume station inputs instead of directly consuming player inventory.
-- [ ] Make station outputs stay in station output slots until collected or moved by automation.
-- [ ] Drop station output overflow to the ground using the existing ground item pickup flow.
-- [ ] Move station timers from per-node `_process` to a shared machine scheduler before scaling to many machines.
-- [ ] Keep station timers independent from UI visibility.
-- [ ] Move station crafting ownership out of `PlayerController` and into station/world simulation.
-- [ ] Make station output spawning independent from player UI listeners.
-- [ ] Preserve active craft recipe data or provide recipe migration rules so renamed recipes cannot consume inputs and produce nothing.
+- [x] Add station input slots.
+- [x] Add station output slots.
+- [x] Make station recipes consume station inputs instead of directly consuming player inventory.
+- [x] Make station outputs stay in station output slots until collected or moved by automation.
+- [x] Drop station output overflow to the ground using the existing ground item pickup flow.
+- [x] Move station timers from per-node `_process` to a shared machine scheduler before scaling to many machines.
+- [x] Keep station timers independent from UI visibility.
+- [x] Move station crafting ownership out of `PlayerController` and into station/world simulation.
+- [x] Make station output spawning independent from player UI listeners.
+- [x] Preserve active craft recipe data or provide recipe migration rules so renamed recipes cannot consume inputs and produce nothing.
 - [ ] Save and load active station jobs, remaining craft time, inputs, and outputs.
-- [ ] Add blocked-output and missing-input station states.
-- [ ] Stop rebuilding station recipe rows on every progress refresh; update existing row state instead.
-- [ ] Display recipe duration from recipe data instead of hardcoded station UI text.
+- [x] Add blocked-output and missing-input station states.
+- [x] Stop rebuilding station recipe rows on every progress refresh; update existing row state instead.
+- [x] Display recipe duration from recipe data instead of hardcoded station UI text.
 
 ### P3 - Save, Load, and Tests
 
@@ -70,15 +70,15 @@ These tasks come from the architecture review and should be finished before addi
 - [ ] Split destructive world generation from load/rebuild paths so saves are not overwritten by `_ready()`.
 - [ ] Rebuild building occupancy from saved grid positions instead of persisting runtime instance ids.
 - [ ] Add defensive load validation for missing definitions, bad ids, invalid positions, and corrupted inventory stacks.
-- [ ] Add headless tests for resource occupancy cleanup.
-- [ ] Add headless tests for building placement and payment rollback.
-- [ ] Add headless tests for atomic inventory removal and locked slots.
-- [ ] Add headless tests for station crafting, output drops, and future station slots.
+- [x] Add headless tests for resource occupancy cleanup.
+- [x] Add headless tests for building placement and payment rollback.
+- [x] Add headless tests for atomic inventory removal and locked slots.
+- [x] Add headless tests for station crafting, output drops, and future station slots.
 - [ ] Add headless tests for save/load round trips.
 - [x] Add a timeout around the pre-commit smoke runner so commits cannot hang forever if Godot stalls.
 - [ ] Add a smoke-test path that uses real viewport mouse/button events for UI click leak coverage.
 - [x] Add smoke-test coverage for failed building placement cost rollback.
-- [ ] Add viewport-size smoke coverage for the inventory and station UI.
+- [x] Add viewport-size smoke coverage for the inventory and station UI.
 
 ## Prototype Features
 
@@ -101,12 +101,15 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Make resource nodes breakable with the Multitool Cutter.
 - [x] Replace instant resource hits with gradual lock-on cutter damage.
 - [x] Allow the player to move and steer the cutter beam while cutting.
+- [x] Require a valid target before activating the cutter beam.
+- [x] Retarget the active cutter only to valid targets inside laser range.
+- [x] Make the Multitool Cutter active only while the use button is held.
 - [x] Add placeholder feedback for hits, damage, and depletion.
 - [x] Spawn ground item drops when destroyed resource nodes deplete.
 - [ ] Add proper mining time and tool modifiers.
-- [ ] Add resource respawn or regeneration rules.
+- [x] Add resource respawn or regeneration rules.
 - [x] Make future resource respawn and chunk spawning check building occupancy before placing resources.
-- [ ] Move resource definitions into data resources.
+- [x] Move resource definitions into data resources.
 
 ### Player and Tools
 
@@ -114,7 +117,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Add the Multitool Cutter as the starting tool, builder, and future weapon at the behavior level.
 - [x] Configure the hit area and target check in front of the player.
 - [x] Rotate or face the player toward the mouse cursor during aiming and harvesting.
-- [ ] Add the first damageable monster target that uses the Multitool Cutter lock-on damage path.
+- [x] Add the first damageable monster target that uses the Multitool Cutter lock-on damage path.
 - [ ] Restrict harvesting by tool type once swords and separate tools are added.
 - [ ] Add tool durability or upgrade rules.
 - [ ] Add equipment effects for armor and accessory slots.
@@ -138,7 +141,7 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Add a left-side character equipment panel with Helmet, Armor, Gloves, Boots, Belt, and Amulet slots.
 - [x] Keep the inventory key able to close the window after clicking category buttons.
 - [x] Add atomic multi-item removal for prototype costs.
-- [ ] Add item definitions with per-item stack sizes instead of a shared prototype stack size.
+- [x] Add item definitions with per-item stack sizes instead of a shared prototype stack size.
 - [ ] Add actual equipping and stat effects for character equipment slots.
 - [ ] Add drag/drop, split, merge, and quick-transfer inventory actions.
 - [ ] Add stable slot save/load.
@@ -157,11 +160,11 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Refund prototype building costs on failed placement.
 - [x] Add a craftable 1x1 fence building.
 - [x] Allow fence placement after crafting a fence item at the workbench.
-- [ ] Add a dedicated building placement cursor and clearer blocked-cell feedback.
-- [ ] Add building removal and refund rules.
-- [ ] Add building health and destruction rules.
+- [x] Add a dedicated building placement cursor and clearer blocked-cell feedback.
+- [x] Add building removal and refund rules.
+- [x] Add building health and destruction rules.
 - [ ] Save and load placed buildings.
-- [ ] Move building definitions and costs into data resources.
+- [x] Move building definitions and costs into data resources.
 
 ### Stations and Crafting
 
@@ -175,10 +178,10 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Drop completed craft outputs outside the station footprint so they remain visible.
 - [x] Re-check station range before crafting.
 - [x] Auto-close station UI when interaction becomes invalid.
-- [ ] Add machine input and output slots instead of crafting directly from the player inventory.
-- [ ] Add station recipe queues or explicit single-job rules.
-- [ ] Add blocked-output behavior.
-- [ ] Move recipes into data resources.
+- [x] Add machine input and output slots instead of crafting directly from the player inventory.
+- [x] Add station recipe queues or explicit single-job rules.
+- [x] Add blocked-output behavior.
+- [x] Move recipes into data resources.
 
 ### Automation
 
@@ -192,15 +195,15 @@ These tasks come from the architecture review and should be finished before addi
 
 - [x] Add inventory toggle with Tab/I.
 - [x] Keep gameplay actions blocked while inventory or station UI is open.
-- [ ] Add one authoritative gameplay mode owner.
+- [x] Add one authoritative gameplay mode owner.
 - [x] Split HUD item summary from capacity display.
 - [x] Show the current day, time, and time-of-day phase in the HUD.
-- [ ] Stop rebuilding station recipe rows every progress update.
+- [x] Stop rebuilding station recipe rows every progress update.
 - [x] Make inventory and station windows mutually exclusive.
 - [x] Block movement and automatic pickup while blocking gameplay input.
-- [ ] Make the inventory window responsive below the default 1280px viewport width.
+- [x] Make the inventory window responsive below the default 1280px viewport width.
 - [ ] Add focused keyboard/gamepad navigation later.
-- [ ] Add pause/main menu behavior.
+- [x] Add pause/main menu behavior.
 
 ## Prototype Verification
 
@@ -208,8 +211,8 @@ These tasks come from the architecture review and should be finished before addi
 - [x] Verify that harvested resource cells can be built on.
 - [x] Verify that UI clicks do not trigger mining or building placement.
 - [x] Verify that failed building placement does not consume materials.
-- [x] Verify that station output stays on the ground until picked up.
+- [x] Verify that station output stays in station output slots until collected.
 - [x] Verify time-of-day phase boundaries and dynamic time advancement.
-- [ ] Define the minimum readiness criteria for the first playable build.
-- [ ] Record found bugs and limitations in `CHANGELOG.md` or a separate task list.
+- [x] Define the minimum readiness criteria for the first playable build.
+- [x] Record found bugs and limitations in `CHANGELOG.md` or a separate task list.
 - [x] Run the project in Godot 4.6.x stable after each architecture pass.

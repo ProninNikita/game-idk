@@ -22,7 +22,55 @@ The format is based on Keep a Changelog: https://keepachangelog.com/
 
 ## [Unreleased]
 
-No unreleased changes.
+### Changed
+
+- Multitool Cutter activation now requires a valid target instead of firing into empty ground.
+- Active Multitool Cutter targeting now retargets only to valid targets within laser range and draws the beam to the selected target.
+- Multitool Cutter use is now hold-to-cut instead of toggle-on/toggle-off.
+- Active Multitool Cutter locks now keep the current valid target while held until another valid target is selected, the target leaves range, or the button is released.
+
+### Fixed
+
+- Multitool Cutter locks now clear safely when a damageable target is defeated, avoiding freed-object runtime errors on the next cutter update.
+
+### Technical
+
+- Building placement now runs through an all-or-nothing player-side transaction that validates placement and costs, pays atomically, revalidates before world mutation, and refunds on failure.
+- Added `ResourceDef`, `RecipeDef`, `BuildingDef`, and `DataRegistry` for shared prototype item, resource, recipe, building, drop, durability, cost, footprint, stack size, save id, and display-name data.
+- Building placement, building UI, resource spawning, resource drops, station recipes, station duration display, inventory stack sizes, and runtime item id validation now read from shared data definitions.
+- Station UI recipe rows are now reused during crafting progress refreshes instead of being rebuilt every update.
+- Inventory and station overlay windows now fit within narrower viewports, with a compact inventory layout below the default 1280px width.
+- Station crafting now uses station-owned input and output slots: players load inputs, start crafts from station storage, and collect outputs afterward.
+- Station craft timers now tick through the world machine scheduler instead of each station owning its own active `_process` loop.
+- Station output overflow now drops to the ground through the world ground item flow.
+- The prototype now has an explicit gameplay mode state for normal play, inventory, station UI, build placement, and pause.
+- Buildings now have prototype health and drop partial refund items when destroyed.
+- The world now spawns a first damageable Training Drone target that uses the Multitool Cutter lock-on damage path.
+- Resource nodes can be queued for prototype respawn after depletion, while still respecting occupied building cells.
+- Esc now opens a pause overlay and the Resume button unpauses the scene tree.
+- Building placement preview now shows footprint grid lines, blocked-cell cross feedback, and range feedback.
+- Prototype building scenes now carry their `definition_id` and can apply default definition data when instantiated.
+- Core scene references in `main.gd`, `PlayerController.world`, and world spawning/placement paths now use concrete prototype types instead of broad `Node`/`call()` access.
+- Inventory slot-count shrink now preserves occupied overflow slots instead of silently deleting items, so future save migrations cannot truncate items without an explicit handling path.
+- Inventory internals now use typed `InventorySlot` and `ItemStack` models while still exposing dictionary snapshots to the current HUD.
+- Added smoke coverage for empty-ground cutter activation rejection and in-range cutter retargeting.
+- Added smoke coverage for cutter release stopping damage and held cutting during movement.
+- Added smoke coverage for building placement rollback when placement becomes blocked after payment but before world mutation.
+- Added smoke coverage for atomic inventory removal and locked-slot removal protection.
+- Added smoke coverage for station recipe rows being reused during progress refreshes.
+- Added smoke coverage for inventory and station windows fitting inside a 1024px viewport.
+- Added smoke coverage for station input loading, station-owned crafting, output slot collection, and output overflow drops.
+- Added smoke coverage for the Training Drone damage path, building destruction refunds, and pause/resume behavior.
+
+### Known Issues
+
+- Save/load is intentionally deferred for the current architecture pass.
+- Equipment slots are visual placeholders until equipment behavior is implemented.
+- Automation devices, chests, and conveyors are still planned content.
+- Added smoke coverage for shared data registry definitions, per-item stack sizes, resource drops and durability, building costs, footprints, and recipe durations.
+- Added smoke coverage for building scenes carrying and applying their shared definition ids.
+- Added smoke coverage for inventory resize protection when slot counts shrink below occupied slots.
+- Added smoke coverage for typed inventory slot and item stack models.
 
 ## [0.1.1] - 2026-05-26
 

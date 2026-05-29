@@ -80,20 +80,34 @@ Should show:
 
 Do not build a huge tech tree in MVP. A categorized recipe list is enough.
 
+Current prototype inventory and station windows:
+
+- fit inside narrower 1024px test viewports;
+- use a compact inventory layout below the default 1280px width;
+- keep the current panel structure so placeholder visuals can be replaced later.
+
 Current prototype station UI:
 
 - opens when the cursor is over a nearby Furnace, Forge, or Workbench and the player presses E;
-- shows recipe inputs, output, and 10-second craft time;
-- disables recipe buttons while a station is crafting or when the player lacks ingredients;
+- shows recipe inputs, output, 10-second craft time, station input summary, and station output summary;
+- has a `Load` action per recipe to move missing inputs into station slots;
+- has a `Craft` action that starts only when station inputs are available;
+- has a `Collect Outputs` action for station output slots;
+- disables recipe buttons while a station is crafting, when inputs are missing, or when output is blocked;
 - closes with the Close button or Esc.
+
+Esc opens a compact pause overlay during normal play. The Resume button returns to normal play and unpauses the scene tree.
 
 ## Tool Targeting
 
 Current prototype cutter behavior:
 
-- LMB or E activates the Multitool Cutter beam and locks onto a nearby resource target in the aim direction;
+- holding LMB or E activates the Multitool Cutter beam only while the aim direction contains a nearby valid target;
 - the player can move while the cutter is active;
-- the beam follows the mouse and can be steered between targets while cutting;
+- the current target is outlined immediately;
+- the beam keeps the current valid target and can be steered between valid targets inside laser range while cutting;
+- the cutter does not draw or deal damage into empty ground;
+- releasing the button immediately stops the beam and damage;
 - the cutter applies gradual damage to the current target under the beam;
 - building placement still uses LMB after a building has been selected.
 

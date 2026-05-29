@@ -3,10 +3,17 @@ class_name HearthlineHUD
 
 signal build_requested(building_id: StringName)
 signal station_recipe_requested(recipe_id: StringName)
+signal station_input_requested(recipe_id: StringName)
+signal station_output_collect_requested()
 signal station_close_requested()
 signal gameplay_input_block_changed(blocked: bool)
+signal pause_state_changed(paused: bool)
 
+const DataRegistry = preload("res://scripts/data/data_registry.gd")
 const TOOLBELT_SLOT_COUNT: int = 9
+const OVERLAY_MARGIN: Vector2 = Vector2(16.0, 16.0)
+const INVENTORY_WINDOW_SIZE: Vector2 = Vector2(1240.0, 580.0)
+const STATION_WINDOW_SIZE: Vector2 = Vector2(560.0, 440.0)
 
 var _inventory_label: Label
 var _inventory_capacity_label: Label
@@ -15,32 +22,57 @@ var _world_label: Label
 var _time_label: Label
 var _toolbelt_grid: GridContainer
 var _inventory_window: PanelContainer
+var _inventory_root: HBoxContainer
+var _inventory_equipment_frame: PanelContainer
+var _inventory_content_frame: PanelContainer
+var _inventory_category_box: VBoxContainer
 var _inventory_grid: GridContainer
 var _inventory_content: VBoxContainer
 var _building_content: VBoxContainer
+var _building_grid: GridContainer
 var _upgrades_content: VBoxContainer
 var _main_menu_content: VBoxContainer
+var _pause_window: PanelContainer
 var _station_window: PanelContainer
 var _station_title: Label
 var _station_status: Label
+var _station_storage: Label
+var _station_collect_button: Button
 var _station_recipe_list: VBoxContainer
 var _toolbelt_labels: Array[Label] = []
 var _inventory_labels: Array[Label] = []
+var _station_recipe_rows: Dictionary = {}
+var _building_slot_controls: Array[Control] = []
+var _compact_inventory_layout: bool = false
+var _pause_open: bool = false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_status_panel()
 	_build_toolbelt()
 	_build_inventory_window()
+	_build_pause_window()
 	_build_station_window()
+	_fit_overlay_windows_to_viewport()
 
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("inventory"):
+		if _pause_open:
+			get_viewport().set_input_as_handled()
+			return
 		toggle_inventory_window()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel") and _station_window != null and _station_window.visible:
 		station_close_requested.emit()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_cancel") and _inventory_window != null and _inventory_window.visible:
+		_inventory_window.visible = false
+		_emit_gameplay_input_block_state()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_cancel"):
+		toggle_pause()
 		get_viewport().set_input_as_handled()
 
 
@@ -73,7 +105,8 @@ func set_inventory(items: Dictionary) -> void:
 
 	var parts: Array[String] = []
 	for key: Variant in keys:
-		parts.append("%s: %d" % [String(key), int(items[key])])
+		var item_id: StringName = StringName(key)
+		parts.append("%s: %d" % [_format_item_name(item_id), int(items[key])])
 
 	_inventory_label.text = "Inventory: " + ", ".join(parts)
 
@@ -93,9 +126,12 @@ func set_hint(text: String) -> void:
 func show_station(snapshot: Dictionary) -> void:
 	if _station_window == null:
 		return
+	if _pause_open:
+		return
 	if _inventory_window != null:
 		_inventory_window.visible = false
 
+	_fit_overlay_windows_to_viewport()
 	_station_window.visible = true
 	_render_station(snapshot)
 	_emit_gameplay_input_block_state()
@@ -104,6 +140,7 @@ func show_station(snapshot: Dictionary) -> void:
 func update_station(snapshot: Dictionary) -> void:
 	if _station_window == null or not _station_window.visible:
 		return
+	_fit_overlay_windows_to_viewport()
 	_render_station(snapshot)
 
 
@@ -117,6 +154,8 @@ func hide_station() -> void:
 func toggle_inventory_window() -> void:
 	if _inventory_window == null:
 		return
+	if _pause_open:
+		return
 
 	if _inventory_window.visible:
 		_inventory_window.visible = false
@@ -126,6 +165,7 @@ func toggle_inventory_window() -> void:
 			_emit_gameplay_input_block_state()
 			return
 
+		_fit_overlay_windows_to_viewport()
 		_inventory_window.visible = true
 		_select_category(&"inventory")
 	_emit_gameplay_input_block_state()
@@ -137,6 +177,28 @@ func is_inventory_window_visible() -> bool:
 
 func is_station_window_visible() -> bool:
 	return _station_window != null and _station_window.visible
+
+
+func is_pause_window_visible() -> bool:
+	return _pause_window != null and _pause_window.visible
+
+
+func toggle_pause() -> void:
+	set_paused(not _pause_open)
+
+
+func set_paused(paused: bool) -> void:
+	_pause_open = paused
+	if _pause_window != null:
+		_pause_window.visible = paused
+	if paused:
+		if _inventory_window != null:
+			_inventory_window.visible = false
+		if _station_window != null and _station_window.visible:
+			station_close_requested.emit()
+	_select_category(&"main_menu" if paused else &"inventory")
+	pause_state_changed.emit(paused)
+	_emit_gameplay_input_block_state()
 
 
 func _build_status_panel() -> void:
@@ -233,25 +295,26 @@ func _build_inventory_window() -> void:
 	root_margin.add_theme_constant_override("margin_bottom", 12)
 	_inventory_window.add_child(root_margin)
 
-	var root: HBoxContainer = HBoxContainer.new()
-	root.add_theme_constant_override("separation", 12)
-	root_margin.add_child(root)
+	_inventory_root = HBoxContainer.new()
+	_inventory_root.add_theme_constant_override("separation", 12)
+	root_margin.add_child(_inventory_root)
 
-	var equipment_frame: PanelContainer = PanelContainer.new()
-	equipment_frame.custom_minimum_size = Vector2(180.0, 520.0)
-	root.add_child(equipment_frame)
-	_build_equipment_panel(equipment_frame)
+	_inventory_equipment_frame = PanelContainer.new()
+	_inventory_equipment_frame.custom_minimum_size = Vector2(180.0, 520.0)
+	_inventory_root.add_child(_inventory_equipment_frame)
+	_build_equipment_panel(_inventory_equipment_frame)
 
-	var content_frame: PanelContainer = PanelContainer.new()
-	content_frame.custom_minimum_size = Vector2(820.0, 520.0)
-	root.add_child(content_frame)
+	_inventory_content_frame = PanelContainer.new()
+	_inventory_content_frame.custom_minimum_size = Vector2(820.0, 520.0)
+	_inventory_content_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inventory_root.add_child(_inventory_content_frame)
 
 	var content_margin: MarginContainer = MarginContainer.new()
 	content_margin.add_theme_constant_override("margin_left", 10)
 	content_margin.add_theme_constant_override("margin_top", 10)
 	content_margin.add_theme_constant_override("margin_right", 10)
 	content_margin.add_theme_constant_override("margin_bottom", 10)
-	content_frame.add_child(content_margin)
+	_inventory_content_frame.add_child(content_margin)
 
 	var content_stack: VBoxContainer = VBoxContainer.new()
 	content_margin.add_child(content_stack)
@@ -266,16 +329,51 @@ func _build_inventory_window() -> void:
 	content_stack.add_child(_upgrades_content)
 	content_stack.add_child(_main_menu_content)
 
-	var category_box: VBoxContainer = VBoxContainer.new()
-	category_box.custom_minimum_size = Vector2(180.0, 520.0)
-	category_box.add_theme_constant_override("separation", 8)
-	root.add_child(category_box)
+	_inventory_category_box = VBoxContainer.new()
+	_inventory_category_box.custom_minimum_size = Vector2(180.0, 520.0)
+	_inventory_category_box.add_theme_constant_override("separation", 8)
+	_inventory_root.add_child(_inventory_category_box)
 
-	_add_category_button(category_box, "Inventory", &"inventory")
-	_add_category_button(category_box, "Building", &"building")
-	_add_category_button(category_box, "Upgrades", &"upgrades")
-	_add_category_button(category_box, "Main Menu", &"main_menu")
+	_add_category_button(_inventory_category_box, "Inventory", &"inventory")
+	_add_category_button(_inventory_category_box, "Building", &"building")
+	_add_category_button(_inventory_category_box, "Upgrades", &"upgrades")
+	_add_category_button(_inventory_category_box, "Main Menu", &"main_menu")
 	_select_category(&"inventory")
+
+
+func _build_pause_window() -> void:
+	_pause_window = PanelContainer.new()
+	_pause_window.visible = false
+	_pause_window.anchor_left = 0.5
+	_pause_window.anchor_top = 0.5
+	_pause_window.anchor_right = 0.5
+	_pause_window.anchor_bottom = 0.5
+	_pause_window.offset_left = -180.0
+	_pause_window.offset_top = -110.0
+	_pause_window.offset_right = 180.0
+	_pause_window.offset_bottom = 110.0
+	add_child(_pause_window)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_top", 16)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_bottom", 16)
+	_pause_window.add_child(margin)
+
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	margin.add_child(box)
+
+	var title: Label = Label.new()
+	title.text = "Paused"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+
+	var resume_button: Button = Button.new()
+	resume_button.text = "Resume"
+	resume_button.pressed.connect(Callable(self, "set_paused").bind(false))
+	box.add_child(resume_button)
 
 
 func _build_station_window() -> void:
@@ -321,6 +419,16 @@ func _build_station_window() -> void:
 	_station_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_station_status)
 
+	_station_storage = Label.new()
+	_station_storage.text = "Input: empty\nOutput: empty"
+	_station_storage.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_station_storage)
+
+	_station_collect_button = Button.new()
+	_station_collect_button.text = "Collect Outputs"
+	_station_collect_button.pressed.connect(_request_station_output_collect)
+	box.add_child(_station_collect_button)
+
 	_station_recipe_list = VBoxContainer.new()
 	_station_recipe_list.add_theme_constant_override("separation", 8)
 	box.add_child(_station_recipe_list)
@@ -360,14 +468,14 @@ func _build_building_content() -> VBoxContainer:
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(help)
 
-	var building_grid: GridContainer = GridContainer.new()
-	building_grid.columns = 3
-	box.add_child(building_grid)
+	_building_grid = GridContainer.new()
+	_building_grid.columns = 3
+	box.add_child(_building_grid)
 
-	_add_building_slot(building_grid, &"furnace", "Furnace", "Cost: 2 stone, 1 wood\nSize: 2x2")
-	_add_building_slot(building_grid, &"forge", "Forge", "Cost: 4 stone, 2 ore\nSize: 2x2")
-	_add_building_slot(building_grid, &"workbench", "Workbench", "Cost: 2 wood, 1 stone\nSize: 2x2")
-	_add_building_slot(building_grid, &"fence", "Fence", "Cost: 1 fence\nSize: 1x1")
+	for definition: Dictionary in DataRegistry.get_building_definitions():
+		var building_id: StringName = StringName(definition.get("id", &""))
+		var building_title: String = String(definition.get("display_name", String(building_id)))
+		_add_building_slot(_building_grid, building_id, building_title, _format_building_details(definition))
 	return box
 
 
@@ -411,6 +519,7 @@ func _add_building_slot(parent: GridContainer, building_id: StringName, title: S
 	slot.custom_minimum_size = Vector2(240.0, 150.0)
 	slot.add_theme_constant_override("separation", 6)
 	parent.add_child(slot)
+	_building_slot_controls.append(slot)
 
 	var name_label: Label = Label.new()
 	name_label.text = title
@@ -440,6 +549,14 @@ func _request_station_recipe(recipe_id: StringName) -> void:
 	station_recipe_requested.emit(recipe_id)
 
 
+func _request_station_input(recipe_id: StringName) -> void:
+	station_input_requested.emit(recipe_id)
+
+
+func _request_station_output_collect() -> void:
+	station_output_collect_requested.emit()
+
+
 func _request_station_close() -> void:
 	station_close_requested.emit()
 
@@ -459,20 +576,58 @@ func _render_station(snapshot: Dictionary) -> void:
 	var progress: float = float(snapshot.get("craft_progress", 0.0))
 	_station_title.text = station_name
 
-	if active_recipe_id == &"":
-		_station_status.text = "Ready. Each craft takes 10 seconds."
-	else:
+	if active_recipe_id != &"":
 		_station_status.text = "Crafting: %.1fs left" % time_left
+	else:
+		_station_status.text = String(snapshot.get("station_state_label", "Ready"))
 
-	_clear_children(_station_recipe_list)
+	if _station_storage != null:
+		_station_storage.text = "Input: %s\nOutput: %s" % [
+			_format_item_summary(snapshot.get("input_items", {}) as Dictionary),
+			_format_item_summary(snapshot.get("output_items", {}) as Dictionary),
+		]
+	if _station_collect_button != null:
+		_station_collect_button.disabled = not bool(snapshot.get("can_collect_outputs", false))
 
 	var recipes: Array = snapshot.get("recipes", []) as Array
+	_sync_station_recipe_rows(recipes, active_recipe_id, progress)
+
+
+func _sync_station_recipe_rows(recipes: Array, active_recipe_id: StringName, station_progress: float) -> void:
+	var active_row_ids: Dictionary = {}
+	var row_index: int = 0
 	for recipe_value: Variant in recipes:
 		var recipe: Dictionary = recipe_value as Dictionary
-		_add_station_recipe_row(_station_recipe_list, recipe, active_recipe_id, progress)
+		var recipe_id: StringName = StringName(recipe.get("id", &""))
+		if recipe_id == &"":
+			continue
+
+		active_row_ids[recipe_id] = true
+		var row: Dictionary = _station_recipe_rows.get(recipe_id, {}) as Dictionary
+		var frame: Node = row.get("frame", null) as Node
+		if frame == null or not is_instance_valid(frame):
+			row = _add_station_recipe_row(_station_recipe_list, recipe_id)
+			_station_recipe_rows[recipe_id] = row
+			frame = row.get("frame", null) as Node
+
+		_update_station_recipe_row(row, recipe, active_recipe_id, station_progress)
+		if frame != null and frame.get_parent() == _station_recipe_list:
+			_station_recipe_list.move_child(frame, row_index)
+		row_index += 1
+
+	for existing_id_value: Variant in _station_recipe_rows.keys():
+		var existing_id: StringName = StringName(existing_id_value)
+		if active_row_ids.has(existing_id):
+			continue
+
+		var stale_row: Dictionary = _station_recipe_rows.get(existing_id, {}) as Dictionary
+		var stale_frame: Node = stale_row.get("frame", null) as Node
+		if stale_frame != null and is_instance_valid(stale_frame):
+			stale_frame.queue_free()
+		_station_recipe_rows.erase(existing_id)
 
 
-func _add_station_recipe_row(parent: VBoxContainer, recipe: Dictionary, active_recipe_id: StringName, station_progress: float) -> void:
+func _add_station_recipe_row(parent: VBoxContainer, recipe_id: StringName) -> Dictionary:
 	var frame: PanelContainer = PanelContainer.new()
 	parent.add_child(frame)
 
@@ -493,29 +648,63 @@ func _add_station_recipe_row(parent: VBoxContainer, recipe: Dictionary, active_r
 	row.add_child(info)
 
 	var title: Label = Label.new()
-	title.text = String(recipe.get("display_name", "Recipe"))
 	info.add_child(title)
 
 	var details: Label = Label.new()
 	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	details.text = "%s -> %s\nTime: 10s" % [_format_recipe_inputs(recipe), _format_recipe_output(recipe)]
 	info.add_child(details)
 
-	var recipe_id: StringName = StringName(recipe.get("id", &""))
-	var is_active: bool = recipe_id == active_recipe_id
-	if is_active:
-		var progress_bar: ProgressBar = ProgressBar.new()
-		progress_bar.min_value = 0.0
-		progress_bar.max_value = 100.0
-		progress_bar.value = station_progress * 100.0
-		info.add_child(progress_bar)
+	var progress_bar: ProgressBar = ProgressBar.new()
+	progress_bar.min_value = 0.0
+	progress_bar.max_value = 100.0
+	progress_bar.visible = false
+	info.add_child(progress_bar)
+
+	var load_button: Button = Button.new()
+	load_button.text = "Load"
+	load_button.custom_minimum_size = Vector2(84.0, 44.0)
+	load_button.pressed.connect(Callable(self, "_request_station_input").bind(recipe_id))
+	row.add_child(load_button)
 
 	var button: Button = Button.new()
 	button.text = "Craft"
 	button.custom_minimum_size = Vector2(96.0, 44.0)
-	button.disabled = active_recipe_id != &"" or not bool(recipe.get("can_afford", false))
 	button.pressed.connect(Callable(self, "_request_station_recipe").bind(recipe_id))
 	row.add_child(button)
+
+	return {
+		"frame": frame,
+		"title": title,
+		"details": details,
+		"progress_bar": progress_bar,
+		"load_button": load_button,
+		"button": button,
+	}
+
+
+func _update_station_recipe_row(row: Dictionary, recipe: Dictionary, active_recipe_id: StringName, station_progress: float) -> void:
+	var title: Label = row.get("title", null) as Label
+	if title != null:
+		title.text = String(recipe.get("display_name", "Recipe"))
+
+	var details: Label = row.get("details", null) as Label
+	if details != null:
+		details.text = "%s -> %s\nTime: %s" % [_format_recipe_inputs(recipe), _format_recipe_output(recipe), _format_duration(float(recipe.get("duration", 0.0)))]
+
+	var recipe_id: StringName = StringName(recipe.get("id", &""))
+	var is_active: bool = recipe_id == active_recipe_id
+	var progress_bar: ProgressBar = row.get("progress_bar", null) as ProgressBar
+	if progress_bar != null:
+		progress_bar.visible = is_active
+		progress_bar.value = station_progress * 100.0
+
+	var button: Button = row.get("button", null) as Button
+	if button != null:
+		button.disabled = active_recipe_id != &"" or not bool(recipe.get("can_start", recipe.get("can_afford", false)))
+
+	var load_button: Button = row.get("load_button", null) as Button
+	if load_button != null:
+		load_button.disabled = active_recipe_id != &"" or not bool(recipe.get("can_load_inputs", false))
 
 
 func _format_recipe_inputs(recipe: Dictionary) -> String:
@@ -534,18 +723,106 @@ func _format_recipe_output(recipe: Dictionary) -> String:
 
 
 func _format_item_name(item_id: StringName) -> String:
-	return String(item_id).replace("_", " ").capitalize()
+	return DataRegistry.get_item_display_name(item_id)
 
 
-func _clear_children(parent: Node) -> void:
-	for child: Node in parent.get_children():
-		child.queue_free()
+func _format_item_summary(items: Dictionary) -> String:
+	if items.is_empty():
+		return "empty"
+
+	var keys: Array = items.keys()
+	keys.sort()
+	var parts: Array[String] = []
+	for item_id_value: Variant in keys:
+		var item_id: StringName = StringName(item_id_value)
+		parts.append("%s x%d" % [_format_item_name(item_id), int(items[item_id_value])])
+	return ", ".join(parts)
+
+
+func _format_building_details(definition: Dictionary) -> String:
+	var cost: Dictionary = definition.get("cost", {}) as Dictionary
+	var footprint: Vector2i = definition.get("footprint", Vector2i.ONE) as Vector2i
+	return "Cost: %s\nSize: %dx%d" % [DataRegistry.format_cost(cost), footprint.x, footprint.y]
+
+
+func _format_duration(duration: float) -> String:
+	if duration <= 0.0:
+		return "unknown"
+	if is_equal_approx(duration, float(roundi(duration))):
+		return "%ds" % roundi(duration)
+	return "%.1fs" % duration
+
+
+func _fit_overlay_windows_to_viewport() -> void:
+	_fit_centered_panel(_inventory_window, INVENTORY_WINDOW_SIZE, OVERLAY_MARGIN)
+	_fit_centered_panel(_station_window, STATION_WINDOW_SIZE, OVERLAY_MARGIN)
+	_apply_inventory_responsive_layout()
+
+
+func _fit_centered_panel(panel: Control, desired_size: Vector2, margin: Vector2) -> void:
+	if panel == null:
+		return
+
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var available_width: float = maxf(320.0, viewport_size.x - margin.x * 2.0)
+	var available_height: float = maxf(240.0, viewport_size.y - margin.y * 2.0)
+	var fitted_size: Vector2 = Vector2(
+		minf(desired_size.x, available_width),
+		minf(desired_size.y, available_height)
+	)
+
+	panel.anchor_left = 0.5
+	panel.anchor_top = 0.5
+	panel.anchor_right = 0.5
+	panel.anchor_bottom = 0.5
+	panel.offset_left = -fitted_size.x * 0.5
+	panel.offset_top = -fitted_size.y * 0.5
+	panel.offset_right = fitted_size.x * 0.5
+	panel.offset_bottom = fitted_size.y * 0.5
+
+
+func _apply_inventory_responsive_layout() -> void:
+	var viewport_width: float = get_viewport().get_visible_rect().size.x
+	_compact_inventory_layout = viewport_width < 1180.0
+
+	var root_separation: int = 12
+	var side_width: float = 180.0
+	var content_width: float = 820.0
+	var building_slot_width: float = 240.0
+	var building_columns: int = 3
+
+	if _compact_inventory_layout:
+		root_separation = 8
+		side_width = 160.0
+		content_width = 620.0
+		building_slot_width = 210.0
+		building_columns = 2
+	if viewport_width < 1040.0:
+		content_width = 580.0
+
+	if _inventory_root != null:
+		_inventory_root.add_theme_constant_override("separation", root_separation)
+	if _inventory_equipment_frame != null:
+		_inventory_equipment_frame.custom_minimum_size = Vector2(side_width, 520.0)
+	if _inventory_content_frame != null:
+		_inventory_content_frame.custom_minimum_size = Vector2(content_width, 520.0)
+	if _inventory_category_box != null:
+		_inventory_category_box.custom_minimum_size = Vector2(side_width, 520.0)
+	if _building_grid != null:
+		_building_grid.columns = building_columns
+	for slot: Control in _building_slot_controls:
+		slot.custom_minimum_size = Vector2(building_slot_width, 150.0)
+	for label: Label in _inventory_labels:
+		if _compact_inventory_layout:
+			label.custom_minimum_size = Vector2(64.0, 48.0)
+		else:
+			label.custom_minimum_size = Vector2(78.0, 48.0)
 
 
 func _emit_gameplay_input_block_state() -> void:
 	var inventory_open: bool = _inventory_window != null and _inventory_window.visible
 	var station_open: bool = _station_window != null and _station_window.visible
-	gameplay_input_block_changed.emit(inventory_open or station_open)
+	gameplay_input_block_changed.emit(inventory_open or station_open or _pause_open)
 
 
 func _build_placeholder_content(title_text: String, body_text: String) -> VBoxContainer:
@@ -602,7 +879,10 @@ func _update_inventory_window(slots: Array) -> void:
 	if _inventory_grid == null:
 		return
 
-	_ensure_labels(_inventory_grid, _inventory_labels, slots.size(), Vector2(78.0, 48.0))
+	var slot_size: Vector2 = Vector2(78.0, 48.0)
+	if _compact_inventory_layout:
+		slot_size = Vector2(64.0, 48.0)
+	_ensure_labels(_inventory_grid, _inventory_labels, slots.size(), slot_size)
 
 	for i: int in range(slots.size()):
 		var slot: Dictionary = slots[i]
@@ -640,8 +920,8 @@ func _format_slot_text(index: int, slot: Dictionary, compact: bool) -> String:
 		return "%02d\nMultitool Cutter" % slot_number
 
 	if compact:
-		return "%d\n%s x%d" % [slot_number, String(item_id), amount]
-	return "%02d\n%s x%d" % [slot_number, String(item_id), amount]
+		return "%d\n%s x%d" % [slot_number, _format_item_name(item_id), amount]
+	return "%02d\n%s x%d" % [slot_number, _format_item_name(item_id), amount]
 
 
 func _get_slot_modulate(slot: Dictionary) -> Color:
@@ -655,7 +935,6 @@ func _get_slot_modulate(slot: Dictionary) -> Color:
 func _ensure_labels(parent: GridContainer, labels: Array[Label], count: int, size: Vector2) -> void:
 	while labels.size() < count:
 		var label: Label = Label.new()
-		label.custom_minimum_size = size
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -665,3 +944,6 @@ func _ensure_labels(parent: GridContainer, labels: Array[Label], count: int, siz
 	while labels.size() > count:
 		var label: Label = labels.pop_back()
 		label.queue_free()
+
+	for label: Label in labels:
+		label.custom_minimum_size = size

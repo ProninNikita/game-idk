@@ -135,6 +135,10 @@ Balance output/sec and player attention/sec, not only raw throughput.
 
 The current fence item is a build token for a 1x1 fence building.
 
+Current prototype item, recipe, and building balance values are registered through `DataRegistry`, including item stack sizes, building costs, building footprints, station recipe inputs/outputs, and recipe durations.
+
+Current prototype resource node balance is also registered through `DataRegistry`: Tree drops 4 Wood and has 3 durability, Stone drops 3 Stone and has 4 durability, Ore drops 2 Ore and has 5 durability, and Wild Crop drops 2 Wild Crop and has 2 durability.
+
 ## Exploration Balance
 
 Rule: a new biome should provide at least one of three things:

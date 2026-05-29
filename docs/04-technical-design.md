@@ -11,7 +11,7 @@ Build a Godot project that reaches a playable prototype quickly, but does not co
 - Engine: Godot 4.6.x stable.
 - World measurement: grid/tile-based logic over 2D top-down space.
 - Game entities: Godot scenes plus data resources.
-- Data: typed GDScript Resources for items/recipes/buildings.
+- Data: typed GDScript Resources for items/resources/recipes/buildings.
 - Saves: versioned save data; do not serialize the live scene tree directly without control.
 - Simulation: separate visual update from logic tick.
 
@@ -60,7 +60,7 @@ Proposed autoloads:
 
 - `Game`: application state, scene switching, pause.
 - `SaveManager`: save/load and migrations.
-- `DataRegistry`: access to item/recipe/building definitions.
+- `DataRegistry`: access to item/resource/recipe/building definitions. The current prototype uses this as a static registry instead of an autoload so the data path can be shared without changing project startup wiring yet.
 - `EventBus`: global signals only for cross-system events.
 - `Settings`: settings, input remap, audio volumes.
 
@@ -81,6 +81,8 @@ Responsible for:
 - creating the player;
 - connecting UI;
 - routing pause/save.
+
+Current prototype wiring uses concrete `HearthlineWorld`, `PlayerController`, and `HearthlineHUD` references in `main.gd`, and `PlayerController.world` is typed as `HearthlineWorld`.
 
 ### World Scene
 
@@ -172,6 +174,10 @@ var item_id: StringName
 var amount: int
 ```
 
+Current prototype inventory storage uses typed `InventorySlot` and `ItemStack` models internally, while `get_slots()` still returns dictionary snapshots for the current HUD layer.
+
+Current prototype inventory resizing is fail-safe: if `slot_count` is reduced below occupied slots, the inventory keeps occupied overflow slots instead of deleting items. Empty overflow slots are trimmed once they no longer contain items.
+
 ## Recipes
 
 Recipe definition as Resource:
@@ -189,6 +195,28 @@ extends Resource
 ```
 
 In real code, raw Dictionary can later be replaced by typed helper structures if editor usability requires it.
+
+## Resources
+
+Resource definition as Resource:
+
+```gdscript
+class_name ResourceDef
+extends Resource
+
+@export var id: StringName
+@export var display_name: String
+@export var drop_item_id: StringName
+@export var drop_amount: int
+@export var max_health: float
+@export var collision_radius: float
+@export var color: Color
+@export var tags: Array[StringName]
+```
+
+Current prototype resource nodes read drop item, drop amount, durability, collision radius, display name, and debug color from `ResourceDef` entries in `DataRegistry`. World generation still owns distribution rules for the current map, but spawned resource node behavior now comes from shared data.
+
+Current prototype data uses `ItemDef`, `ResourceDef`, `RecipeDef`, `BuildingDef`, and `DataRegistry`. The registry currently creates the active prototype definitions in code, keeps item, resource, recipe, and building ids in separate registries, and exposes compatibility dictionaries to the older gameplay code until those systems accept typed resources directly.
 
 ## Buildings
 
@@ -212,13 +240,20 @@ Current prototype buildings:
 - `workbench`: 2x2 footprint, costs 2 wood and 1 stone.
 - `fence`: 1x1 footprint, costs 1 fence item.
 
+Current prototype building definitions, footprints, display names, costs, scene references, and station recipe links come from `DataRegistry`. Building scenes carry a `definition_id` so a scene instance can apply shared definition defaults even before the placement flow calls setup. Current prototype placement runs through an all-or-nothing player-side transaction: validate definition, range, footprint occupancy, and cost; remove cost atomically; revalidate placement immediately before world mutation; place the building; refund the paid cost if final placement fails.
+
+Buildings have prototype health. When destroyed through the shared damage path, they release their occupied grid cells and drop partial refund items based on their build cost.
+
 Current prototype station behavior:
 
 - interact with stations by pointing at a nearby station and pressing E;
 - each active station can run one 10-second craft at a time;
-- ingredients are removed from the player inventory when crafting starts;
-- outputs are dropped near the station when crafting completes;
-- station recipes currently live in `building_instance.gd` and should move into data resources once item definitions mature.
+- players load ingredients from inventory into station input slots;
+- station simulation consumes station input slots when crafting starts;
+- outputs are stored in station output slots when crafting completes;
+- output overflow is dropped near the station by the world, not by player UI listeners;
+- station recipes and craft durations come from `RecipeDef` entries in `DataRegistry`.
+- station timers are advanced by the world machine scheduler, so station jobs keep progressing independently from UI visibility.
 
 ## Save/Load
 

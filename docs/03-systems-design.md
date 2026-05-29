@@ -70,8 +70,11 @@ The current starting tool is the Multitool Cutter recovered from the escape caps
 
 Prototype rules:
 
-- pressing the tool action activates the beam and locks onto a nearby valid target in the current aim direction;
+- holding the tool action activates the beam only while a nearby valid target is in the current aim direction;
 - while active, the player can move and steer the beam with the mouse;
+- the current target is outlined immediately when selected;
+- the cutter keeps the current valid target while held, retargets only to valid targets inside laser range, and does not fire into empty ground;
+- releasing the tool action immediately drops the lock and stops damage;
 - the cutter deals gradual damage over time to the current target under the beam;
 - depleted resources drop items on the ground through the existing pickup flow;
 - future monsters should use the same lock-on damage path before specialized weapons are added.
@@ -108,7 +111,7 @@ Every automation should replace a repeated manual action:
 - Forge: 10 iron ingots -> 1 iron armor.
 - Workbench: 5 wood -> 1 fence.
 
-All current station recipes take 10 seconds, consume inputs from the player inventory, and drop outputs on the ground outside the station footprint until machine slots are implemented.
+All current station recipes take 10 seconds. The player loads required inputs into station input slots, starts the recipe from station storage, and collects completed outputs from station output slots. Output overflow drops onto the ground through the normal ground item pickup flow.
 
 ### Post-MVP Machines
 

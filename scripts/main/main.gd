@@ -1,33 +1,41 @@
 extends Node2D
 
-@onready var world: Node2D = $World
-@onready var player: Node2D = $Player
-@onready var hud: CanvasLayer = $HUD
+@onready var world: HearthlineWorld = $World as HearthlineWorld
+@onready var player: PlayerController = $Player as PlayerController
+@onready var hud: HearthlineHUD = $HUD as HearthlineHUD
 
 
 func _ready() -> void:
 	_ensure_input_actions()
 
-	player.global_position = world.call("get_spawn_position")
-	player.call("set_world", world)
-	player.call("set_world_bounds", world.call("get_world_bounds"))
-	player.connect("inventory_changed", Callable(hud, "set_inventory"))
-	player.connect("inventory_slots_changed", Callable(hud, "set_inventory_slots"))
-	player.connect("action_hint_changed", Callable(hud, "set_hint"))
-	player.connect("station_opened", Callable(hud, "show_station"))
-	player.connect("station_updated", Callable(hud, "update_station"))
-	player.connect("station_closed", Callable(hud, "hide_station"))
-	world.connect("time_of_day_changed", Callable(hud, "set_time_of_day"))
-	hud.connect("build_requested", Callable(player, "start_building_placement"))
-	hud.connect("station_recipe_requested", Callable(player, "start_station_recipe"))
-	hud.connect("station_close_requested", Callable(player, "close_station_ui"))
-	hud.connect("gameplay_input_block_changed", Callable(player, "set_gameplay_input_blocked"))
+	player.global_position = world.get_spawn_position()
+	player.set_world(world)
+	player.set_world_bounds(world.get_world_bounds())
+	player.inventory_changed.connect(hud.set_inventory)
+	player.inventory_slots_changed.connect(hud.set_inventory_slots)
+	player.action_hint_changed.connect(hud.set_hint)
+	player.station_opened.connect(hud.show_station)
+	player.station_updated.connect(hud.update_station)
+	player.station_closed.connect(hud.hide_station)
+	world.time_of_day_changed.connect(hud.set_time_of_day)
+	hud.build_requested.connect(player.start_building_placement)
+	hud.station_input_requested.connect(player.load_station_recipe_inputs)
+	hud.station_recipe_requested.connect(player.start_station_recipe)
+	hud.station_output_collect_requested.connect(player.collect_active_station_outputs)
+	hud.station_close_requested.connect(player.close_station_ui)
+	hud.gameplay_input_block_changed.connect(player.set_gameplay_input_blocked)
+	hud.pause_state_changed.connect(_on_pause_state_changed)
 
-	hud.call("set_world_info", world.get("map_size"), world.call("get_resource_count"))
-	hud.call("set_time_of_day", world.call("get_time_of_day_snapshot"))
-	hud.call("set_inventory", player.call("get_inventory_snapshot"))
-	hud.call("set_inventory_slots", player.call("get_inventory_slots_snapshot"))
-	hud.call("set_hint", "WASD - move | Mouse - aim | LMB/E - lock cutter | LMB - build | Walk over drops to pick up")
+	hud.set_world_info(world.map_size, world.get_resource_count())
+	hud.set_time_of_day(world.get_time_of_day_snapshot())
+	hud.set_inventory(player.get_inventory_snapshot())
+	hud.set_inventory_slots(player.get_inventory_slots_snapshot())
+	hud.set_hint("WASD - move | Mouse - aim | LMB/E - lock cutter | LMB - build | Walk over drops to pick up")
+
+
+func _on_pause_state_changed(paused: bool) -> void:
+	get_tree().paused = paused
+	player.set_gameplay_mode(PlayerController.MODE_PAUSE if paused else PlayerController.MODE_NORMAL)
 
 
 func _ensure_input_actions() -> void:

@@ -58,7 +58,7 @@ The project currently has the first Godot skeleton:
 - a crash-landing premise where the player starts with only a Multitool Cutter from the escape capsule supplies;
 - procedural placement of trees, stone, ore, and wild crops;
 - a player with top-down movement;
-- a starting Multitool Cutter that locks onto nearby resources and applies gradual cutting damage;
+- a starting Multitool Cutter that only stays active while the use button is held on valid targets, outlines the current target, and applies gradual cutting damage;
 - destroyed resources drop items onto the ground;
 - nearby ground items are picked up if the inventory has space;
 - a slot-based inventory with a visible HUD panel;
@@ -70,11 +70,16 @@ The project currently has the first Godot skeleton:
 - building slots for Furnace, Forge, Workbench, and Fence;
 - placeable 2x2 Furnace, Forge, and Workbench placeholders, plus a placeable 1x1 Fence;
 - building placement rejects occupied resource, building, and dynamic blocker cells such as the player;
+- buildings have prototype health and drop partial refund items when destroyed;
 - station UI that opens with E when the cursor is over a nearby Furnace, Forge, or Workbench;
-- 10-second station recipes for Coal, Iron Ingot, Iron Armor, and Fence;
-- completed station craft outputs drop onto the ground outside the station footprint for pickup;
+- station input/output slots with Load, Craft, and Collect Outputs controls;
+- 10-second station recipes for Coal, Iron Ingot, Iron Armor, and Fence, owned by station simulation instead of direct player-inventory crafting;
+- completed station craft outputs stay in station output slots until collected, while output overflow drops onto the ground;
+- a first damageable Training Drone target that uses the same Multitool Cutter lock-on damage path as resources;
+- Esc pause behavior with a small pause overlay and Resume action;
 - mouse-based facing and cutter targeting direction;
-- code-drawn placeholders with no graphic assets yet.
+- code-drawn placeholders with no graphic assets yet;
+- shared prototype definitions for current items, resources, recipes, buildings, drops, durability, costs, stack sizes, display names, footprints, and station recipe durations through `DataRegistry`.
 
 To run it: open `project.godot` in Godot 4.6.x stable and launch the main scene.
 
@@ -96,4 +101,4 @@ git config core.hooksPath .githooks
 
 ## Current Architecture Review Status
 
-The current prototype loop passes the headless smoke test, and the first P0 stability fixes are closed. The next major work should focus on the architecture backlog in [TODO.md](TODO.md): shared data definitions, all-or-nothing placement transactions, station-owned crafting, save/load-safe world generation, a single gameplay mode owner, and real viewport UI input coverage.
+The current prototype loop passes the headless smoke test, the P0 stability fixes are closed, and the first shared data registry is in place. The next major work should focus on the architecture backlog in [TODO.md](TODO.md): station-owned crafting, save/load-safe world generation, a single gameplay mode owner, real viewport UI input coverage, and replacing broader string/group contracts with explicit behavior contracts.

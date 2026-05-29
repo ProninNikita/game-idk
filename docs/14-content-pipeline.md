@@ -4,14 +4,14 @@ Status: `Draft`
 
 ## Goal
 
-Adding new content should be repeatable: items, recipes, buildings, machines, and biomes follow the same path from idea to playable verification.
+Adding new content should be repeatable: items, resources, recipes, buildings, machines, and biomes follow the same path from idea to playable verification.
 
 ## General Process
 
 1. Describe the content's design role.
-2. Add the data definition.
+2. Add the data definition and register it in `DataRegistry`.
 3. Add placeholder visual/audio if needed.
-4. Connect it to the registry.
+4. Connect the relevant runtime system or UI to the shared definition.
 5. Add a recipe or unlock condition.
 6. Test it on the test map.
 7. Record balance notes.
@@ -29,6 +29,7 @@ Checklist:
 - [ ] Has icon.
 - [ ] Has source: where the item comes from.
 - [ ] Has sink: where the item is spent.
+- [ ] Registered in `DataRegistry`.
 - [ ] Item is tested in inventory.
 
 Example:
@@ -51,6 +52,7 @@ Checklist:
 - [ ] Craft time is set.
 - [ ] Station type is set.
 - [ ] Unlock condition is set or explicitly `none`.
+- [ ] Registered in `DataRegistry`.
 - [ ] Recipe does not break progression gates.
 - [ ] Recipe is tested manually and at a station.
 
@@ -60,6 +62,20 @@ Balance questions:
 - What does the recipe now make easier?
 - What new problem appears after unlocking it?
 
+## Adding a Resource Node
+
+Checklist:
+
+- [ ] Resource definition.
+- [ ] Drop item exists.
+- [ ] Drop amount is set.
+- [ ] Durability is set.
+- [ ] Collision radius is set.
+- [ ] Placeholder color or future art hook is set.
+- [ ] Registered in `DataRegistry`.
+- [ ] Distribution rule is added to world generation or a biome.
+- [ ] Harvesting and pickup are tested.
+
 ## Adding a Building
 
 Checklist:
@@ -68,6 +84,7 @@ Checklist:
 - [ ] Scene.
 - [ ] Footprint.
 - [ ] Build cost.
+- [ ] Registered in `DataRegistry`.
 - [ ] Placement rules.
 - [ ] Collision.
 - [ ] Save/load state.

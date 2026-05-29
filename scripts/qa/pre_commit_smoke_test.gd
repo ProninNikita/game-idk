@@ -1,6 +1,11 @@
 extends SceneTree
 
 const MAIN_SCENE_PATH: String = "res://scenes/main/main.tscn"
+const RESOURCE_NODE_SCENE: PackedScene = preload("res://scenes/world/resource_node.tscn")
+const DataRegistry = preload("res://scripts/data/data_registry.gd")
+const INVENTORY_SLOT_SCRIPT: Script = preload("res://scripts/player/inventory_slot.gd")
+const ITEM_STACK_SCRIPT: Script = preload("res://scripts/player/item_stack.gd")
+const MONSTER_TARGET_SCRIPT: Script = preload("res://scripts/world/monster_target.gd")
 const BUILDING_NAMES: Dictionary = {
 	&"furnace": "Furnace",
 	&"forge": "Forge",
@@ -9,7 +14,7 @@ const BUILDING_NAMES: Dictionary = {
 }
 
 class FailedPlacementWorld:
-	extends Node
+	extends HearthlineWorld
 
 	var backing_world: HearthlineWorld = null
 
@@ -42,8 +47,53 @@ class FailedPlacementWorld:
 		return false
 
 
-	func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2, source_color: Color = Color(0.92, 0.78, 0.28)) -> Node:
+	func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2, source_color: Color = Color(0.92, 0.78, 0.28)) -> GroundItem:
 		return backing_world.spawn_ground_item(item_id, amount, spawn_position, source_color)
+
+
+class RevalidatedBlockedWorld:
+	extends HearthlineWorld
+
+	var backing_world: HearthlineWorld = null
+	var can_place_calls: int = 0
+	var place_building_calls: int = 0
+
+
+	func _init(new_backing_world: HearthlineWorld) -> void:
+		backing_world = new_backing_world
+
+
+	func get_building_definition(building_id: StringName) -> Dictionary:
+		return backing_world.get_building_definition(building_id)
+
+
+	func get_tile_size() -> int:
+		return backing_world.get_tile_size()
+
+
+	func world_to_grid(world_position: Vector2) -> Vector2i:
+		return backing_world.world_to_grid(world_position)
+
+
+	func grid_to_world_center(grid_position: Vector2i, footprint: Vector2i = Vector2i.ONE) -> Vector2:
+		return backing_world.grid_to_world_center(grid_position, footprint)
+
+
+	func can_place_building(building_id: StringName, grid_position: Vector2i) -> bool:
+		can_place_calls += 1
+		if can_place_calls > 1:
+			return false
+		return backing_world.can_place_building(building_id, grid_position)
+
+
+	func place_building(building_id: StringName, grid_position: Vector2i) -> bool:
+		place_building_calls += 1
+		return backing_world.place_building(building_id, grid_position)
+
+
+	func spawn_ground_item(item_id: StringName, amount: int, spawn_position: Vector2, source_color: Color = Color(0.92, 0.78, 0.28)) -> GroundItem:
+		return backing_world.spawn_ground_item(item_id, amount, spawn_position, source_color)
+
 
 var _main: Node = null
 var _world: HearthlineWorld = null
@@ -61,13 +111,20 @@ func _run() -> void:
 	print("[smoke] Starting pre-commit gameplay smoke test")
 	await _load_main_scene()
 	await _verify_startup_state()
+	await _verify_data_registry_definitions()
+	await _verify_inventory_resize_protection()
+	_verify_inventory_atomic_removal_and_locked_slots()
 	await _verify_time_of_day_cycle()
 	await _verify_movement_and_mouse_facing()
 	await _verify_inventory_window_buttons()
+	await _verify_cutter_targeting_rules()
+	await _verify_monster_target_damage()
 	await _verify_harvest_drop_pickup()
 	await _verify_building_buttons_and_placement()
 	await _verify_station_buttons_crafting_and_pickup()
 	await _verify_station_auto_close()
+	await _verify_viewport_size_ui_coverage()
+	await _verify_pause_menu_behavior()
 	await _verify_building_occupancy_release()
 	_finish()
 
@@ -103,6 +160,99 @@ func _verify_startup_state() -> void:
 		var first_slot: Dictionary = slots[0]
 		_expect(StringName(first_slot.get("item_id", &"")) == &"multitool_cutter", "First hotbar slot contains the Multitool Cutter")
 		_expect(bool(first_slot.get("locked", false)), "Multitool Cutter slot is locked")
+	if not _player.inventory.slots.is_empty():
+		var first_slot_model: Object = _player.inventory.slots[0] as Object
+		_expect(first_slot_model != null and first_slot_model.get_script() == INVENTORY_SLOT_SCRIPT, "Inventory stores typed slot models internally")
+		if first_slot_model != null:
+			var first_stack_model: Object = first_slot_model.get("stack") as Object
+			_expect(first_stack_model != null and first_stack_model.get_script() == ITEM_STACK_SCRIPT, "Inventory slots store typed item stack models internally")
+
+
+func _verify_data_registry_definitions() -> void:
+	_expect(DataRegistry.has_item(&"wood"), "DataRegistry has Wood item definition")
+	_expect(DataRegistry.get_item_stack_size(&"iron_armor", 99) == 1, "DataRegistry provides per-item stack sizes")
+
+	_expect(DataRegistry.has_resource(&"tree"), "DataRegistry has Tree resource definition")
+	var tree_definition: Dictionary = _world.get_resource_definition(&"tree")
+	_expect(not tree_definition.is_empty(), "DataRegistry provides Tree resource definition")
+	_expect(StringName(tree_definition.get("drop_item_id", &"")) == &"wood", "Tree resource drop item comes from resource definition data")
+	_expect(int(tree_definition.get("drop_amount", 0)) == 4, "Tree resource drop amount comes from resource definition data")
+	_expect(is_equal_approx(float(tree_definition.get("max_health", 0.0)), 3.0), "Tree resource durability comes from resource definition data")
+	var spawned_tree: HarvestableResourceNode = _find_first_resource_by_type(&"tree")
+	_expect(spawned_tree != null, "World spawned a Tree resource from registered resource data")
+	if spawned_tree != null:
+		_expect(spawned_tree.drop_item_id == &"wood", "Spawned Tree drop item matches resource definition")
+		_expect(spawned_tree.drop_amount == 4, "Spawned Tree drop amount matches resource definition")
+		_expect(is_equal_approx(spawned_tree.max_health, 3.0), "Spawned Tree durability matches resource definition")
+
+	var furnace_definition: Dictionary = _world.get_building_definition(&"furnace")
+	_expect(not furnace_definition.is_empty(), "DataRegistry provides Furnace building definition")
+	var furnace_cost: Dictionary = furnace_definition.get("cost", {}) as Dictionary
+	_expect(int(furnace_cost.get(&"stone", 0)) == 2, "Furnace build cost comes from building definition data")
+	_expect(furnace_definition.get("footprint", Vector2i.ZERO) == Vector2i(2, 2), "Furnace footprint comes from building definition data")
+	var furnace_scene: PackedScene = furnace_definition.get("scene") as PackedScene
+	_expect(furnace_scene != null, "Furnace building definition provides a scene")
+	if furnace_scene != null:
+		var furnace_instance: BuildingInstance = furnace_scene.instantiate() as BuildingInstance
+		_expect(furnace_instance != null, "Furnace scene instantiates as a BuildingInstance")
+		if furnace_instance != null:
+			_expect(furnace_instance.definition_id == &"furnace", "Furnace scene carries its building definition id")
+			_main.add_child(furnace_instance)
+			await process_frame
+			_expect(furnace_instance.building_id == &"furnace", "Furnace scene applies definition defaults from its id")
+			furnace_instance.queue_free()
+			await process_frame
+
+	var furnace_recipes: Array = DataRegistry.get_station_recipe_definitions(&"furnace")
+	_expect(furnace_recipes.size() >= 2, "DataRegistry provides Furnace station recipes")
+	if not furnace_recipes.is_empty():
+		var first_recipe: Dictionary = furnace_recipes[0] as Dictionary
+		_expect(float(first_recipe.get("duration", 0.0)) > 0.0, "Station recipe duration comes from recipe definition data")
+
+
+func _verify_inventory_resize_protection() -> void:
+	var inventory: InventoryComponent = InventoryComponent.new()
+	inventory.slot_count = 3
+	var leftover: int = inventory.add_item_with_leftover(&"wood", 1)
+	_expect(leftover == 0, "Resize protection test inventory accepts Wood")
+
+	inventory.slot_count = 1
+	var protected_slots: Array[Dictionary] = inventory.get_slots()
+	_expect(inventory.get_count(&"wood") == 1, "Inventory resize preserves items that would be truncated")
+	_expect(protected_slots.size() > inventory.slot_count, "Inventory keeps overflow slots while they contain items")
+
+	var removed: int = inventory.remove_item(&"wood", 1)
+	var trimmed_slots: Array[Dictionary] = inventory.get_slots()
+	_expect(removed == 1, "Resize protection test inventory removes Wood after preservation")
+	_expect(trimmed_slots.size() == inventory.slot_count, "Inventory trims preserved overflow slots after they become empty")
+	inventory.free()
+
+
+func _verify_inventory_atomic_removal_and_locked_slots() -> void:
+	var inventory: InventoryComponent = InventoryComponent.new()
+	inventory.slot_count = 4
+	inventory.toolbelt_slot_count = 2
+
+	var wood_leftover: int = inventory.add_item_with_leftover(&"wood", 2)
+	_expect(wood_leftover == 0, "Atomic removal test inventory accepts Wood")
+	var wood_before: int = inventory.get_count(&"wood")
+	var failed_removal: bool = inventory.try_remove_items({&"wood": 2, &"stone": 1})
+	_expect(not failed_removal, "Atomic inventory removal rejects incomplete multi-item costs")
+	_expect(inventory.get_count(&"wood") == wood_before, "Atomic inventory removal keeps available items after failure")
+
+	var stone_leftover: int = inventory.add_item_with_leftover(&"stone", 1)
+	_expect(stone_leftover == 0, "Atomic removal test inventory accepts Stone")
+	var successful_removal: bool = inventory.try_remove_items({&"wood": 2, &"stone": 1})
+	_expect(successful_removal, "Atomic inventory removal accepts complete multi-item costs")
+	_expect(inventory.get_count(&"wood") == 0, "Atomic inventory removal removes Wood after success")
+	_expect(inventory.get_count(&"stone") == 0, "Atomic inventory removal removes Stone after success")
+
+	var tool_count_before: int = inventory.get_count(&"multitool_cutter")
+	var removed_tool_count: int = inventory.remove_item(&"multitool_cutter", 1)
+	_expect(tool_count_before == 1, "Locked slot test inventory starts with the Multitool Cutter")
+	_expect(removed_tool_count == 0, "Locked Multitool Cutter slot cannot be removed by inventory removal")
+	_expect(inventory.get_count(&"multitool_cutter") == tool_count_before, "Locked Multitool Cutter remains in inventory")
+	inventory.free()
 
 
 func _verify_time_of_day_cycle() -> void:
@@ -170,6 +320,87 @@ func _verify_inventory_window_buttons() -> void:
 	_expect(not _player.gameplay_input_blocked, "Gameplay input unblocks after inventory closes")
 
 
+func _verify_cutter_targeting_rules() -> void:
+	_player.global_position = _world.get_spawn_position()
+	_player.facing = Vector2.RIGHT
+	_player.call("_clear_cutter_lock", false)
+	_player.call("_try_start_cutter_lock")
+	await process_frame
+	_expect(not bool(_player.get("_cutter_active")), "Multitool Cutter does not activate on empty ground")
+	_expect(_player.get("_cutter_target") == null, "Multitool Cutter has no target on empty ground")
+
+	var target_a: HarvestableResourceNode = RESOURCE_NODE_SCENE.instantiate() as HarvestableResourceNode
+	target_a.name = "CutterTargetA"
+	target_a.display_name = "Test Target A"
+	target_a.max_health = 10.0
+	target_a.health = 10.0
+	target_a.collision_radius = 10.0
+	_main.add_child(target_a)
+	target_a.global_position = _player.global_position + Vector2(42.0, 0.0)
+	target_a.add_to_group("resource_nodes")
+	_world.register_damageable_node(target_a)
+
+	var target_b: HarvestableResourceNode = RESOURCE_NODE_SCENE.instantiate() as HarvestableResourceNode
+	target_b.name = "CutterTargetB"
+	target_b.display_name = "Test Target B"
+	target_b.max_health = 10.0
+	target_b.health = 10.0
+	target_b.collision_radius = 10.0
+	_main.add_child(target_b)
+	target_b.global_position = _player.global_position + Vector2(0.0, 42.0)
+	target_b.add_to_group("resource_nodes")
+	_world.register_damageable_node(target_b)
+	await process_frame
+
+	_player.face_towards_world_position(target_a.global_position)
+	_player.call("_try_start_cutter_lock")
+	_expect(bool(_player.get("_cutter_active")), "Multitool Cutter activates when aimed at a target")
+	_expect(_player.get("_cutter_target") == target_a, "Multitool Cutter selects the aimed target immediately")
+
+	var target_a_health_before: float = target_a.health
+	_player.call("_update_cutter_lock", 0.2)
+	_expect(target_a.health < target_a_health_before, "Multitool Cutter damages the selected target")
+
+	_player.face_towards_world_position(target_b.global_position)
+	_player.call("_update_cutter_lock", 0.1)
+	_expect(_player.get("_cutter_target") == target_b, "Multitool Cutter retargets inside laser range")
+
+	_player.face_towards_world_position(_player.global_position + Vector2(-64.0, 0.0))
+	_player.call("_update_cutter_lock", 0.1)
+	_expect(_player.get("_cutter_target") == target_b, "Multitool Cutter keeps the current valid target instead of firing into empty ground")
+
+	_player.call("_update_cutter_lock", 0.0, false)
+	_expect(not bool(_player.get("_cutter_active")), "Multitool Cutter stops when use input is released")
+
+	_player.call("_clear_cutter_lock", false)
+	target_a.queue_free()
+	target_b.queue_free()
+	await process_frame
+
+
+func _verify_monster_target_damage() -> void:
+	var monster: Node2D = _find_first_monster()
+	_expect(monster != null, "A damageable monster target exists")
+	if monster == null:
+		return
+
+	_player.global_position = monster.global_position + Vector2(-42.0, 0.0)
+	_player.face_towards_world_position(monster.global_position)
+	_player.call("_clear_cutter_lock", false)
+	var health_before: float = float(monster.get("health"))
+	_player.call("_update_cutter_lock", 0.3, true)
+	_expect(_player.get("_cutter_target") == monster, "Multitool Cutter locks on to a monster target")
+	_expect(float(monster.get("health")) < health_before, "Multitool Cutter damages the monster target")
+
+	monster.call("hit", float(monster.get("health")) + 1.0, [&"combat"])
+	await process_frame
+	_expect(not is_instance_valid(monster) or monster.is_queued_for_deletion(), "Monster target can be defeated through the shared damage path")
+	_player.call("_update_cutter_lock", 0.1, true)
+	_expect(not bool(_player.get("_cutter_active")), "Multitool Cutter clears defeated monster targets")
+	_expect(_player.get("_cutter_target") == null, "Multitool Cutter drops defeated monster target references")
+	_player.call("_clear_cutter_lock", false)
+
+
 func _verify_harvest_drop_pickup() -> void:
 	var resource: HarvestableResourceNode = _find_first_resource()
 	_expect(resource != null, "A resource node is available for harvesting")
@@ -185,33 +416,45 @@ func _verify_harvest_drop_pickup() -> void:
 	_player.global_position = resource.global_position + Vector2(-28.0, 0.0)
 	await _warp_mouse_to_global(resource.global_position)
 	_player.facing = Vector2.RIGHT
-	_player.call("_try_start_cutter_lock")
-	await process_frame
+	Input.action_press(&"interact")
+	await _physics_steps(2)
 	_expect(_player.get("_cutter_target") == resource, "Multitool Cutter locks on to the resource")
 
 	var health_after_lock: float = resource.health
-	_player.call("_update_cutter_lock", 0.25)
-	await process_frame
+	await _physics_steps(6)
 	_expect(resource.health < health_after_lock, "Multitool Cutter deals gradual damage while locked")
+
+	Input.action_release(&"interact")
+	await _physics_steps(2)
+	_expect(not bool(_player.get("_cutter_active")), "Multitool Cutter deactivates after releasing the use button")
+	var health_after_release: float = resource.health
+	await _physics_steps(4)
+	_expect(is_equal_approx(resource.health, health_after_release), "Multitool Cutter stops damaging after release")
 
 	await _warp_mouse_to_global(_player.global_position + Vector2(0.0, 80.0))
 	_player.call("_update_mouse_facing")
-	_player.call("_update_cutter_lock", 0.1)
+	_player.call("_update_cutter_lock", 0.1, true)
 	await process_frame
-	_expect(_player.facing.y > 0.70, "Multitool Cutter beam can be steered while active")
+	_expect(_player.facing.y > 0.70, "Multitool Cutter aim can be steered toward the mouse")
 
 	await _warp_mouse_to_global(resource.global_position)
 	_player.call("_update_mouse_facing")
+	Input.action_press(&"interact")
+	await _physics_steps(2)
 	var position_before_moving_cut: Vector2 = _player.global_position
+	var health_before_moving_cut: float = resource.health
 	Input.action_press(&"move_down")
-	await _physics_steps(4)
+	await _physics_steps_aiming_at(resource.global_position, 4)
 	Input.action_release(&"move_down")
+	await _physics_steps_aiming_at(resource.global_position, 1)
+	_expect(_player.global_position.y > position_before_moving_cut.y + 1.0, "Player can move while holding the Multitool Cutter button")
+	_expect(resource.health < health_before_moving_cut, "Multitool Cutter keeps damaging while held and aimed during movement")
+	Input.action_release(&"interact")
 	await _physics_steps(1)
-	_expect(_player.global_position.y > position_before_moving_cut.y + 1.0, "Player can move while the Multitool Cutter is active")
 
 	var health_after_moving: float = resource.health
 	_player.face_towards_world_position(resource.global_position)
-	_player.call("_update_cutter_lock", 0.25)
+	_player.call("_update_cutter_lock", 0.25, true)
 	await process_frame
 	_expect(resource.health < health_after_moving, "Multitool Cutter keeps damaging after moving when aimed at the target")
 
@@ -220,7 +463,7 @@ func _verify_harvest_drop_pickup() -> void:
 		if not is_instance_valid(resource) or resource.is_queued_for_deletion():
 			break
 		_player.face_towards_world_position(resource.global_position)
-		_player.call("_update_cutter_lock", 0.2)
+		_player.call("_update_cutter_lock", 0.2, true)
 		await process_frame
 
 	_expect(_count_ground_items(drop_item_id) > ground_before, "Harvesting drops items on the ground")
@@ -248,6 +491,7 @@ func _verify_building_buttons_and_placement() -> void:
 	})
 	_expect(not _world.can_place_building(&"fence", _world.world_to_grid(_player.global_position)), "Buildings cannot be placed on the player")
 	await _verify_failed_building_placement_rolls_back_cost()
+	await _verify_revalidated_building_placement_rolls_back_cost()
 
 	var furnace_grid: Vector2i = await _place_building_from_ui(&"furnace")
 	_expect(_find_building_at(&"furnace", furnace_grid) != null, "Furnace is placed from the Building UI")
@@ -271,9 +515,8 @@ func _verify_failed_building_placement_rolls_back_cost() -> void:
 	var furnace_before: BuildingInstance = _find_building_at(building_id, grid_position)
 	_expect(furnace_before == null, "Rollback check grid starts empty")
 
-	var original_world: Node = _player.world
+	var original_world: HearthlineWorld = _player.world
 	var failed_world: FailedPlacementWorld = FailedPlacementWorld.new(_world)
-	_main.add_child(failed_world)
 	_player.set_world(failed_world)
 	_player.start_building_placement(building_id)
 	_expect(_player.pending_building_id == building_id, "Furnace placement mode starts for rollback check")
@@ -284,13 +527,48 @@ func _verify_failed_building_placement_rolls_back_cost() -> void:
 
 	_player.set_world(original_world)
 	_player.cancel_building_placement()
-	failed_world.queue_free()
+	failed_world.free()
 	await process_frame
 
 	_expect(not placed, "Failed Furnace placement reports failure")
 	_expect(_find_building_at(building_id, grid_position) == null, "Failed Furnace placement does not create a building")
 	_expect(_player.inventory.get_count(&"wood") == wood_before, "Failed Furnace placement refunds wood")
 	_expect(_player.inventory.get_count(&"stone") == stone_before, "Failed Furnace placement refunds stone")
+
+
+func _verify_revalidated_building_placement_rolls_back_cost() -> void:
+	var building_id: StringName = &"furnace"
+	var grid_position: Vector2i = _find_free_grid_near_player(building_id)
+	_expect(grid_position.x > -9000, "Found free placement grid for revalidated Furnace placement")
+	if grid_position.x <= -9000:
+		return
+
+	var wood_before: int = _player.inventory.get_count(&"wood")
+	var stone_before: int = _player.inventory.get_count(&"stone")
+
+	var original_world: HearthlineWorld = _player.world
+	var blocked_world: RevalidatedBlockedWorld = RevalidatedBlockedWorld.new(_world)
+	_player.set_world(blocked_world)
+	_player.start_building_placement(building_id)
+	_expect(_player.pending_building_id == building_id, "Furnace placement mode starts for revalidation rollback check")
+
+	var placed: bool = _player.try_place_pending_building_at_grid(grid_position)
+	await process_frame
+	await physics_frame
+
+	_player.set_world(original_world)
+	_player.cancel_building_placement()
+	var can_place_calls: int = blocked_world.can_place_calls
+	var place_building_calls: int = blocked_world.place_building_calls
+	blocked_world.free()
+	await process_frame
+
+	_expect(not placed, "Blocked revalidated Furnace placement reports failure")
+	_expect(can_place_calls >= 2, "Furnace placement revalidates after payment")
+	_expect(place_building_calls == 0, "Furnace placement stops before world mutation after revalidation failure")
+	_expect(_find_building_at(building_id, grid_position) == null, "Blocked revalidated Furnace placement does not create a building")
+	_expect(_player.inventory.get_count(&"wood") == wood_before, "Blocked revalidated Furnace placement refunds wood")
+	_expect(_player.inventory.get_count(&"stone") == stone_before, "Blocked revalidated Furnace placement refunds stone")
 
 
 func _verify_station_buttons_crafting_and_pickup() -> void:
@@ -311,6 +589,7 @@ func _verify_station_buttons_crafting_and_pickup() -> void:
 
 	var fence_grid: Vector2i = await _place_building_from_ui(&"fence")
 	_expect(_find_building_at(&"fence", fence_grid) != null, "Crafted fence item can be placed from the Building UI")
+	await _verify_station_output_overflow(furnace)
 
 
 func _verify_station_auto_close() -> void:
@@ -327,6 +606,49 @@ func _verify_station_auto_close() -> void:
 	await _physics_steps(4)
 	_expect(_player.active_station == null, "Station interaction auto-closes when player leaves range")
 	_expect(not _is_station_visible(), "Station UI hides after auto-close")
+
+
+func _verify_viewport_size_ui_coverage() -> void:
+	var original_size: Vector2i = root.size
+	var original_content_scale_size: Vector2i = root.content_scale_size
+	root.size = Vector2i(1024, 720)
+	root.content_scale_size = Vector2i(1024, 720)
+	await process_frame
+	await physics_frame
+
+	await _open_inventory_with_action()
+	_expect(_control_fits_viewport(_hud.get("_inventory_window") as Control), "Inventory window fits within a 1024px viewport")
+	await _press_button_by_text(_hud, "Building")
+	_expect(_control_fits_viewport(_hud.get("_inventory_window") as Control), "Building category fits within a 1024px viewport")
+	await _close_inventory_with_action()
+
+	var furnace: BuildingInstance = _find_first_building(&"furnace")
+	_expect(furnace != null, "Furnace exists for viewport-size station UI check")
+	if furnace != null:
+		await _open_station(furnace)
+		_expect(_control_fits_viewport(_hud.get("_station_window") as Control), "Station window fits within a 1024px viewport")
+		_player.close_station_ui()
+		await process_frame
+
+	root.content_scale_size = original_content_scale_size
+	root.size = original_size
+	await process_frame
+	await physics_frame
+
+
+func _verify_pause_menu_behavior() -> void:
+	var position_before: Vector2 = _player.global_position
+	await _tap_action(&"ui_cancel")
+	_expect(_is_pause_visible(), "Pause menu opens with Esc")
+	_expect(paused, "Scene tree pauses while pause menu is open")
+	Input.action_press(&"move_right")
+	await process_frame
+	await physics_frame
+	Input.action_release(&"move_right")
+	_expect(_player.global_position.distance_to(position_before) < 1.0, "Pause menu blocks player movement")
+	await _press_button_by_text(_hud, "Resume")
+	_expect(not _is_pause_visible(), "Resume button closes the pause menu")
+	_expect(not paused, "Scene tree resumes after pressing Resume")
 
 
 func _verify_ui_blocks_movement() -> void:
@@ -350,45 +672,60 @@ func _verify_inventory_toggle_closes_station(station: BuildingInstance) -> void:
 
 func _verify_building_occupancy_release() -> void:
 	var fence: BuildingInstance = _find_first_building(&"fence")
-	_expect(fence != null, "Fence exists for occupancy release check")
+	_expect(fence != null, "Fence exists for destruction and occupancy release check")
 	if fence == null:
 		return
 
 	var grid_position: Vector2i = fence.grid_position
-	fence.queue_free()
+	var fence_ground_before: int = _count_ground_items(&"fence")
+	fence.hit(fence.max_health + 1.0, [&"cutting"])
 	await process_frame
 	await process_frame
-	_expect(_world.can_place_building(&"fence", grid_position), "Building cells are released when a building leaves the tree")
+	_expect(_world.can_place_building(&"fence", grid_position), "Building cells are released when a building is destroyed")
+	_expect(_count_ground_items(&"fence") > fence_ground_before, "Destroyed buildings drop refund items")
 
 
 func _craft_recipe_and_pickup(station: BuildingInstance, recipe_title: String, output_item_id: StringName, output_amount: int) -> void:
 	await _open_station(station)
 	var inventory_before: int = _player.inventory.get_count(output_item_id)
 	var ground_before: int = _count_ground_items(output_item_id)
+	await _press_station_load_button(recipe_title)
+	var recipe_id: StringName = _get_station_recipe_id_by_title(station, recipe_title)
+	_expect(recipe_id != &"" and station.has_recipe_inputs(recipe_id), "%s inputs load into station input slots" % recipe_title)
 	await _press_station_recipe_button(recipe_title)
 	_expect(station.is_crafting(), "%s recipe starts crafting" % recipe_title)
+
+	var recipe_row_before_progress: Control = _find_station_recipe_frame(recipe_title)
+	_expect(recipe_row_before_progress != null, "%s station recipe row exists before progress refresh" % recipe_title)
+	station.call("_process", 0.5)
+	_player.call("_refresh_active_station_ui")
+	await process_frame
+	var recipe_row_after_progress: Control = _find_station_recipe_frame(recipe_title)
+	_expect(recipe_row_after_progress == recipe_row_before_progress, "%s station recipe row is reused during progress updates" % recipe_title)
 
 	station.call("_process", 10.5)
 	await process_frame
 	await physics_frame
 	_expect(not station.is_crafting(), "%s recipe completes" % recipe_title)
-	_expect(_count_ground_items(output_item_id) >= ground_before + output_amount, "%s output drops on the ground" % recipe_title)
-	_expect(_player.inventory.get_count(output_item_id) == inventory_before, "%s output waits on the ground before pickup" % recipe_title)
+	_expect(_count_ground_items(output_item_id) == ground_before, "%s output stays in station slots instead of dropping immediately" % recipe_title)
+	_expect(_player.inventory.get_count(output_item_id) == inventory_before, "%s output waits in station output slots before collection" % recipe_title)
+	_expect(_get_station_output_count(station, output_item_id) >= output_amount, "%s output is stored in station output slots" % recipe_title)
 
-	var output_item: Node2D = _find_ground_item(output_item_id)
-	_expect(output_item != null, "%s ground output exists" % recipe_title)
-	if output_item != null:
-		_expect(not _is_point_inside_building_footprint(station, output_item.global_position), "%s output drops outside the station footprint" % recipe_title)
-		_player.global_position = output_item.global_position
-		_player.set("_pickup_left", 0.0)
-		_player.call("_try_pickup_ground_items")
-		await process_frame
-		await physics_frame
-		_expect(_player.inventory.get_count(output_item_id) >= inventory_before + output_amount, "%s output can be picked up" % recipe_title)
+	await _press_button_by_text(_hud, "Collect Outputs")
+	_expect(_player.inventory.get_count(output_item_id) >= inventory_before + output_amount, "%s output can be collected from station slots" % recipe_title)
 
 	await _open_station(station)
 	await _press_button_by_text(_hud, "Close")
 	_expect(not _is_station_visible(), "Station Close button hides the station UI")
+
+
+func _verify_station_output_overflow(station: BuildingInstance) -> void:
+	var ground_before: int = _count_ground_items(&"coal")
+	var overflow: Dictionary = station.add_output_items({&"coal": 999})
+	await process_frame
+	await physics_frame
+	_expect(not overflow.is_empty(), "Station output overflow reports leftover items")
+	_expect(_count_ground_items(&"coal") > ground_before, "Station output overflow drops items through the ground item flow")
 
 
 func _open_station(station: BuildingInstance) -> void:
@@ -438,7 +775,15 @@ func _press_building_create_button(building_name: String) -> void:
 	await _press_button(create_button, "Create %s" % building_name)
 
 
+func _press_station_load_button(recipe_title: String) -> void:
+	await _press_station_recipe_row_button(recipe_title, "Load")
+
+
 func _press_station_recipe_button(recipe_title: String) -> void:
+	await _press_station_recipe_row_button(recipe_title, "Craft")
+
+
+func _press_station_recipe_row_button(recipe_title: String, button_text: String) -> void:
 	var label: Label = _find_label_by_text(_hud, recipe_title)
 	_expect(label != null, "%s recipe label exists" % recipe_title)
 	if label == null:
@@ -446,14 +791,14 @@ func _press_station_recipe_button(recipe_title: String) -> void:
 
 	var node: Node = label
 	while node != null:
-		var craft_button: Button = _find_button_by_text(node, "Craft")
-		if craft_button != null:
-			_expect(not craft_button.disabled, "%s Craft button is enabled" % recipe_title)
-			await _press_button(craft_button, "Craft %s" % recipe_title)
+		var row_button: Button = _find_button_by_text(node, button_text)
+		if row_button != null:
+			_expect(not row_button.disabled, "%s %s button is enabled" % [recipe_title, button_text])
+			await _press_button(row_button, "%s %s" % [button_text, recipe_title])
 			return
 		node = node.get_parent()
 
-	_expect(false, "%s Craft button exists" % recipe_title)
+	_expect(false, "%s %s button exists" % [recipe_title, button_text])
 
 
 func _open_inventory_with_action() -> void:
@@ -516,9 +861,23 @@ func _is_station_visible() -> bool:
 	return window != null and window.visible
 
 
+func _is_pause_visible() -> bool:
+	var window: Control = _hud.get("_pause_window") as Control
+	return window != null and window.visible
+
+
 func _is_content_visible(property_name: String) -> bool:
 	var content: Control = _hud.get(property_name) as Control
 	return content != null and content.visible
+
+
+func _control_fits_viewport(control: Control) -> bool:
+	if control == null:
+		return false
+
+	var viewport_rect: Rect2 = root.get_visible_rect()
+	var control_rect: Rect2 = control.get_global_rect()
+	return viewport_rect.encloses(control_rect)
 
 
 func _add_inventory_items(items: Dictionary) -> void:
@@ -561,6 +920,20 @@ func _find_first_resource() -> HarvestableResourceNode:
 	return null
 
 
+func _find_first_resource_by_type(resource_type: StringName) -> HarvestableResourceNode:
+	for node: Node in get_nodes_in_group("resource_nodes"):
+		if not is_instance_valid(node):
+			continue
+		if node.is_queued_for_deletion():
+			continue
+		if not node is HarvestableResourceNode:
+			continue
+		var resource: HarvestableResourceNode = node as HarvestableResourceNode
+		if resource.resource_type == resource_type:
+			return resource
+	return null
+
+
 func _find_first_building(building_id: StringName) -> BuildingInstance:
 	for node: Node in get_nodes_in_group("buildings"):
 		if not is_instance_valid(node):
@@ -572,6 +945,19 @@ func _find_first_building(building_id: StringName) -> BuildingInstance:
 		var building: BuildingInstance = node as BuildingInstance
 		if building.building_id == building_id:
 			return building
+	return null
+
+
+func _find_first_monster() -> Node2D:
+	for node: Node in get_nodes_in_group("damageable"):
+		if not is_instance_valid(node):
+			continue
+		if node.is_queued_for_deletion():
+			continue
+		if not node is Node2D:
+			continue
+		if (node as Object).get_script() == MONSTER_TARGET_SCRIPT:
+			return node as Node2D
 	return null
 
 
@@ -622,6 +1008,22 @@ func _find_ground_item(item_id: StringName) -> Node2D:
 	return best_item
 
 
+func _get_station_recipe_id_by_title(station: BuildingInstance, recipe_title: String) -> StringName:
+	for recipe_value: Variant in station.get_recipes():
+		var recipe: Dictionary = recipe_value as Dictionary
+		if String(recipe.get("display_name", "")) == recipe_title:
+			return StringName(recipe.get("id", &""))
+	return &""
+
+
+func _get_station_output_count(station: BuildingInstance, item_id: StringName) -> int:
+	var total: int = 0
+	for slot: Dictionary in station.get_output_slots_snapshot():
+		if StringName(slot.get("item_id", &"")) == item_id:
+			total += int(slot.get("amount", 0))
+	return total
+
+
 func _is_point_inside_building_footprint(building: BuildingInstance, point: Vector2) -> bool:
 	var size: Vector2 = Vector2(float(building.footprint.x * building.tile_size), float(building.footprint.y * building.tile_size))
 	var rect: Rect2 = Rect2(building.global_position - size * 0.5, size)
@@ -664,7 +1066,24 @@ func _find_label_by_text(parent: Node, text: String) -> Label:
 	return null
 
 
+func _find_station_recipe_frame(recipe_title: String) -> Control:
+	var label: Label = _find_label_by_text(_hud, recipe_title)
+	if label == null:
+		return null
+
+	var node: Node = label
+	while node != null:
+		if node is PanelContainer:
+			return node as Control
+		node = node.get_parent()
+	return null
+
+
 func _warp_mouse_to_global(world_position: Vector2) -> void:
+	if _player != null and _player.camera != null:
+		_player.camera.reset_smoothing()
+		await process_frame
+
 	var world_canvas: CanvasItem = _world as CanvasItem
 	var viewport_position: Vector2 = world_canvas.get_global_transform_with_canvas() * world_canvas.to_local(world_position)
 	root.warp_mouse(viewport_position)
@@ -678,6 +1097,12 @@ func _warp_mouse_to_global(world_position: Vector2) -> void:
 
 func _physics_steps(count: int) -> void:
 	for step_index: int in range(count):
+		await physics_frame
+
+
+func _physics_steps_aiming_at(world_position: Vector2, count: int) -> void:
+	for step_index: int in range(count):
+		await _warp_mouse_to_global(world_position)
 		await physics_frame
 
 

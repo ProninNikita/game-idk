@@ -37,7 +37,7 @@ The repository includes a headless gameplay smoke test:
 scripts/qa/run_pre_commit_smoke.sh
 ```
 
-The test loads the main scene, checks startup state, verifies time-of-day phase boundaries and dynamic advancement, moves the player, validates aim/facing behavior, locks the Multitool Cutter onto a resource, verifies gradual cutter damage, verifies beam steering and player movement while cutting, verifies ground drops and pickup, opens and clicks every current inventory category button, uses every current Building Create button, places Furnace, Forge, Workbench, and Fence, opens station UI, clicks Craft and Close station buttons, fast-forwards station crafting, verifies outputs stay on the ground outside station footprints until pickup, checks station auto-close out of range, and verifies building occupancy is released when a building leaves the tree.
+The test loads the main scene, checks startup state, verifies shared data registry definitions, per-item stack sizes, resource drops and durability, verifies building scenes carry and apply definition ids, verifies typed inventory slot and item stack models, verifies inventory resize protection for occupied overflow slots, verifies atomic inventory removal and locked-slot protection, verifies time-of-day phase boundaries and dynamic advancement, moves the player, validates aim/facing behavior, verifies that the Multitool Cutter rejects empty-ground activation, verifies in-range cutter retargeting, verifies the Training Drone damage path, locks the cutter onto a resource while the button is held, verifies gradual cutter damage, verifies release stops damage, verifies beam steering and player movement while cutting, verifies ground drops and pickup, opens and clicks every current inventory category button, uses every current Building Create button, verifies failed building placement cost rollback including post-payment placement revalidation, places Furnace, Forge, Workbench, and Fence, opens station UI, clicks Load, Craft, Collect Outputs, and Close station buttons, verifies station recipe rows are reused during progress refreshes, fast-forwards station crafting, verifies outputs stay in station output slots until collection, verifies output overflow drops to the ground, checks station auto-close out of range, verifies inventory and station windows fit inside a 1024px viewport, verifies pause/resume behavior, and verifies building occupancy is released with refund drops when a building is destroyed.
 
 Enable the versioned git hook once per clone:
 
@@ -72,6 +72,16 @@ Before any build:
 - save and load work;
 - returning to menu does not break state;
 - no red errors in Godot Output during 5 minutes of normal play.
+
+## First Playable Readiness
+
+Minimum readiness for the first playable build:
+
+- the smoke test passes without failures;
+- the core loop works from gathering to building to station crafting to output collection;
+- inventory, station, build placement, pause, and normal play modes do not overlap;
+- resource, building, station, and ground item counts remain consistent after destruction and collection;
+- known limitations are documented in the changelog before sharing a build.
 
 ## Playtest Checklist: First 20 Minutes
 

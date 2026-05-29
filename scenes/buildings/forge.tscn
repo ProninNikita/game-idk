@@ -9,6 +9,7 @@ size = Vector2(64, 64)
 collision_layer = 1
 collision_mask = 1
 script = ExtResource("1")
+definition_id = &"forge"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_forge")

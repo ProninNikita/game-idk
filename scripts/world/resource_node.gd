@@ -1,7 +1,7 @@
 extends StaticBody2D
 class_name HarvestableResourceNode
 
-signal depleted(grid_position: Vector2i)
+signal depleted(grid_position: Vector2i, resource_type: StringName)
 
 var resource_type: StringName = &"tree"
 var display_name: String = "Resource"
@@ -36,7 +36,7 @@ func setup(type: StringName, grid_pos: Vector2i, cell_size: int, definition: Dic
 	max_health = float(definition.get("max_health", 3))
 	health = max_health
 	debug_color = definition.get("color", debug_color) as Color
-	collision_radius = float(definition.get("radius", 12.0))
+	collision_radius = float(definition.get("collision_radius", definition.get("radius", 12.0)))
 	position = Vector2((grid_position.x + 0.5) * tile_size, (grid_position.y + 0.5) * tile_size)
 
 	if is_inside_tree():
@@ -58,7 +58,7 @@ func hit(damage: float, tool_tags: Array) -> Dictionary:
 
 	if health <= 0:
 		_depleted = true
-		depleted.emit(grid_position)
+		depleted.emit(grid_position, resource_type)
 		remove_from_group("resource_nodes")
 		set_deferred("collision_layer", 0)
 		set_deferred("collision_mask", 0)

@@ -80,7 +80,7 @@ The player appears in a relatively safe area:
 ### Gathering
 
 - Manual gathering is quick and tactile.
-- The Multitool Cutter locks onto a nearby target and deals gradual damage while the lock is valid.
+- The Multitool Cutter only stays active while the use button is held on a nearby valid target, outlines that target, and deals gradual damage while the lock is valid.
 - Tools affect speed, yield, and resource access.
 - Some resources require stations or automation.
 
